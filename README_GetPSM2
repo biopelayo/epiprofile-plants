@@ -1,0 +1,63 @@
+README (ESPAÑOL)
+¿Qué hace GetPSM2?
+
+Hace lo mismo que GetPSM (construye PSMs desde ventanas de RT y MS2 coincidentes), pero cambia la forma de etiquetar los PSMs para priorizar el string de “secuencia modificada” (mod_short) en la visualización.
+
+Diferencias clave vs GetPSM (campos del psm)
+
+psm.pep{ino}
+Antes (GetPSM): "<pep_seq>_<mod_short>"
+Ahora (GetPSM2): "<mod_short_stripped>_<pep_seq>"
+Donde mod_short_stripped es His.mod_short{ino} después del último punto (.).
+Ej.: "H3K9ac.ASAPSTK" → "ASAPSTK".
+
+En cada fila (espectro) del psm:
+
+psm.seq = mod_short_stripped (antes era pep_seq)
+
+psm.mod0 = pep_seq (antes era mod_short)
+
+psm.mod1 = mod_type (igual)
+
+psm.mod2 = mapeo numérico para pLabel (igual; se calcula con GetMods)
+
+Esto facilita que en herramientas tipo pLabel/pFind veas primero la “secuencia modificada” y no la cruda.
+
+Entradas y lógica (idéntico a GetPSM)
+
+Ventana de RT por péptido con GetTopBottom + GetLocal sobre la traza monoisotópica.
+
+Selección de MS2 por:
+
+RT dentro de la ventana,
+
+carga igual a teórica,
+
+precursor a ±ptol ppm de la m/z teórica, permitiendo M/M+1/M+2 con unitdiff/z.
+
+Corrección opcional de m/z: si cae fuera de ppm, se ajusta a pico MS1 más intenso en la ventana ppm del MS1 asociado al espectro.
+
+Ficheros de salida
+
+./psm/<out_filename>.mat → struct psm (formato alternativo de etiquetas).
+
+./psm/<out_filename>.plabel → fichero pLabel (idéntica estructura a GetPSM, pero con psm.seq = mod_short_stripped).
+
+Casos prácticos y avisos
+
+Si His.mod_short{} no contiene puntos (.), no pasa nada: se usa tal cual (no se recorta).
+
+ptol==100 → se fuerza a 10 ppm (comportamiento heredado). Cambia el if si quieres 100 ppm reales.
+
+El catálogo de mods (GetMods) define el orden de IDs en mod2. Si añades/modificas mods, cambiarán los IDs exportados.
+
+El layout de carpetas asume .../MS2/<RAW>.ms2. Ajusta ms2_path si usas otra estructura.
+
+Validación rápida
+GetPSM2(outdir, 'H3_altlabels', His, pep_rts, pep_intens, isorts, mono_isointens, ...
+        MS1_index, MS1_peaks, MS2_index, 10, 1.0032);
+
+S = load(fullfile(outdir,'psm','H3_altlabels.mat'));
+psm = S.psm;
+head = table(psm.fname(1:5), psm.seq(1:5), psm.mod0(1:5), psm.tmz(1:5), psm.emz(1:5), ...
+             'VariableNames',{'fname','seq_display','raw_seq','tmz','emz'})

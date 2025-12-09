@@ -1,0 +1,87 @@
+README (ESPAÑOL)
+¿Qué hace GetBenchmark?
+
+Genera un informe consolidado (TSV con extensión .xls) de identificaciones a partir de todos los ficheros .mat que encuentre en <cur_outpath>/psm. Cada .mat debe contener una variable psm con la información de los PSMs (Peptide-Spectrum Matches). Para cada PSM calcula el error en ppm y lo vuelca en un fichero:
+
+<cur_outpath>/psm/identification_list.xls
+
+
+Importante: Aunque la extensión es .xls, el archivo es texto tabulado (TSV). Excel/LibreOffice lo abren sin problema.
+
+Estructura esperada de psm
+
+Cada .mat debe incluir una variable llamada psm con estos campos (misma longitud n):
+
+psm.fname{j} — nombre de archivo origen (raw/mzML…).
+
+psm.emz(j) — m/z medido del precursor.
+
+psm.tmz(j) — m/z teórico del precursor.
+
+psm.chg(j) — carga del precursor (entero).
+
+psm.seq{j} — secuencia peptídica (1-letra, mayúsculas).
+
+psm.mod0{j} — descripción de modificación #1 (convención del proyecto).
+
+psm.mod1{j} — descripción de modificación #2 (convención del proyecto).
+
+psm.prot{j} — tipo de histona / proteína asignada.
+
+psm.rt(j) — tiempo de retención (minutos).
+
+El número de filas n se infiere con length(psm.fname).
+
+Columnas del informe
+
+filename
+
+measured m/z (6 decimales)
+
+calculated m/z (6 decimales)
+
+charge (entero)
+
+ppm = 1e6 * (emz - tmz) / tmz (6 decimales)
+
+sequence
+
+modification1
+
+modification2
+
+histone type
+
+retention time(min) (4 decimales)
+
+Uso
+% Estructura de carpetas esperada:
+% <root>/
+%   └── psm/
+%        ├── sample1.mat   % cada .mat contiene la variable 'psm'
+%        ├── sample2.mat
+%        └── ...
+GetBenchmark('<root>');
+
+
+Salida: <root>/psm/identification_list.xls
+
+Buenas prácticas y comprobaciones
+
+TSV vs XLS: si prefieres claridad, renómbralo a .tsv. El contenido es idéntico.
+
+Separadores y saltos de línea: evita TABs o saltos de línea en campos de texto (fname, seq, mod0, …) o límpialos antes de escribir.
+
+Codificación: si usas caracteres no ASCII (e.g., nombres con acentos), asegúrate de que tu entorno MATLAB esté en UTF-8 o abre con fopen(...,'wt','n','UTF-8') (en versiones recientes) para forzar codificación.
+
+Precisión: los formatos %.6f (m/z, ppm) y %.4f (RT) son razonables; ajusta si necesitas más/menos decimales.
+
+Robustez: si algún .mat no trae psm, fallará al acceder a los campos. Opcionalmente, añade validaciones isfield(psm, ...).
+
+Problemas comunes
+
+No se abre el archivo de salida: permisos insuficientes o ruta inexistente. Revisa que <cur_outpath>/psm/ exista y sea escribible.
+
+Excel muestra todo en una sola columna: en algunas configuraciones regionales, Excel espera ; en lugar de \t. Importa como “texto delimitado por TAB” o cambia el separador.
+
+ppm raros: verifica que tmz sea el mismo estado de carga y química que emz (mismo aducto/protón). Si no, recalcula tmz correctamente.

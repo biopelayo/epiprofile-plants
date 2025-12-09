@@ -1,0 +1,112 @@
+README (ESPAÑOL)
+¿Qué es H3_01_3_8?
+
+Un bloque de cuantificación dirigida para el péptido N-terminal de histona H3 (“TKQTAR”), centrado en K4. Evalúa 5 estados: unmod, K4me1, K4me2, K4me3, K4ac. Ancla la RT con la forma no modificada y reubica ventanitas RT para cada PTM, extrayendo RT e intensidad desde MS1 (y opcionalmente confirmando con MS2).
+
+Entradas
+
+MS1_index [nMS1×4]: (scan, RT[min], idx_inicio_picos_MS1_acumulado, baseline).
+
+MS1_peaks [∑picosMS1×2]: picos MS1 concatenados (m/z, intensidad).
+
+MS2_index [nMS2×8]: (MS1_scan, MS1_RT, MS2_scan, m/z, z, FragType, idx_inicio_picos_MS2, baseline).
+
+MS2_peaks [∑picosMS2×2]: picos MS2 concatenados (m/z, intensidad).
+
+ptol (ppm): tolerancia de m/z. Ojo: si pasas 100, internamente se ajusta a 10 ppm en funciones auxiliares.
+
+cur_outpath: carpeta de salida.
+
+special (struct):
+
+nDAmode: 0/1 = MS1-only; 2 = MS2-assisted (get_rts2/get_rts22).
+
+ndebug: activa caminos de comprobación de RT de referencia (usa check_ref).
+
+nhmass: activa repertorio alternativo de iones clave para MS2.
+
+raw_path: ruta del fichero bruto (para check_ref).
+
+Flujo de trabajo
+
+Init (init_histone)
+Define secuencia TKQTAR, PTMs (mod_type), estados de carga (pep_ch), calcula m/z teóricos (calculate_pepmz) y fija RTs de referencia (rt_ref).
+
+Cálculo principal (calculate_layout)
+
+Ancla RT unmod (posible ajuste por check_ref).
+
+Si nDAmode==2, intenta anclaje con MS2 asistido (get_rts2).
+
+Extrae unmod con get_histone0; si cuaja, calibra el resto: ΔRT = RT_obs_unmod − RT_ref_unmod_original.
+
+Recolocación de ventanas para PTMs:
+
+relocate (solo MS1, get_rts).
+
+relocate2 (MS2 asistido, get_rts2/get_rts22).
+
+Para cada PTM (2..5), extrae trazas finales con get_histone1.
+
+Salida
+
+output_histone: guarda .mat con intensidades y RTs.
+
+draw_layout: figuras diagnósticas (XICs, RTs marcadas, etc.).
+
+Si nDAmode==1: GetPSM exporta .plabel (útil para ver espectros).
+
+Decisiones y heurísticas
+
+unitdiff = 1.0032 Da: diferencia 13C–12C para generar isótopos y ventanas alternas.
+
+Ventanas RT:
+
+me1 después de unmod ([unmod+0.1, unmod+16]).
+
+me2/me3 antes de unmod ([4, unmod−3]), y se emparejan con find_pair.
+
+ac entre me2 y unmod ([(unmod+me2)/2, unmod−0.1]).
+
+MS2-assisted: get_rts2/get_rts22 combinan XIC MS1 y correlación con iones diagnósticos MS2 cerca del apex RT.
+
+Archivos de salida
+
+H3_01_3_8.mat: cuantificación por forma/estado de carga.
+
+H3_01_3_8.plabel (si nDAmode==1): etiquetas simples de espectros.
+
+Figuras/plots en cur_outpath (según implemente draw_layout).
+
+Requisitos y dependencias
+
+Funciones auxiliares del ecosistema EpiProfile(_PLANTS):
+get_rts, get_rts2, get_rts22, GetProfiles, GetTopBottom(11),
+GetLocal, GetMods, calculate_pepmz, get_histone0/1, find_pair,
+draw_layout, output_histone, GetPSM, check_ref, relocateD.
+
+[Reality Filter] No puedo verificar aquí la presencia exacta de todas las funciones en tu árbol; este módulo asume su disponibilidad en tu copia de EpiProfile_PLANTS.
+
+Uso mínimo (pseudocódigo)
+% Cargar MS1/MS2 previamente extraídos con GetMS1ScanNo / GetMS2ScanNo:
+load MS1_scans.mat   % MS1_index, MS1Type
+load MS1_peaks.mat   % MS1_peaks
+load MS2_scans.mat   % MS2_index
+load MS2_peaks.mat   % MS2_peaks
+
+ptol    = 10;                   % ppm
+outdir  = 'out/H3_01_3_8';
+special = struct('nDAmode',2,'ndebug',0,'nhmass',0,'raw_path','/path/to/raw');
+
+if ~exist(outdir,'dir'); mkdir(outdir); end
+H3_01_3_8(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,outdir,special);
+
+Consejos y “gotchas”
+
+Si ptol==100 en algunas funciones auxiliares se fuerza a 10 ppm. Pasa directamente 10 salvo que quieras el comportamiento heredado.
+
+Asegúrate de que los RTs de MS1_index están en minutos (las utilidades previas suelen convertirlos si vienen en segundos).
+
+Si no sale RT para un PTM, el código pone 0 en His.rt_ref(hno) (no encontrado).
+
+En MS2-assisted, los resultados dependen de tener suficientes MS2 cerca del apex; datasets muy “perfilados” pero con poco DDA pueden no ayudar.

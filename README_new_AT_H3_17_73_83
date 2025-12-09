@@ -1,0 +1,96 @@
+README (en castellano, para no bioinformáticos)
+¿Qué hace este script?
+
+Realiza una cuantificación dirigida de dos péptidos H3 en tus datos de espectrometría de masas:
+
+Localiza un tiempo de retención (RT) representativo por péptido y por carga.
+
+Integra la intensidad (señal MS1).
+
+Extrae una traza monoisotópica (evolución del pico monoisotópico a lo largo del gradiente).
+
+Guarda resultados en <cur_outpath>/H3_17_73_83.mat y dibuja figuras de diagnóstico.
+
+Opcional: si special.nDAmode==1, obtiene PSMs (evidencia MS2).
+
+Relación con EpiProfile_PLANTS: este patrón es un bloque modular del pipeline. Ajustando init_histone (secuencias, derivatizaciones, cargas) puedes apuntar a otras especies o péptidos con el mismo flujo.
+
+Entradas clave (explicadas sencillo)
+
+MS1_index / MS1_peaks: índice y picos de MS1 (la 2ª columna de MS1_index suele ser RT en minutos).
+
+MS2_index / MS2_peaks: índice y picos MS2 (útiles para PSMs y recalibración asistida).
+
+ptol: tolerancia de masa (ppm habitual en HRAM).
+
+cur_outpath: carpeta de salida para el .mat y figuras.
+
+special:
+
+ndebug: si 1, no recalibra RTs (modo rápido/depuración).
+
+nDAmode: si 2, hace recalibración flexible de RTs (si el ancla no cambia, busca todo el gradiente; si cambia, ±5 min y refina con get_rts2). Si 1, además saca PSMs.
+
+nhmass: masa auxiliar para get_rts2 en modo DA (si tu rama la usa).
+
+raw_path: ruta a los “raw”, utilizada por check_ref.
+
+[No verificado] pr en mod_type se usa habitualmente para propionilación (derivatización estándar en EpiProfile para histonas). Verifica con tu protocolo real.
+
+¿Qué hace cada bloque y por qué?
+
+check: si H3_17_73_83.mat ya existe, no recalcula (idempotente).
+
+init_histone:
+
+Define dos péptidos: EIAQDFKTDLR y EIAQDYKTDLR.
+
+Asigna derivatizaciones por posición (0,pr;7,pr;).
+
+Considera cargas 1–4 y calcula m/z teóricos (calculate_pepmz).
+
+Fija RTs de referencia y prioriza z=2 como carga “principal” (reordena columnas si hace falta).
+
+calculate_layout:
+
+Reserva matrices de salida (pep_rts, pep_intens, mono_isointens).
+
+Recalibra RTs (si ndebug~=1) usando check_ref:
+
+Si nDAmode==2:
+
+Si el ancla no cambia, busca en todo el gradiente (0 → RT final).
+
+Si cambia, busca en ±5 min y refina con get_rts2.
+
+Después bloquea las anclas (pone ndebug=1).
+
+Para cada péptido, get_histone0 devuelve RTs, intensidades y la traza monoisotópica; se guardan si el RT es válido.
+
+output/draw: guarda el .mat y crea figuras QC.
+
+PSM (opcional): si nDAmode==1, GetPSM2 extrae evidencia MS2.
+
+Ejemplo de ejecución
+H3_17_73_83(MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+            10, 'results/H3_panel', ...
+            struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/ruta/a/raw'));
+
+
+ptol=10 (ppm) razonable para instrumentos HRAM.
+
+nDAmode=2 → recalibración flexible y, al terminar, fija ndebug=1.
+
+nDAmode=1 → además genera PSMs.
+
+raw_path → imprescindible para check_ref.
+
+Consejos y errores típicos
+
+Sin RT: revisa rt_ref, ptol y confirma presencia real del péptido; amplía ventana (±5 min) si procede.
+
+Figuras vacías: verifica permisos de escritura y que draw_layout esté en el path.
+
+PSMs ausentes: confirma MS2_index/peaks, parámetros de búsqueda y que el péptido fragmenta adecuadamente.
+
+Adaptación a otras plantas: edita init_histone (secuencias/derivatizaciones/cargas) según tu librería de EpiProfile_PLANTS.

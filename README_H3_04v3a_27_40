@@ -1,0 +1,191 @@
+README extenso — Panel H3_04v3a_27_40 (KSAPSTGGVKKPHR, 27–40)
+Qué hace este panel
+
+Este panel implementa la cuantificación dirigida de PTMs centradas en S28 y combinaciones con K27/K36 sobre el péptido de histona H3 KSAPSTGGVKKPHR (residuos 27–40). En concreto, opera sobre los siguientes estados (11 filas):
+
+S28ph
+
+K27me1 + S28ph
+
+K27me2 + S28ph
+
+K27me3 + S28ph
+
+K27me2 + S28ph + K36me2
+
+K27me3 + S28ph + K36me2
+
+S28ac
+
+S28pr (oculto por defecto en figuras)
+
+K27me2 + S28ac
+
+K27me3 + S28ac
+
+K27me3 + S28ac + K36me1
+
+Flujo de trabajo:
+
+Construye el objeto His con la secuencia base, la tabla de PTMs (mod_short/mod_type), la malla m/z × cargas (pep_mz) y RTs de referencia (rt_ref).
+
+Reubica las RT esperadas (funciones relocate/relocate2) buscando señales reales en MS1 (y opcionalmente en MS2 si activas DA mode).
+
+Extrae las XICs y computa RTs/intensidades por estado PTM usando get_histone12.
+
+Guarda un .mat con las matrices y dibuja figuras-resumen con el layout y los cromatogramas. En modo DA (diagnóstico asistido por MS2), además exporta PSMs.
+
+[Reality Filter] El mapeo exacto de índices numéricos en mod_type (p. ej., 0,pr;1,me3;2,ph;10,me2;...) depende del convenio interno de EpiProfile para direccionar posiciones dentro del péptido. Aquí no se reinterpreta ese convenio; se asume consistente con el resto del core. Si tu build de EpiProfile usa otro esquema, ajusta mod_type en consecuencia.
+
+Entrada, salida y dependencias
+Entradas
+
+MS1_index (n×2): índice y RT (min) por scan MS1.
+
+MS1_peaks: picos centroidados de MS1 (estructura interna EpiProfile).
+
+MS2_index, MS2_peaks: análogos para MS2 (usados si special.nDAmode==1).
+
+ptol: tolerancia de masa (típicamente ppm; el valor se pasa tal cual a los extractores).
+
+cur_outpath: directorio de salida.
+
+special: estructura de control:
+
+special.ndebug = 1 → usa relocateD (diagnóstico/simple).
+
+special.nDAmode = 1 → MS2-assisted (usa get_rts2 y relocate2, exporta PSMs).
+
+special.nhmass: masa/ajuste usado por get_rts2 (si DA mode).
+
+special.raw_path: opcional; algunos helpers lo usan para trazas.
+
+Salidas (en disco)
+
+H3_04v3a_27_40.mat con:
+
+pep_rts (nPTM×nCharge): RTs por estado/carga (0 si no hay señal).
+
+pep_intens (nPTM×nCharge): intensidades/áreas XIC por estado/carga.
+
+mono_isointens (nMS1×nPTM): XIC monoisotópica por estado (para plot).
+
+Figuras PNG/PDF del layout y XICs.
+
+En DA mode: tablas de PSM.
+
+Dependencias del core (no incluidas aquí)
+
+GetMods, calculate_pepmz, get_histone12, get_rts, get_rts2, find_pair, relocateD, output_histone, draw_layout, GetPSM.
+
+Lógica de RTs y ventanas
+
+El panel lee RTs de referencia desde H3_04v3_27_40.xls (función get_KSAPSTGGVKKPHR_rt). El fichero debe incluir una sección [rt] con una tabla tabulada; se parsea solo la segunda columna como RT.
+
+Con esas RTs se abren ventanas [t1,t2] heurísticas (delta=0.3 min por defecto) para localizar cada estado:
+
+S28ph y derivados (K27me* + S28ph): se buscan aguas abajo de la referencia de S28ph o acotando por anclas de K27.
+
+Combinaciones con K36me2/me1: se restringen a regiones más tempranas (hacia el inicio del gradiente) en relación a los anclajes K27me2/3 S28ph.
+
+S28ac/S28pr: aguas abajo de S28ph o en intervalos definidos por K27me*.
+
+Cuando hay pares “competidores” (p. ej., K27me2S28ph vs K27me3S28ph; K27me2S28ac vs K27me3S28ac; o las combinaciones con K36):
+
+Se extraen ambas trazas y se resuelven con find_pair, que prioriza el pico con mayor suma de intensidades y consistencia de forma (si ambas están presentes dentro del umbral).
+
+En DA mode (relocate2 + get_rts2), se aplican los mismos intervalos, pero se valida con fragmentación MS2 (p. ej., iones diagnósticos/neutral losses), lo que reduce falsos positivos en co-elución o bajo S/N.
+
+Casos de co-elución y decisiones
+
+K27me2S28ph vs K27me3S28ph: se buscan antes de S28ac y cerca del clúster K27me*.
+
+K27me2S28phK36me2 vs K27me3S28phK36me2: mismo patrón, aún más temprano (incremento de metilaciones tiende a desplazar elución).
+
+K27me2S28ac vs K27me3S28ac: ventanas entre (K27me3 ref + δ, S28ph ref − δ).
+
+S28pr: cuantificado pero oculto en figuras (His.display(8)=0) por ser más propenso a ruido/isóbaros.
+
+Consejo: si observas “picos gemelos” muy cercanos, considera ampliar delta a 0.4–0.5 min y revisar la separación cromatográfica real de tu gradiente.
+
+Parámetros prácticos y cómo ajustarlos
+
+delta = 0.3 min: separa el inicio de la ventana respecto a la RT ancla (reduce captura de colas).
+
+Gradientes más rápidos o picos anchos → sube a 0.4–0.5.
+
+Gradientes lentos con picos afilados → 0.2–0.3 suele ir bien.
+
+ptol (ppm típico): si tu adquisición es Orbitrap alta resolución, 5–10 ppm suele funcionar; en TOF con centroids muy limpios, 10–20 ppm.
+
+Si ves “saltos” por isóbaros, prueba a reducir ptol o activar DA mode.
+
+unitdiff = 1.0032: espaciado isotópico ^13C. No cambiar salvo trabajar con configuraciones inusuales.
+
+Errores comunes y diagnóstico
+
+H3_04v3_27_40.xls no encontrado o sin sección [rt]
+
+Efecto: ref_rts vacío → se mantiene His.rt_ref semilla. Menos robustez en relocate.
+
+Solución: exporta el .xls correcto o copia uno de referencia estabilizado para tu setup.
+
+DA mode sin special.nhmass
+
+Efecto: get_rts2 puede fallar a filtrar correctamente.
+
+Solución: define special.nhmass acorde al método (consulta tus extractores MS2).
+
+get_histone12 devuelve RT=0 en filas esperadas
+
+Efecto: ausencia de señal o ventana mal colocada.
+
+Solución: inspecciona figuras, incrementa delta o revisa ptol. Considera DA mode.
+
+Figuras muy “cargadas”
+
+Oculta canales ruidosos ajustando His.display (ya ocultamos S28pr por defecto).
+
+Integración en EpiProfile_PLANTS
+
+Añade este panel a tu batch de paneles H3 (junto con H3_04_27_40 y H3_04a_27_40).
+
+Asegura que las rutas de salida (cur_outpath) sean especie-específicas si trabajas con múltiples especies (AT/MP/CR).
+
+Mantén en el repo un *.xls de referencia por panel (generado en una corrida “buena”) para robustecer relocate en campañas futuras.
+
+Orden de llamada recomendado
+
+Ejecuta primero H3_04v3_27_40 (el “hermano” que genera el .xls con [rt]).
+
+Lanza H3_04v3a_27_40 (este panel), que reusa esas RTs para ventanas de búsqueda.
+
+Si hay MS2 confiable, activa DA mode:
+
+special.nDAmode = 1; special.nhmass = ...;
+
+Validación rápida (QA)
+
+Comprueba que S28ph (~31.3 min inicial) y S28ac (~31.3–+α min) aparecen con buena forma.
+
+Verifica la separación relativa K27me2/3 en las parejas ph/ac.
+
+En DA mode, revisa que el conteo de PSMs sea coherente con los picos XIC dominantes.
+
+Ejemplo de uso (pseudocódigo)
+cur_outpath = 'results/AT/H3/';
+special = struct('ndebug',0,'nDAmode',1,'nhmass',0,'raw_path','/path/to/raw');
+
+% Previo: asegurarse de haber corrido H3_04v3_27_40 para generar el .xls
+H3_04v3_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,10,cur_outpath,special);
+
+% Ahora este panel:
+H3_04v3a_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,10,cur_outpath,special);
+
+Notas finales
+
+Este panel no devuelve variables al workspace: escribe artefactos en disco y dibuja figuras.
+
+Si necesitas usar los arrays en memoria para un flujo posterior, cárgalos desde H3_04v3a_27_40.mat.
+
+Mantén sincronizado el convenio de mod_type con tu build de EpiProfile para evitar desalineaciones residuo↔PTM.

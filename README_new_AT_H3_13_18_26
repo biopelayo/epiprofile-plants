@@ -1,0 +1,139 @@
+README (en castellano, para no bioinformáticos)
+¿Qué hace este script?
+Realiza una cuantificación dirigida de cuatro péptidos H3 en datos de espectrometría de masas:
+
+
+Estima un tiempo de retención (RT) representativo por péptido y carga.
+
+
+Integra la intensidad (cuánta señal MS1 tiene cada objetivo).
+
+
+Extrae una traza monoisotópica a lo largo del gradiente (evolución temporal de la señal).
+
+
+Guarda resultados en H3_13_18_26.mat y dibuja figuras diagnósticas.
+
+
+Opcional: si special.nDAmode==1, obtiene PSMs (evidencia MS2).
+
+
+
+Relación con EpiProfile_PLANTS: este fichero es un “bloque” del pipeline. Cambiando el panel en init_histone (secuencias, derivatizaciones, cargas) puedes apuntar a otros péptidos/especies manteniendo el mismo flujo.
+
+
+Entradas y por qué importan
+
+
+MS1_index / MS1_peaks: índice y picos de MS1. La 2ª columna de MS1_index suele ser el RT (min).
+
+
+MS2_index / MS2_peaks: índice y picos de MS2. Se usan para apoyo (dibujos/PSM) y en recalibraciones asistidas.
+
+
+ptol: tolerancia de masa. Más pequeña = coincidencias m/z más estrictas (típico ppm en alta resolución).
+
+
+cur_outpath: carpeta para escribir el .mat y las figuras.
+
+
+special:
+
+
+ndebug: si es 1, no recalibra RTs (modo más rápido).
+
+
+nDAmode: si es 2, hace una recalibración flexible de RT (busca por todo el gradiente si el ancla no cambia; si cambia, busca ±5 min y refina). Si es 1, además saca PSMs.
+
+
+nhmass: masa auxiliar para get_rts2 (solo si la usan tus funciones).
+
+
+raw_path: ruta con los ficheros raw (para check_ref).
+
+
+
+
+
+[No verificado] En estos scripts, pr suele indicar propionilación (derivatización estándar de N-terminales/Lisinas en EpiProfile para histonas). Ajusta a tu protocolo real si difiere.
+
+
+Qué hace cada bloque (en lenguaje llano)
+
+
+check: si ya existe H3_13_18_26.mat, no recalcula (ahorra tiempo; comportamiento idempotente).
+
+
+init_histone: define qué péptidos buscar (KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR), qué derivatizaciones se asumen (p. ej., 0,pr;1,pr;6,pr;), qué cargas (1, 2 y 3), y calcula m/z teóricos por carga. Marca z=2 como carga principal y reordena las columnas para que salga primero.
+
+
+calculate_layout:
+
+
+Reserva matrices de salida.
+
+
+Recalibra RTs (si ndebug~=1) usando check_ref.
+
+
+Si nDAmode==2: si el ancla no cambia, busca en todo el gradiente; si cambia, busca en ±5 min y refina con get_rts2. Al terminar, bloquea anclas (ndebug=1).
+
+
+
+
+Llama a get_histone0 para cada péptido y guarda RTs, intensidades y trazas monoisotópicas válidas.
+
+
+
+
+output/draw: guarda el .mat y crea figuras QC.
+
+
+PSM (opcional): con nDAmode==1, usa GetPSM2 para evidencia MS2.
+
+
+
+Ejemplo de ejecución
+H3_13_18_26(MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+            10, 'results/H3_panel', ...
+            struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/ruta/a/raw'));
+
+
+
+ptol=10 (ppm) típico en instrumentos de alta resolución.
+
+
+nDAmode=2 → recalibra RTs de forma flexible; después fija ndebug=1.
+
+
+nDAmode=1 → además extrae PSMs.
+
+
+raw_path → imprescindible para check_ref.
+
+
+
+Consejos y errores típicos
+
+
+No encuentra RT: revisa rt_ref, ptol y que el péptido realmente esté presente; amplía ventanas (±5 min) si hace falta.
+
+
+Figuras vacías: confirma permisos de escritura y que draw_layout esté en el path de MATLAB.
+
+
+PSMs sin señal: asegúrate de tener MS2_index/peaks útiles y que el péptido esté fragmentado adecuadamente.
+
+
+Adaptación a otras especies: edita init_histone (secuencias y mod_type) según tu librería/planta.
+
+
+
+Nota “Reality Filter”
+
+
+La interpretación de pr como propionilación es la práctica común en EpiProfile; verifícala con tu protocolo.
+
+
+Los campos exactos de special pueden variar entre ramas; arriba se describe el uso habitual en tu EpiProfile_PLANTS.
+

@@ -1,0 +1,313 @@
+README — H4_01_4_17 (Documentación técnica extensa)
+1) Alcance y motivación
+
+Panel: péptido N-terminal de H4 GKGGKGLGKGGAKR (residuos 4–17 de H4 canónica en numeración de proteína completa), con su espacio de acetilación en las cuatro lisinas clásicas: K5, K8, K12 y K16. El panel cubre:
+
+unmod (derivatizado por propionilación en N/lys, sin acetilaciones biológicas),
+
+todas las mono-acetilaciones (K5ac, K8ac, K12ac, K16ac),
+
+todas las di-acetilaciones (6 combinaciones),
+
+todas las tri-acetilaciones (4 combinaciones),
+
+la tetra-acetilación (K5acK8acK12acK16ac).
+
+Por diseño, este es el panel de mayor combinatoria dentro de histonas core. La lógica de extracción y la recolocación por ventanas RT está optimizada para gradientes convencionales (p. ej., 30–60 min) con ESI-TOF/Q-TOF u Orbitrap en modo centroid.
+
+Por qué un panel dedicado:
+(i) Es el ancla clásica para balance acetilación global de H4, (ii) su química de derivatización (propionilación “pr”) mejora comportamiento cromatográfico y separa parcialmente isómeros, (iii) sirve como calibrador interno para corrimiento RT global (unmod → resto), y (iv) es armazón ideal para cuantificación relativa en campañas de alto rendimiento.
+
+Nota química: “pr” en mod_type no es una PTM biológica; es la propionilación química de preparación de muestra (termini y ε-NH2 de Lys).
+
+2) Entradas y salidas
+Entradas (argumentos de la función)
+
+MS1_index (n×2): índice de scans MS1 y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno del core).
+
+MS2_index, MS2_peaks: datos MS2 centroidados (solo requeridos para recolocación DA y PSM export).
+
+ptol: tolerancia de masa (ppm u otra unidad que el core espere).
+
+cur_outpath: carpeta de salida para .mat y figuras.
+
+special (struct):
+
+ndebug: 1 → modo diagnóstico relocateD (recolocación mínima).
+
+nDAmode:
+
+2 → recolocación asistida por MS2 (relocate2/get_rts2).
+
+≠2 → recolocación solo MS1 (relocate/get_rts).
+
+1 → (además) exporta PSM tras cuantificar (GetPSM).
+
+nhmass: pista de masa/neutral-loss para get_rts2 (si procede).
+
+raw_path: ruta al raw usada por check_ref para afinar el ancla unmod.
+
+Salidas (ficheros en disco)
+
+H4_01_4_17.mat con:
+
+pep_rts (16×4): RT por fila (estado de acetilación) × carga (reordenada para poner 2+ primero).
+
+pep_intens (16×4): áreas/intensidades integradas alineadas con pep_rts.
+
+mono_isointens (nMS1×16): trazas XIC monoisotópicas por variante.
+
+(El struct His se pasa a output_histone junto con métricas).
+
+Gráficas: draw_layout(...) produce XIC/resúmenes (formato según tu implementación).
+
+PSM (opcional): si special.nDAmode==1, GetPSM(...) exporta tablas PSM.
+
+3) Estructura His (definiciones del panel)
+
+pep_seq = 'GKGGKGLGKGGAKR' (H4 4–17).
+
+mod_short (16 entradas, en el orden original):
+
+unmod
+
+K5ac
+
+K8ac
+
+K12ac
+
+K16ac
+
+K5acK8ac
+
+K5acK12ac
+
+K5acK16ac
+
+K8acK12ac
+
+K8acK16ac
+
+K12acK16ac
+
+K8acK12acK16ac
+
+K5acK12acK16ac
+
+K5acK8acK16ac
+
+K5acK8acK12ac
+
+K5acK8acK12acK16ac
+
+mod_type: codificación compacta relativa al péptido (índice 0 = N-terminal del péptido; 2,5,9,13 ≈ posiciones de las Lys dentro de la secuencia local).
+Ejemplos:
+
+Unmod: 0,pr;2,pr;5,pr;9,pr;13,pr;
+
+K5ac: 0,pr;2,ac;5,pr;9,pr;13,pr;
+
+K5acK8acK12acK16ac: 0,pr;2,ac;5,ac;9,ac;13,ac;
+
+pep_ch: rejilla de cargas 1–4 para cada fila (sí, 1+ permitido).
+
+pep_mz: calculado vía calculate_pepmz(His) (portabilidad entre forks).
+
+rt_ref: semillas RT (min) para unmod y cada estado de ac (sirven para definir ventanas de recolocación).
+
+display: por defecto 1 (mostrar) en todas las variantes en este panel.
+
+Reordenación de cargas: se reordena para que 2+ sea la primera columna (consistencia visual/merge entre paneles).
+
+[Reality Filter] El mapping exacto de índices en mod_type a residuos se basa en el core de EpiProfile que estés usando. Si tu core tiene un desplazamiento distinto, ajusta mod_type para coherencia y no reutilices ciegamente índices.
+
+4) Flujo de proceso (alto nivel)
+
+Check de salida: si existe H4_01_4_17.mat, retorna (idempotencia).
+
+Init: init_histone() construye His (secuencia, tabla PTM, cargas/m/z, RT semillas).
+
+Cálculo: calculate_layout(...)
+
+Ancla unmod: check_ref refina His.rt_ref(1).
+
+Si nDAmode==2, también se puede sondear con get_rts2 alrededor del ancla.
+
+Extracción unmod: get_histone0(...) devuelve RT/áreas/trazas.
+
+Si hay unmod, se calibra drift global: delta = RT_unmod_obs - RT_unmod_seed; se desplazan todas las semillas rt_ref(2:end) += delta.
+
+Recolocación:
+
+MS1-only → relocate(...)
+
+DA-mode → relocate2(...) (usa get_rts2 con pistas MS2/neutral-loss).
+
+Extracción modificados:
+
+Mono-acets y tri-acets se extraen con módulos combinatorios: get_histone4 (bloques de 4) y get_histone6 (bloques de 6).
+
+El resto cae en get_histone1 según disponibilidad.
+
+Cambio de orden (solo para tri-acets): change_order(...) reordena filas 12–15 → 15–14–13–12 por criterios de presentación/coherencia (ver §8).
+
+Salida y plotting: output_histone(...) y draw_layout(...).
+
+PSM (opcional): si special.nDAmode==1, exporta identificaciones.
+
+5) Estrategia RT (ventanas y heurísticas)
+
+Las ventanas se construyen a partir del ancla unmod:
+
+K5ac: busca antes de unmod: [unmod − 11, unmod − δ] con δ=0.1 min (evita colas); nsplit=1.
+
+K8ac / K12ac / K16ac: su RT se trata dependiente de K5ac:
+
+Si K5ac no aparece → estas tres se anulan (probable fallo de ventana/gradiente).
+
+Si K5ac aparece pero con corrimiento respecto a su seed, se propaga ese corrimiento a K8/K12/K16 (alineación relativa).
+
+K5acK8ac: [unmod − 17, min(K5ac, unmod) − δ].
+
+Di-acets restantes (K5acK12ac…K12acK16ac): dependientes de K5acK8ac (si falla, se anulan o heredan RT).
+
+Tri-acets (ej. K8acK12acK16ac): [unmod − 23, min(K5acK8ac, K5ac, unmod) − δ].
+
+Tetra (K5acK8acK12acK16ac): [unmod − 28, min(K8acK12acK16ac, K5acK8ac, K5ac, unmod) − δ].
+
+Intuición cromatográfica (no rígida): cuanta más acetilación, más hidrofílico y eluye antes → las ventanas se abren progresivamente más alejadas antes de unmod.
+
+[Reality Filter] Los offsets exactos (−11, −17, −23, −28 min) son heurísticos de este fork y dependen del gradiente/columna. En LC muy rápida, reduce la anchura de ventanas; en gradientes largos, podrían ampliarse.
+
+6) Tolerancia de masa e isótopos
+
+unitdiff = 1.0032 (espaciado ^13C) para traza monoisotópica en XIC.
+
+ptol se propaga a get_rts/get_rts2/get_histone*:
+
+Orbitrap/FT centroidado: 5–10 ppm típico.
+
+TOF/Q-TOF centroidado: 10–20 ppm.
+
+Ajusta ptol si observas falsos positivos (reduce) o pérdidas (aumenta).
+
+7) Modos MS1-only vs. DA (MS2-asistido)
+
+Recolocación:
+
+nDAmode==2 → relocate2 + get_rts2 (usa diagnóstico MS2/neutral-loss si procede).
+
+Otro valor → relocate + get_rts (solo MS1).
+
+Export PSM:
+
+nDAmode==1 → activa GetPSM después de cuantificar.
+
+Esta semántica “asimétrica” hereda forks históricos; si prefieres un único interruptor, homogeneiza las dos ramas en tu core.
+
+8) change_order: por qué reordenar 12–15
+
+La función invierte el bloque de tri-acetilaciones (filas 12–15) para presentarlas en un orden más coherente con:
+
+(i) la intuición de elución (tri-acets suelen agruparse con RTs similares/solapadas) y
+
+(ii) la lectura visual en tus gráficas, donde colocas primero combinaciones con K5 (más hidrofóbico) hacia las que tienden a salir algo más tarde que las tri-acets sin K5.
+
+Concretamente: copia contenido de 15→12, 14→13, 13→14, 12→15 (mod_short, mod_type, rt_ref, pep_rts, pep_intens, mono_isointens). Es solo presentación: no altera la cuantificación previa.
+
+9) Pseudocódigo reproducible de ejecución
+cur_outpath = 'results/AT/H4/';
+special = struct();
+special.ndebug   = 0;
+special.nDAmode  = 2;           % usa recolocación asistida por MS2
+special.nhmass   = 0;           % si no aplicable, dejar 0
+special.raw_path = '/data/run1.raw';
+
+ptol = 10;  % ppm típico
+
+H4_01_4_17(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+% Salidas:
+%   results/AT/H4/H4_01_4_17.mat
+%   figuras bajo results/AT/H4/ (según draw_layout)
+
+10) Lista de control (QC)
+
+Unmod (RT ~ seed 30.08 min) detectado y usado para drift (¿delta razonable?).
+
+Orden de elución esperado (tendencia):
+tetra-acilada < tri-aciladas < di-aciladas < mono-aciladas < unmod.
+(No es ley: depende de gradiente/columna.)
+
+Cargas: no filtres 1+; este péptido N-terminal puede dar señales útiles en 1+, 2+, 3+, 4+.
+
+Isómeros posicionales (K5ac vs K8ac vs K12ac vs K16ac): si colisionan, usa nDAmode==2 para explotar diagnóstico MS2; si no resuelve, estrecha ventanas o revisa Mods y get_histone4/6.
+
+PSM coherentes con picos XIC dominantes (si exportas).
+
+11) Solución de problemas
+
+No aparece K5ac y el resto cae a cero: revisa ventana K5ac [unmod−11, unmod−δ] y el delta global. Con LC corta, intenta −7…−δ.
+
+Tri-acets saturan y tapan di-acets: revisa dinámica de rango y thresholds en get_histone6.
+
+Exceso de falsos positivos en combinatorias: baja ptol y activa DA (nDAmode==2).
+
+Desajuste m/z: reconfirma derivatización (todas las Lys y N-term deben estar en pr en unmod); si no, calculate_pepmz reflejará masas distintas.
+
+12) Integración en EpiProfile_PLANTS
+
+Mantén librerías por especie (AT/MP/CR) y guarda outputs por especie.
+
+Conserva un .mat “good-run” de referencia para bootstrap de recolocación en runs ruidosos.
+
+Usa el mismo reordenado de cargas (2+ primero) en todos los paneles para simplificar merges posteriores.
+
+13) Extensiones y variantes
+
+Añadir crotonilación (Kcr) o butirilación (Kbu): amplía mod_short/mod_type, ajusta calculate_pepmz y define ventanas acordes (más hidrofílicas → antes que ac).
+
+Soporte ETD/EThcD: si dispones de fragmentación que conserve PTMs, potencia get_rts2 con fragmentos diagnósticos y re-pontencia Mods.
+
+14) Proveniencia y versionado
+
+Identificador estable del panel: H4_01_4_17.
+
+CHANGELOG: anota cambios en:
+
+offsets de ventana,
+
+rejilla de cargas,
+
+correcciones en mod_type,
+
+semántica de nDAmode.
+
+Añade snippet de método LC-MS (columna, gradiente, flujo, instrumento) en METHODS.md por reproducibilidad.
+
+15) Notas de interpretación
+
+Comparaciones entre muestras deben normalizarse a nivel de proyecto (ej.: qsmooth/ComBat en la capa downstream, fuera del alcance de este panel).
+
+Las intensidades de combinatorias no son estrictamente aditivas; recuerda la competencia de sitios y la química de derivatización.
+
+Si una conclusión depende de diferenciar isómeros posicionales cercanos (p. ej., K8ac vs K12ac), siempre valida con MS2 diagnóstico y, si es posible, con un método ortogonal (p. ej., anticuerpos bien caracterizados en Western/ChIP con cautela).
+
+16) Resumen operativo
+
+Afina unmod con check_ref → calibra drift.
+
+Recoloca K5ac (antes de unmod).
+
+Propaga a K8/K12/K16 y a di-/tri-/tetra-acets con las ventanas jerárquicas.
+
+Usa get_histone4/6 para bloques combinatorios (mejora la asignación).
+
+(Opcional) DA mode para recolocación MS2 y PSM.
+
+Reordena tri-acets (12–15) para visualización consistente.
+
+Guarda .mat + figuras.

@@ -1,0 +1,58 @@
+README (ES) — get_key_ions2.m
+¿Qué hace?
+
+get_key_ions2 genera dos listas alineadas de m/z teóricos (K1 y K2) para el mismo péptido bajo dos isoformas de modificación (índices pno y qno), usando solo fragmentos de la serie C-terminal. Cada posición i en K1 y K2 representa el mismo corte del esqueleto peptídico, por lo que las parejas K1(i)–K2(i) sirven como “iones diagnósticos” para distinguir las isoformas en espectros MS/MS.
+
+Diferencia clave con get_key_ions:
+get_key_ions2 ignora a propósito los fragmentos N-terminales. Esto es fiel al código original que compartiste.
+
+Entradas
+
+His.pep_seq: secuencia del péptido.
+
+His.mod_type{pno}, His.mod_type{qno}: descriptores de modificaciones para cada isoforma.
+
+Mods: definiciones de modificaciones.
+
+ActiveType: tipo de fragmentación (p. ej., 'CID', 'ETD') que controla qué iones teóricos se generan en get_theo_mz.
+
+Funciones auxiliares necesarias (ya existentes en tu proyecto):
+
+get_mod_postype(seq, modString, Mods) → posiciones y tipos de modificación.
+
+get_theo_mz(seq, modString, charge, Mods, ActiveType) → m/z teóricos y códigos de tipo/posición.
+
+Salidas
+
+K1, K2: vectores fila de igual longitud con m/z solo de la serie C-terminal, alineados por posición de corte (C-terminal).
+K1(i) y K2(i) son comparables directamente.
+
+Cómo funciona (sin jerga)
+
+Convierte las modificaciones de cada isoforma en códigos POS*10000+TIPO para compararlas.
+
+Determina el rango de posiciones donde las isoformas difieren.
+
+Calcula los iones teóricos de cada isoforma con get_theo_mz y recupera la posición de cada ión (en este caso, nos quedamos con los C-terminales).
+
+Recorre las posiciones C-terminales del rango y, si existe el ión en ambas isoformas, añade el par de m/z a K1/K2.
+
+Elimina huecos vacíos (ceros).
+
+Uso mínimo
+[K1, K2] = get_key_ions2(His, pno, qno, Mods, 'CID');  % o 'ETD'
+% Luego, en los espectros MS2, comparar señales cerca de K1(i) vs K2(i).
+
+Cuándo usar get_key_ions2 (y no get_key_ions)
+
+Cuando tu análisis o tu instrumento/protocolo prioriza iones C-terminales (p. ej., ciertas condiciones de fragmentación, o una evaluación rápida enfocada a C-serie).
+
+Cuando quieres replicar exactamente el comportamiento original que tenías, donde la parte N-terminal está desactivada.
+
+Problemas frecuentes
+
+K1/K2 vacíos: puede no haber coincidencias C-terminales compartidas en el rango de diferencia p-q.
+
+ActiveType no coherente con cómo get_theo_mz codifica los iones (CID vs ETD).
+
+His.mod_type{pno/qno} mal definidos o Mods incompleto.

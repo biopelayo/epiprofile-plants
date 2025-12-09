@@ -1,0 +1,150 @@
+H3_04_27_40 — Panel dirigido H3 KSAPATGGVKKPHR (27–40)
+1) Resumen ejecutivo
+
+Panel para el péptido H3 KSAPATGGVKKPHR (pos. 27–40) con PTMs en K27 y K36 (metilaciones 1–3 en combinaciones simples y dobles) y K27ac.
+Flujo: anclaje en unmod → recalibración de RTs → reubicación con heurísticas MS1 o asistida por MS2 → extracción de RT e intensidad (XIC) por cada estado PTM → salidas (mat, figuras, y PSMs si procede).
+
+Estados cubiertos (orden en His.mod_short)
+unmod, K36me1, K27me1, K27me2, K36me2, K27me3, K36me3, K27me2K36me1, K27me1K36me2, K27me1K36me1, K27me3K36me1, K27me1K36me3, K27me2K36me2, K27me3K36me2, K27me2K36me3, K27me3K36me3, K27ac.
+
+2) Entradas, salidas y parámetros clave
+
+Entradas
+
+MS1_index, MS1_peaks: perfil y picos MS1 (centroidado).
+
+MS2_index, MS2_peaks: escaneos y picos MS2 (centroidado).
+
+ptol: tolerancia m/z en ppm.
+
+special:
+
+raw_path (para check_ref),
+
+ndebug (modo depuración),
+
+nDAmode (0/1/2; usa MS2-asistida y exporta PSMs),
+
+nhmass (parámetros de diagnóstico/neutral-loss para MS2).
+
+Salidas
+
+H3_04_27_40.mat con pep_rts (RT por carga y estado) y pep_intens (intensidades XIC).
+
+Figuras de layout (draw_layout) con huellas MS1/MS2.
+
+PSMs (GetPSM) si special.nDAmode == 1.
+
+Constantes internas
+
+unitdiff = 1.0032 (Δ¹³C–¹²C).
+
+Cargas consideradas: 2+, 3+, 4+ (más realista para este largo de péptido).
+
+m/z teóricos por calculate_pepmz(His) (evita hard-codes).
+
+En plots, por defecto se ocultan [15 16] (combinaciones muy complejas): His.display([15 16]) = 0.
+
+3) Estrategia de RT y reglas de extracción
+3.1 Anclaje y recalibración
+
+Se intenta anclar RT de unmod (check_ref → get_rts o get_rts2).
+
+Si hay ambigüedad, se triangula con K27me1 (hno=3) y K27me2 (hno=4), buscando el máximo de unmod plausible entre picos confiables de K27.
+
+Recalibración global: Δ = RT(unmod_obs) − RT(unmod_prior) y se aplica a todas las RT de referencia (alineación por traslación).
+
+3.2 Reubicación “triple” y cascadas metilo
+
+Núcleo del panel: resolver el eje K27 (me1→me3) y eje K36 (me1→me3), incluidos dobletes (K27xK36).
+
+En relocate/relocate2 se exploran ventanas amplias hacia RT más tempranas (metilaciones altas tienden a eluir antes).
+
+Se usa una función find_triple para identificar simultáneamente los máximos de K27me2 / K36me2 / K27me3K36me1 (índices 4, 5, 11) y derivar un mapa xt de RTs canónicas:
+
+xt(1,1) → K27me2, xt(1,2) → K36me2, xt(1,3) → K36me3,
+
+xt(2,1) → K27me3, xt(2,2) → K27me2K36me1, xt(2,3) → K27me1K36me2,
+
+xt(3,2) → K27me3K36me1, xt(3,3) → K27me1K36me3.
+(El resto se asigna por reglas complementarias y pequeñas búsquedas locales).
+
+3.3 Extractores
+
+Simple (un objetivo): get_histone1/get_histone11 cuando el canal puede resolverse sin colisiones.
+
+Pareado (dos objetivos): get_histone2 cuando se anticipa co-elución (p. ej., K36me3 vs K27me2K36me1).
+
+Dobletes con fuerte dependencia de vecinos (p. ej., K27me2K36me2, K27me3K36me2, K27me2K36me3) usan ventanas sincronizadas con xt4 (pico “pivote” escogido entre hno=13 y hno=14 por intensidad).
+
+4) Ventanas RT (operativo)
+
+t = RT del ancla unmod. δ = 0.1 min.
+
+K36me1 / K27me1: [t+δ, t+15] con disambiguación “doblete” si aparecen dos máximos cercanos.
+
+K27me2/K27me3/K27me3K36me1: búsqueda amplia [t−35, t−δ] y find_triple para anclar los centros.
+
+K27me2K36me2 / K27me3K36me2 / K27me3K36me3: [t−50, …] acotando superior con xt(1,1)−δ−0.4 y validando contra xt4.
+
+K27ac: ventana tardía [pivot+δ, t−δ] donde pivot es xt(2,3) si existe; si no, t−10.
+
+El resto de combinaciones (K27me1K36me2, K27me1K36me1, K27me2K36me1, K27me1K36me3) se fijan por propagación desde xt o por ventanas locales cortas.
+
+5) MS2 y confirmación diagnóstica
+
+Con nDAmode == 2:
+
+get_rts2 añade filtros por fragmentos diagnósticos (y/o pérdidas neutrales) para distinguir me1/me2/me3 por ambos lisinas y resolver dobletes superpuestos.
+
+En relocate2, la misma arquitectura que en MS1 pero con decisiones reforzadas por MS2.
+
+PSMs exportados si nDAmode == 1.
+
+6) Pares/co-elución clave
+
+K36me3 vs K27me2K36me1 → frecuente co-elución; se usa pareado (get_histone2) a partir de hno=7.
+
+K27me2K36me2 / K27me3K36me2 / K27me3K36me3 → se alinean respecto a xt4 (pico de mayor evidencia entre 13/14) para mantener consistencia.
+
+K27me1K36me1 → se busca tras fijar K27me1 (dependencia de vecino).
+
+7) QA/QC y fallos comunes
+
+Sin ancla unmod: utilizar la triangulación con K27me1/K27me2 (como en el código). Revisar ptol y calibración m/z.
+
+Dobletes falsos en 2+/3+/4+: el criterio inten_sum(2) ≥ inten_sum(1)/30 y ΔRT ≤ 2 min reduce partición de ruido.
+
+Exceso de señal combinatoria (13–16): confirmar con MS2 o estrechar ventana usando xt y xt4.
+
+Figuras: usa His.display([15 16]) = 0 para simplificar diagnóstico visual.
+
+8) Reproducibilidad y extensión
+
+m/z teórico siempre por calculate_pepmz (evita números fijos).
+
+Ventanas RT expresadas explícitamente en el código (relocate/relocate2).
+
+Para extender a otros dobles/mixtos: añadir a mod_short/mod_type, definir RT prior, integrar en relocate* y seleccionar extractor.
+
+9) Diferencias vs H3_03_18_26 y notas por especie (reflexión)
+
+Complejidad combinatoria: aquí hay una red densa de estados K27×K36 con escaleras de metilación (me1→me3) en ambas lisinas; el panel previo (18–26) tenía más énfasis K18/K23/T22 y menos combinatoria doble metilo.
+
+Dinámica de RT: muchas de estas combinaciones eluyen más temprano que unmod (ventanas hacia t−35…−50), mientras que el panel 18–26 operaba más simétrico alrededor del ancla.
+
+Hallazgo triple (find_triple): esta pieza es crítica aquí para estabilizar las referencias; en 18–26 no era necesario un anclaje triple.
+
+Especificidad por especie (A. thaliana, M. polymorpha, Chlamydomonas)
+
+El orden relativo entre K27/K36 y sus dobles suele conservarse, pero los tiempos absolutos y anchos de pico varían por matriz y gradiente.
+
+Mi decisión: EpiProfile separado por especie (librerías y RT priors específicas) y comenzar con este set de reglas; tras 2–3 corridas de calibración, fijar deltas estables por especie.
+
+Para M. polymorpha y Chlamydomonas, esperar ligeramente mayor dispersión de RT en combinatorios 13–16; conviene forzar MS2 (nDAmode=2) para consolidar la identificación de me2/me3 cruzados.
+
+10) Ejemplo de uso
+special = struct('raw_path', rawfile, 'ndebug', 0, 'nDAmode', 2, 'nhmass', 0);
+ptol    = 10;        % ppm
+outdir  = 'results/';
+H3_04_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,outdir,special);

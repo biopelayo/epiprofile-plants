@@ -1,0 +1,138 @@
+README (extenso, en español, para no bioinfo/proteómica)
+¿Qué hace esta función?
+
+get_histone12 intenta cuantificar un péptido de histona específico (índice hno en tu librería His) en datos LC-MS/MS. Para ello:
+
+Busca la ventana de tiempo alrededor del tiempo de retención de referencia (His.rt_ref(hno)), por defecto ±0,2 min.
+
+Extrae del cromatograma MS1 la traza monoisotópica (y vecinos isotópicos) del precursor (usando GetProfiles).
+
+Encuentra picos (apex) en esa traza con GetTopBottom.
+
+Selecciona el apex más coherente con la RT de biblioteca (±0,5 min).
+
+Integra el área (AUC) con get_area.
+
+Devuelve:
+
+cur_rts → RT elegido por carga (si hay varias cargas definidas en tu librería).
+
+cur_intens → área integrada por carga.
+
+cur_mono_isointens → la traza monoisotópica para la primera carga (útil para QC/plots).
+
+Entradas imprescindibles (y qué significan)
+
+MS1_index: matriz con información de los scans MS1. La columna 2 debe ser el tiempo de retención (minutos). Debe estar ordenada de menor a mayor (lo normal).
+
+MS1_peaks: estructura/lista con los picos MS1 accesible por GetProfiles. Es el “almacén” de las intensidades por scan.
+
+ptol: tolerancia de masa para buscar el precursor y las isotopólogas. La función respeta el comportamiento legado: si llega 100, lo convierte a 10 (esto es por compatibilidad histórica).
+
+unitdiff: diferencia de masa entre 12C y 13C (~1.003355 Da). Se usa dividida entre la carga para construir la escalera isotópica [M-1, M, M+1, M+2].
+
+His: tu librería de péptidos de histona con, como mínimo:
+
+His.pep_mz(hno,j) → m/z teórico del péptido hno para la carga j.
+
+His.pep_ch(hno,j) → carga (z) correspondiente.
+
+His.rt_ref(hno) → RT de referencia de biblioteca (min).
+
+hno: índice (entero) del péptido a cuantificar dentro de His.
+
+Salidas
+
+cur_rts(1 x ncharge): RT por cada carga definida en His.pep_mz(hno,:).
+
+cur_intens(1 x ncharge): área integrada por carga.
+
+cur_mono_isointens(T x 1): traza monoisotópica (sólo se guarda para la primera carga del bucle).
+
+Paso a paso (lo que hace internamente)
+
+Configura la ventana ±delta = 0,2 min en RT alrededor de His.rt_ref(hno).
+
+Intenta brackear esa ventana en MS1_index(:,2):
+
+lo_idx: índices de scans con RT ≥ (RT_ref − delta).
+
+hi_idx: índices de scans con RT ≤ (RT_ref + delta).
+
+Opción 1 (comentada): si faltan índices, lanzar error (estricto).
+
+Opción 2 (activa): si faltan índices, hacer fallback al cromatograma entero (inicio/fin).
+
+Para cada carga:
+
+Construye la escalera isotópica [M-1, M, M+1, M+2] según unitdiff / z.
+
+Llama a GetProfiles para obtener la traza temporal y las intensidades isotópicas.
+
+Selecciona la traza monoisotópica (columna j=2).
+
+Con GetTopBottom encuentra candidatos de pico y sus bordes.
+
+Filtra candidatos que estén a ±0,5 min del RT de biblioteca y elige el de máxima área.
+
+Si hay varios, ensancha los bordes para integrar todo ese grupo coherente.
+
+Llama a get_area para la integración y guarda el RT del apex.
+
+Si no hay candidato, fija RT = RT_ref y área = 0.
+
+Por qué hay dos opciones (error vs fallback)
+
+Error (Opción 1): es útil en pipelines estrictos o en control de calidad de métodos. Si no hay datos cerca, prefieres frenar y revisar el experimento.
+
+Fallback (Opción 2): mantiene el proceso robusto (no se cae), pero puede integrar sobre ventanas más amplias, lo que diluye la especificidad. Adecuado en fases exploratorias o cuando hay pocos puntos.
+
+Recomendación práctica: en cuantificación final para paper, considera activar la Opción 1 (estricta) y hacer que el pipeline report cuántos péptidos fallan por RT.
+
+Parámetros clave y su impacto
+
+delta = 0.2 min: ventana local previa a la extracción. Si tu LC es más lento o hay drift, podrías subir a 0,3–0,5.
+
+Filtro de ±0,5 min sobre el apex: segunda barrera de coherencia. Ajusta si tu RT de biblioteca es poco fiable (datos multi-batch no alineados).
+
+ptol: tolerancia de masa efectiva en GetProfiles. Valores grandes dejan pasar más ruido; valores pequeños pueden perder el pico si hay offset de calibración.
+
+nC13: si ptol>100 && z≥3 permite un desplazamiento 13C adicional (heredado). Mantener por compatibilidad si tus datos lo necesitan.
+
+Estructuras y dependencias externas
+
+GetProfiles: dado un rango de scans (rt_i1:rt_i2), la escalera isotópica y ptol, devuelve:
+
+c_isorts → eje temporal (RTs) usados.
+
+c_ref_isointens → intensidades por isotopóloga (columnas) a lo largo del tiempo.
+
+GetTopBottom: detecta picos en una señal 1D, devolviendo posiciones de apex (nt), bordes (nb) y métricas (inten_sum).
+
+get_area: integra área alrededor del apex seleccionado usando los bordes.
+
+[No verificado] Si tus versiones de estas funciones difieren, adapta los comentarios a la firma real. La lógica aquí asume las convenciones de EpiProfile/EpiProfile_PLANTS.
+
+Errores y mensajes comunes
+
+No hay puntos en la ventana: con Opción 2, continuará y usará extremos (principio/fin). Con Opción 1, fallará con error claro.
+
+rt_i1 > rt_i2: inversión rara (por orden o datos). El código lo intercambia y avisa.
+
+Línea sin % (“Descomenta este bloque…”): rompe MATLAB. Está así en tu fuente; dímelo y lo comento.
+
+Consejos de uso / QC
+
+Alinea RTs entre muestras si provienen de batches distintos.
+
+Grafica cur_mono_isointens y marca el cur_rts elegido para validar a ojo en algunos casos.
+
+Cuantificación multi-carga: decide si promedias, eliges la mejor carga, o las usas como replicados técnicos (según tu protocolo).
+
+Reporta missing (área=0) por péptido y muestra: evita inflar ratios con many zeros.
+
+¿Qué cambiaría al generalizar a otras especies?
+
+Nada aquí depende de la secuencia directamente; la especie influye en tu librería (His.pep_mz, His.pep_ch, His.rt_ref).
+
+Asegúrate de que His esté bien formado para cada nueva especie, y mantén coherente unitdiff, ptol y el formato de MS1_*.

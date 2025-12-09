@@ -1,0 +1,113 @@
+comparativa exhaustiva entre tus dos versiones de get_rts: la original y la “robusta con validaciones” (la muy comentada). Me centro en qué cambia, por qué, cómo afecta a los resultados, riesgos y cuándo verás diferencias. Al final incluyo un mini-diff orientativo.
+
+1) Qué cambia y por qué
+Área	Versión original	Versión robusta (comentada)	¿Por qué es relevante?
+Chequeo del rango [t1,t2]	Solo valida casos “gordos” al principio: t1 > RTmax o t2 < 0 o t2 < t1 → retorna vacío.	Normaliza los bordes: calcula min_RT_MS1/max_RT_MS1 y, si t1 o t2 caen por debajo del mínimo, los ajusta al mínimo con warning. Mantiene el early-return si t1 > RTmax o t2 < 0 o t2 < t1.	Evita que un rango parcialmente fuera de los datos cause índices vacíos más adelante. Es más tolerante con peticiones “desalineadas”.
+Mapeo a índices (p, pp)	p = find(RT ≥ t1); rt_i1 = p(1) y pp = find(RT ≤ t2); rt_i2 = pp(end) sin comprobar si p o pp están vacíos.	Comprueba si p o pp quedan vacíos tras el ajuste. Si aún así están vacíos → retorna vacío (no revienta).	La original puede crashear con “index out of range” si no hay scans dentro del rango. La robusta nunca se cae por esto.
+Selección del detector	Igual (según nsplit, llama a GetTopBottom o GetTopBottom11).	Igual.	No hay diferencia funcional aquí.
+Validación de outputs del detector	No valida que nt esté no vacío ni que top1_idx sea válido. Procede a indexar.	Valida: si nt vacío → retorna vacío; verifica que nt esté en rango; comprueba que top1_idx y cur_pos_top1 sean enteros válidos antes de indexar.	Evita errores del tipo “Array indices must be positive integers…” cuando el detector devuelve nada o índices raros.
+Filtro de elución temprana	Si top1_rt < 4 min → devuelve todo vacío.	Igual.	Filtra frente de disolvente; comportamiento idéntico.
+Reglas de ptol y nC13	ptol==100 → 10; nC13=1 si ptol>100 & z≥3.	Igual.	Misma extracción MS1.
+
+Resumen: la versión robusta añade normalización de [t1,t2], guardas de índices y validación de la salida del detector. Todo está pensado para no romper en lotes grandes y para dar mensajes claros si la ventana pedida no es compatible con los datos.
+
+2) Cómo afecta a los resultados
+
+Cuando hay datos “bien formados” en [t1,t2]
+➜ Salidas idénticas (mismos rts, top1_rt, inten_sum, top1_inten_sum).
+No has cambiado la extracción ni el criterio del detector.
+
+Cuando [t1,t2] toca zonas sin datos (p. ej., por debajo de min_RT_MS1)
+
+Original: puede fallar en p(1)/pp(end) (índices vacíos).
+
+Robusta: ajusta t1/t2 al mínimo RT disponible (con warning) y sigue.
+➜ En números: si pedías t1=0.10, t2=0.50 y min_RT_MS1=0.90, la robusta moverá ambos a 0.90. El detector trabajará con esa malla de tiempo. Si el apex queda <4, retorna vacío (lo mismo que habrías querido, pero sin crash).
+
+Cuando el detector no encuentra picos (nt vacío)
+
+Original: intentará indexar y puede romper.
+
+Robusta: devuelve vacíos de forma limpia.
+➜ Te permite distinguir “no hay pico” de “fallo del código”.
+
+Criterio <4 minutos
+➜ Igual: si el apex cae antes de 4 min, ambas retornan vacío. La diferencia es que la robusta llega a ese punto sin caerse aunque el rango inicial fuese incómodo.
+
+3) Riesgos / trade-offs introducidos por la versión robusta
+
+“Ocultar” un rango mal pedido
+
+Al ajustar t1/t2 al mínimo RT, la función no falla y podrías pasar por alto que el rango original no existía en datos.
+
+Mitigación: el warning te lo recuerda. Si quieres más visibilidad, añade un flag de salida (p. ej., clamped=true/false).
+
+Cambiar ligeramente la malla temporal en el borde
+
+Si tus t1/t2 quedan “clampados” a min_RT_MS1, la malla de c_isorts puede ser distinta de la esperada, y el detector segmentar diferente (especialmente si había un pico pegado al borde).
+
+En la práctica, el filtro <4 min ya descarta la mayoría de artefactos del frente, así que el impacto real suele ser mínimo.
+
+Consistencia analítica
+
+Si alguien espera que “rango inválido” fracase (para capturarlo en QA), tu robusta no falla: devuelve vacío + warning.
+
+Mitigación: expón un modo “estricto” (error) vs “tolerante” (ajuste + warning).
+
+4) Cuándo verás diferencias (casos concretos)
+
+t1 o t2 menores que min_RT_MS1
+
+Original: posible crash en pp(end).
+
+Robusta: ajusta y devuelve vacío si top1_rt<4 o cuantifica si hay señal válida.
+
+Implicación: en pipelines de lote, pasas de “run abortado” a “muestra procesada con aviso”.
+
+Detector devuelve nt=[] (señal muy baja o rango inadecuado)
+
+Original: puede romper al indexar nt.
+
+Robusta: retorna vacío (claridad semántica: “no hubo picos”).
+
+Rango marginal (t1≈min_RT_MS1)
+
+La robusta puede “recortar” el rango en el borde. Si hay un hombro de pico justo en el borde, el detector podría seleccionar un máximo ligeramente distinto a igualdad de datos. Cambios esperables: décimas de minuto y pequeñas variaciones en inten_sum.
+
+5) Recomendación para EpiProfile_PLANTS
+
+Usa la robusta como por defecto en lotes (AT/MP/CR, ontogenia y estrés), porque:
+
+Evita caídas por ventanas mal definidas o “huecos” de RT.
+
+Te da mensajes útiles (warnings) en lugar de errores crípticos.
+
+Añade un modo estricto con un parámetro (p. ej., strict_range=true) que lance error en vez de ajustar, si quieres QA duro.
+
+Registra en log si hubo clamping de t1/t2 para poder auditar corridas con muchas “ventanas rozando el mínimo”.
+
+Mini-diff ilustrativo (lógica clave)
+- p  = find(MS1_index(:,2) >= t1);  rt_i1 = p(1);
+- pp = find(MS1_index(:,2) <= t2);  rt_i2 = pp(end);
+
++ min_RT = MS1_index(1,2);  max_RT = MS1_index(end,2);
++ if t1 > max_RT || t2 < 0 || t2 < t1, return vacíos; end
++ if t2 < min_RT, warning(...); t2 = min_RT; end
++ if t1 < min_RT, warning(...); t1 = min_RT; end
++ p  = find(MS1_index(:,2) >= t1);
++ if isempty(p), return vacíos; end
++ rt_i1 = p(1);
++ pp = find(MS1_index(:,2) <= t2);
++ if isempty(pp), return vacíos; end
++ rt_i2 = pp(end);
++ % Validaciones extra de nt/top1_idx antes de indexar c_isorts
+
+Conclusión
+
+Funcionalmente iguales cuando el rango es válido y hay señal: no cambias ciencia.
+
+La versión robusta añade seguridad y mensajes claros, evitando crashes típicos (“índice vacío”) y devolviendo vacíos razonables cuando procede.
+
+El único “precio” es que normaliza rangos que tocan el mínimo RT (con aviso), lo cual es generalmente deseable en batch real.
+
+Si quieres, en el siguiente paso te doy un parámetro strict_range y un flag de salida clamped para que el mismo get_rts sirva tanto en QA estricto como en producción tolerante.

@@ -1,0 +1,86 @@
+README — get_histone2 (ES)
+Resumen funcional
+
+Objetivo: separar la señal de un péptido en dos componentes (p. ej., dos isómeros/modificaciones con el mismo precursor m/z) usando evidencia MS1 + MS2:
+
+Cuantificación total (MS1) con get_histone1: obtiene el área total por carga alrededor del RT de referencia.
+
+Estimación de proporciones (MS2) con get_ratio_2iso: dentro de una ventana estrecha (±0,5 min), calcula una razón temporal entre dos isoformas usando iones diagnósticos (K1 para iso-1, K2 para iso-2).
+
+En DDA (special.nDAmode=1): selecciona MS2 cuyos precursores ≈ {M, M+1, M+2}/z.
+
+En DIA (special.nDAmode=2): restringe al aislamiento más cercano a c_mz.
+
+Si no hay evidencia suficiente, aplica un perfil coseno suavizado de baja amplitud como fallback.
+
+Separación del XIC mono en dos curvas (iso-1 e iso-2), suaviza, anula colas débiles (<20% del máximo), busca ápices y áreas por spline.
+
+Ratio global = area1 / (area1 + area2) para iso-1.
+
+Divide el área total por carga (h_intens) según esa razón y repite los RT de iso-1/iso-2 en todas las cargas.
+
+Salida:
+
+cur_rts: 2 × nCharge (fila 1 iso-1, fila 2 iso-2), mismos RT para todas las cargas.
+
+cur_intens: 2 × nCharge con áreas separadas (iso-1 = total×ratio; iso-2 = total×(1−ratio)).
+
+cur_mono_isointens: num_MS1 × 2 con las series mono-XIC ya separadas y alineadas a escaneos MS1.
+
+Entradas clave
+
+MS1_index / MS1_peaks: estructura estándar del proyecto (RT en (:,2), offset en (:,3); MS1_peaks = [m/z, intensidad]).
+
+MS2_index / MS2_peaks: incluye RT ((:,2)), centro de aislamiento/precursor ((:,4)), código de instrumento ((:,6)), y offset a picos ((:,7)).
+
+ptol (ppm): si ==100, se fuerza a 10 (convención histórica). Si >100 y z≥3, nC13=1 para GetProfiles.
+
+unitdiff (Da): separación isotópica (~1.003355).
+
+Mods: lista/catalogo de modificaciones (para get_key_ions*).
+
+His: incluye pep_mz, pep_ch, rt_ref, mod_short, outpath, outfile, etc.
+
+hno: índice del primer isoforma; el código asume la pareja (hno y hno+1).
+
+special: nDAmode (1 DDA, 2 DIA), nsource/nsubtype (controla versión get_key_ionsH con NH-mass), etc.
+
+Dependencias
+
+get_histone1 — cuantificación MS1 base (±2 min, picking/área robustos).
+
+GetProfiles — genera XICs para {M−1, M, M+1, M+2}.
+
+GetTopBottom11 — picking de ápices (versión usada aquí para señales suavizadas).
+
+get_key_ions / get_key_ionsH — listas K1/K2 de iones diagnósticos por instrumento (CID/ETD/HCD; IT/FT ajusta tolerancia m/z).
+
+Detalles importantes
+
+Instrumentos (MS2_index(:,6)):
+
+Impar (…IT) ⇒ tol = 0.4 Da. Par (…FT) ⇒ tol = 0.02 Da.
+
+ActiveType = 'ETD' si código ∈ {3,4}; si no, 'CID' (aplica también a HCD en esta lógica).
+
+RT windows:
+
+Mono-XIC para ratio: ±0,5 min alrededor de rt_ref(hno).
+
+En DIA, acota a los escaneos realmente aislados para c_mz.
+
+Fallback (poca MS2):
+
+Perfil coseno de baja amplitud (0–0.1) que asigna una variación suave iso-1/iso-2 según el orden de rt_ref(hno) vs rt_ref(hno+1).
+
+Salida PDF: guarda en His.outpath un diagnóstico Iso_<outfile>_<mod_short{hno}>_<mod_short{hno+1}>.pdf con la traza experimental y las dos separadas.
+
+Buenas prácticas / advertencias
+
+Asegura que hno y hno+1 sean realmente una pareja de isoformas (misma secuencia/precursor con mods alternativas) y que sus rt_ref tengan sentido relativo.
+
+Comprueba la coherencia entre MS1_index/MS2_index y sus tablas de picos (offsets/filas).
+
+Si la evidencia MS2 es inconsistente o escasa, el fallback mantiene estabilidad pero introduce suposiciones suaves; valida con ejemplos conocidos.
+
+En DIA, la coincidencia del centro de aislamiento con c_mz se usa como filtro estricto; si tu esquema DIA usa ventanas anchas, confirma que MS2_index(:,4) refleja correctamente el centro de cada ventana.

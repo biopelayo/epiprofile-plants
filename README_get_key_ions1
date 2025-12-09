@@ -1,0 +1,67 @@
+README (ES) — get_key_ions1.m
+¿Qué hace?
+
+Genera una lista K1 de m/z teóricos para un único péptido/isoforma (pno) y devuelve además qué posiciones del esqueleto peptídico se usaron en:
+
+posn: posiciones de corte tipo N-terminal dentro de una ventana,
+
+posc: posiciones de corte tipo C-terminal (reflejadas desde el extremo C).
+
+La lista K1 se organiza así:
+
+Primero, los m/z de la serie N (en el mismo orden que posn);
+
+Después, los m/z de la serie C (en el mismo orden que posc).
+
+En cristiano: construye una “plantilla” de picos teóricos que esperamos ver en el espectro MS/MS para esta isoforma, alrededor de la zona donde están las modificaciones.
+
+Entradas
+
+His.pep_seq: secuencia del péptido (si es 'unmod', la función extrae la secuencia real de His.mod_short{pno} tras el último punto).
+
+His.mod_type{pno}: etiqueta de modificaciones de la isoforma (formato “de máquina”).
+
+Mods: definición/catálogo de modificaciones.
+
+ActiveType: tipo de fragmentación (por ejemplo, 'CID', 'ETD'), que controla cómo get_theo_mz genera los iones teóricos.
+
+Funciones auxiliares ya existentes en tu proyecto:
+
+get_mod_postype(seq, modString, Mods) → devuelve posiciones (1..L) con modificaciones para esa isoforma.
+
+get_theo_mz(seq, modString, charge, Mods, ActiveType) → devuelve m/z teóricos (theo_mz) y códigos (theo_tp) que indican si cada ión es N-serie o C-serie y en qué posición del esqueleto se corta.
+
+Salidas
+
+K1: vector fila con m/z teóricos; primero N-serie, luego C-serie.
+
+posn: posiciones N-terminales consideradas.
+
+posc: posiciones C-terminales consideradas.
+
+Cómo decide qué posiciones usar
+
+Localiza las modificaciones de la isoforma (get_mod_postype).
+
+Si no hay modificaciones (o están a ≤3 residuos de distancia), toma todo el péptido.
+
+Si hay, toma la ventana mínima que cubre desde la primera modificación a la última.
+
+Dentro de esa ventana:
+
+posn recorre cortes N-terminales (de t1 a t2-1);
+
+posc recorre cortes C-terminales “espejados” desde el final.
+
+Uso mínimo
+[K1, posn, posc] = get_key_ions1(His, pno, Mods, 'CID'); % o 'ETD', etc.
+% K1(1:numel(posn))     → m/z N-serie
+% K1(numel(posn)+1:end) → m/z C-serie
+
+Consejos y problemas frecuentes
+
+Si algunas posiciones no tienen ión teórico (según ActiveType), se quedan como 0 en K1.
+
+Asegúrate de que His.pep_seq sea la secuencia real; si viene como 'unmod', la función ya intenta rescatarla desde His.mod_short{pno}.
+
+Si K1 sale muy vacío: revisa ActiveType y tu librería Mods; quizá ese modo de fragmentación no produce iones en las posiciones esperadas o la isoforma no está bien definida.

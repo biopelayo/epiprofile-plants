@@ -1,0 +1,112 @@
+README — H4_02c_20_36 (documentación extensa, en castellano)
+1) Qué mide este panel
+
+Péptido objetivo (H4 20–36): KVLRDNIQGITKPAIRR
+Sitio de interés: K20 (primer residuo del péptido).
+Estado PTM cubierto: unmod (derivatizado), K20me1, K20me2, K20me3, K20ac.
+
+Este péptido es la versión extendida del 20–35 (añade una Arg terminal). La Arg adicional aumenta la basicidad y favorece estados de carga 2+/3+/4+, a veces con RT ligeramente más tempranas que el 20–35 (semillas aquí indicadas). Es útil como panel de confirmación cuando KVLR/HRKVLR o KVLRDNIQGITKPAIR tienen señal floja o solapamientos.
+
+[Reality Filter] Las RT semilla y ventanas reproducen el comportamiento histórico del core. Debes validarlas en tu gradiente/columna concreta.
+
+2) Entradas y salidas
+
+Entradas:
+
+MS1_index (n×2): índice de escaneo y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato core).
+
+MS2_index, MS2_peaks: centroidado MS2 (para relocalización/PSM).
+
+ptol: tolerancia de masa (ppm recomendadas: 5–10 Orbitrap; 10–20 Q-TOF).
+
+cur_outpath: carpeta de salida.
+
+special:
+ndebug (1=diagnóstico mínimo), nDAmode (2=usa MS2; 1=exporta PSM tras cuantificar; otro=MS1-only), nhmass (si aplica), raw_path (para check_ref).
+
+Salidas:
+
+H4_02c_20_36.mat con His, pep_rts (5×3), pep_intens (5×3), mono_isointens (nMS1×5).
+
+Figuras de layout/XIC (draw_layout).
+
+PSM si nDAmode==1.
+
+3) Definición His (cómo están codificadas las PTM)
+
+pep_seq = 'KVLRDNIQGITKPAIRR'.
+
+mod_short = {'unmod','K20me1','K20me2','K20me3','K20ac'}.
+
+mod_type (índices relativos al péptido):
+
+0 = N-terminal peptídico (propionilación, “pr” por derivatización).
+
+1 = K20 (sitio PTM: me1/me2/me3/ac).
+
+12 = Lisina interna derivatizada (pr) según especificación del core.
+
+Cargas: 2 3 4 (prioriza multi-carga).
+
+m/z teórico: calculate_pepmz(His).
+
+RT semilla (min): [39.53, 40.44, 35.63, 34.87, 38.83].
+
+display = 0 (panel auxiliar; oculto en plots por defecto).
+
+4) Estrategia de tiempos de retención
+
+Anclaje del unmod con check_ref.
+
+Si DA (nDAmode==2), se refina con get_rts2 en ±5 min (o todo el gradiente si no hubo ajuste).
+
+Si check_ref falla (ndebug==2): se escanean unmod y K20me1 en todo el gradiente y se sitúa unmod ≈ (me1−3 min) o se elige el candidato más intenso de unmod en (me1−18 .. me1).
+
+Corrección de deriva: si se observa un RT para unmod, se calcula delta = RT_obs_unmod − RT_semilla_unmod y se desplaza todo el set de RT semilla para las PTM.
+
+Relocalización por ventanas (MS1-only: relocate; DA: relocate2):
+
+K20me1: [unmod + 0.1, unmod + 18] (DA: +16).
+
+K20me2: [6, unmod − 3].
+
+K20me3: [6, unmod − 3] (resuelto junto a me2 vía find_pair).
+
+K20ac: [(unmod + me2)/2, unmod − 0.1].
+
+5) Flujo de cuantificación
+
+Extrae unmod con get_histone0 (genera además traza monoisotópica diagnóstica).
+
+Desplaza RT del resto por delta.
+
+Relocaliza ventanas (MS1/DA).
+
+Extrae me1, me2, me3, ac con get_histone1.
+
+Guarda matrices, dibuja, opcional exporta PSM si nDAmode==1.
+
+6) Consejos de QC
+
+Orden de elución típico: me2/me3 antes de unmod; me1 después de unmod; ac entre me2 y unmod.
+
+Comprueba coherencia de 2+/3+/4+: la Arg terminal favorece 3+.
+
+Ante ac tenue/interferencias, usa DA y estrecha ventanas.
+
+7) Ejemplo mínimo
+cur_outpath = 'results/AT/H4/';
+special = struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/data/run.raw');
+ptol = 10; % ppm
+
+H4_02c_20_36(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+8) Notas de reproducibilidad
+
+Mantén CHANGELOG.md (ventanas/cargas/semántica DA).
+
+Documenta LC-MS (columna/gradiente/flujo).
+
+Normaliza a nivel de proyecto (qsmooth/ComBat) para comparaciones entre corridas.

@@ -1,0 +1,136 @@
+README (en castellano, extenso)
+¿Qué hace Raw2MS?
+Convierte automáticamente un conjunto de ficheros vendor *.RAW (por ejemplo, generados por instrumentos de espectrometría de masas) en dos formatos más sencillos/usuales para análisis descendente:
+
+
+.MS1: fichero con información de escaneos MS1 (precursores).
+
+
+.ms2: fichero con información de escaneos MS2 (fragmentación).
+
+
+La función no procesa espectros por sí misma: simplemente invoca dos ejecutables externos para hacer las conversiones y organiza los resultados en carpetas.
+
+Entradas
+
+
+raw_path (cadena): carpeta donde están los *.RAW.
+
+
+raw_names (cell de strings): nombres base de los ficheros (sin extensión).
+Ej.: {'SampleA','SampleB'} → se esperan SampleA.RAW, SampleB.RAW dentro de raw_path.
+
+
+
+Salidas (en disco)
+
+
+Carpeta MS1/ dentro de raw_path, con Nombredemuestra.MS1 por cada muestra convertida.
+
+
+Carpeta MS2/ dentro de raw_path, con Nombredemuestra.ms2 por cada muestra convertida.
+
+
+
+Si un fichero de salida ya existe, no se vuelve a convertir (permite relanzar sin sobreescribir).
+
+
+Dependencias externas
+
+
+RawToMS1.exe: responsable de convertir .RAW → .MS1.
+
+
+xtract.exe: responsable de extraer .ms2 desde .RAW.
+
+
+Ambos deben estar en el directorio de trabajo actual de MATLAB (el que devuelve pwd) antes de ejecutar la función. Si no se encuentran, la función termina mostrando un aviso.
+
+Nota “Reality Filter”: el significado exacto de las banderas de xtract.exe (-a -i 1 -m 5 -ms2 -o ...) depende de la implementación de esa herramienta. No puedo verificar sus semánticas específicas aquí. Consulta la ayuda integrada (xtract.exe --help) o la documentación oficial para interpretar esas opciones.
+
+
+Supuestos y limitaciones
+
+
+Sistema operativo: pensado para entornos donde se pueden ejecutar .exe (Windows). En Linux/Mac, necesitarías alternativas equivalentes o capas de compatibilidad.
+
+
+Rutas con espacios: ya están entrecomilladas en la llamada al sistema para evitar errores.
+
+
+Extensiones: el código usa mayúsculas para .RAW y .MS1, y minúsculas para .ms2. Respeta estas extensiones si renombraras manualmente.
+
+
+Ubicación del .MS1: algunos conversores depositan temporalmente el .MS1 junto al .RAW. El script lo mueve a raw_path/MS1.
+
+
+Parada en error: si falla una conversión para una muestra, la función imprime el nombre del fichero y sale (no continúa con las demás).
+
+
+
+Flujo de trabajo típico
+% 1) Copia RawToMS1.exe y xtract.exe a tu carpeta actual (pwd).
+% 2) Asegúrate de que tus .RAW estén en raw_path.
+
+raw_path  = 'E:\proyectos\proteomica\corrida_2025_11_02';
+raw_names = {'YNG_01','YNG_02','BOT_01','BOT_02'};
+
+Raw2MS(raw_path, raw_names);
+
+% Tras ejecutar, tendrás:
+%   E:\proyectos\proteomica\corrida_2025_11_02\MS1\YNG_01.MS1  (etc.)
+%   E:\proyectos\proteomica\corrida_2025_11_02\MS2\YNG_01.ms2  (etc.)
+
+
+Errores comunes y cómo resolverlos
+
+
+“please first put RawToMS1.exe…” / “please first put xtract.exe…”
+→ Copia los ejecutables a la carpeta actual (pwd) e inténtalo de nuevo.
+
+
+“can not create: <ruta>”
+→ No hay permisos para crear MS1/ o MS2/. Ejecuta MATLAB con permisos adecuados o crea manualmente las carpetas.
+
+
+“can not convert: <...RAW>”
+→ La herramienta externa devolvió un código de error. Comprueba:
+
+
+Que el fichero .RAW existe y no está bloqueado.
+
+
+Que tienes permisos de lectura en el RAW.
+
+
+Que las rutas no contengan caracteres extraños.
+
+
+Lanza el comando manualmente en una consola para ver la ayuda de la herramienta y el error detallado (el script captura status y message, pero no los muestra).
+
+
+
+
+No aparecen los .MS1 en MS1/
+→ Algunos conversores dejan el .MS1 junto al .RAW. El script lo mueve con movefile. Si el nombre de salida difiere, revisa el comportamiento/documentación del conversor.
+
+
+
+Buenas prácticas
+
+
+Mantén una copia inmutable de los .RAW originales.
+
+
+Documenta la versión de los ejecutables usados y las banderas pasadas.
+
+
+Verifica con un visualizador o con un parser simple que los .MS1/.ms2 generados son legibles antes de seguir el pipeline.
+
+
+Automatiza una lista de verificación (número de ficheros esperados, tamaños en disco, logs de conversión).
+
+
+
+Resumen en una frase
+Raw2MS organiza y automatiza la conversión de *.RAW a *.MS1 y *.ms2 invocando ejecutables externos, creando una estructura limpia MS1/ y MS2/ lista para análisis posteriores.

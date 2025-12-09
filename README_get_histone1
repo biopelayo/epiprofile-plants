@@ -1,0 +1,92 @@
+README — get_histone1 (ES)
+¿Qué hace?
+
+Cuantifica un péptido de histona (índice hno en His) en todos sus estados de carga dentro de una ventana estrecha de ±2 minutos alrededor de su RT de referencia. Para cada carga:
+
+Construye XICs en cuatro posiciones isotópicas {M−1, M, M+1, M+2} (espaciadas unitdiff / z).
+
+Extrae candidatos de ápice en la traza monoisotópica (columna 2) con GetTopBottom11.
+
+Filtra candidatos cercanos al RT de referencia (±0,5 min) y se queda con el de mayor intensidad integrada (inten_sum).
+
+Integra el área con get_area (que corrige solapamientos si procede).
+
+Devuelve el RT del ápice y el área por carga. Además, para la primera carga expone la XIC monoisotópica completa.
+
+Entradas
+
+MS1_index (matriz): índice de escaneos. Se usa (:,2) como RT y (:,3) como fila inicial en MS1_peaks.
+
+MS1_peaks (Nx2): todos los picos MS1 [m/z, intensidad] concatenados.
+
+ptol (ppm): si == 100, se fuerza a 10 (convención histórica). Si >100 y z≥3, se activa nC13=1 en GetProfiles.
+
+unitdiff (Da): diferencia isotópica (≈1.003355 Da).
+
+His (struct): pep_mz, pep_ch, rt_ref al menos.
+
+hno (int): índice del péptido en His.
+
+Salidas
+
+cur_rts (1 × nCharge): RT del ápice por carga; si no hay candidato, rt_ref(hno).
+
+cur_intens (1 × nCharge): área integrada por carga (0 si no hay candidato aceptado).
+
+cur_mono_isointens (vector): traza XIC monoisotópica usada para la primera carga.
+
+Algoritmo (detalle)
+
+Ventana de escaneo: calcula índices rt_i1:rt_i2 que cubren His.rt_ref(hno) ± 2 minutos.
+
+Seeds isotópicos: para cada carga z, usa {M−1, M, M+1, M+2} con paso unitdiff/z.
+
+Extracción de XICs: GetProfiles(..., ptol, nC13, rt_i1:rt_i2) devuelve:
+
+c_isorts: RT por scan en esa ventana.
+
+c_ref_isointens: matriz de XICs para las 4 líneas; columna 2 = monoisotópica.
+
+Picking de ápices: GetTopBottom11(mono) produce:
+
+nt: índices candidatos de ápice; nb: fronteras de segmentos; inten_sum: intensidad integrada por candidato.
+
+Se filtran candidatos con |RT − rt_ref(hno)| ≤ 0.5.
+
+Se elige el de mayor inten_sum. Si hay ≥2 candidatos aceptados → se ajustan nb para abarcar desde nb(x(1)) a nb(x(end)+1).
+
+Integración: get_area(...) integra el área (con posible corrección de solapamientos si ptol < 100).
+
+Fallback: si no hay candidatos dentro de ±0,5 min, devuelve RT = rt_ref(hno) y área 0.
+
+Ventanas y umbrales
+
+Búsqueda de escaneos: ±2.0 min alrededor de rt_ref(hno).
+
+Aceptación de ápices: ±0.5 min alrededor de rt_ref(hno) (filtro flag).
+
+Isótopos por carga: {M−1, M, M+1, M+2} (4 trazas).
+
+ptol:
+
+== 100 → 10 ppm (convención de código).
+
+> 100 y z ≥ 3 → nC13 = 1 (tratamiento específico en GetProfiles).
+
+Dependencias
+
+GetProfiles(MS1_index,MS1_peaks,isomzs,z,ptol,nC13,scan_range) — extrae XICs para las líneas isotópicas en el rango de escaneos.
+
+GetTopBottom11(xic) — detecta candidatos de ápice y devuelve también segmentación nb y medidas inten_sum.
+
+get_area(...) — integra el área aplicando deconvolución de solapamientos cuando procede.
+
+Consideraciones prácticas
+
+Asegura que MS1_index(:,2) (RT) y MS1_index(:,3) (offset en MS1_peaks) son coherentes con la tabla de picos.
+
+El valor ptol==100 convertido a 10 puede sorprender; si no es deseable, modifícalo aguas arriba (mantener aquí fidelidad).
+
+Si hay varios picos válidos a ±0,5 min, el ajuste de nb ayuda a que get_area integre en un segmento ceñido a los candidatos.
+
+cur_mono_isointens se reporta solo para la primera carga; es útil para depuración o inspección visual de la traza usada.

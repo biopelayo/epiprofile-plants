@@ -1,0 +1,161 @@
+get_histone4 — Deconvolución de 4 isoformas a partir de MS1+MS2
+
+Este módulo realiza la separación cuantitativa de cuatro isoformas/estados PTM de un péptido de histona usando:
+
+el área total estimada desde MS1 y
+
+los ratios relativos inferidos de iones diagnósticos en MS2 (DDA o DIA).
+
+Genera además una figura PDF de control con la traza experimental y las cuatro sub-trazas resultantes.
+
+[Nota de diseño] El comportamiento reproduce la lógica original (misma E/S). Se han añadido comentarios, validaciones suaves y pequeños “guard-rails” sin modificar la cuantificación.
+
+Entradas
+
+MS1_index (n×7 aprox.)
+
+Col(1): scan MS1
+
+Col(2): rt (min)
+
+Col(3): offset en MS1_peaks (índice inicial de los picos de ese scan)
+
+Resto de columnas: metadatos tal y como los genera tu preprocesado.
+
+MS1_peaks (m×2): [mz, intensity] concatenado para todos los scans, indexado con MS1_index(:,3).
+
+MS2_index (k×≥7):
+
+Col(1): scan MS1 asociado
+
+Col(2): rt (min)
+
+Col(4): precursor/center m/z
+
+Col(6): instrumento (mapa: {CIDIT=1, CIDFT=2, ETDIT=3, ETDFT=4, HCDIT=5, HCDFT=6})
+
+Col(7): offset en MS2_peaks
+
+MS2_peaks (p×2): [mz, intensity] concatenado para todos los MS2.
+
+ptol: tolerancia en ppm (si vale 100, se fuerza a 10 por compatibilidad histórica).
+
+unitdiff: diferencia isotópica (13C ≈ 1.003355 Da).
+
+Mods: estructura con definiciones de iones diagnósticos (usada por get_key_ions / get_key_ionsH).
+
+His (estructura):
+
+pep_mz(hno:hno+3, :): m/z de las isoformas (por carga)
+
+pep_ch(hno:hno+3, :): carga de cada isoforma (por carga)
+
+rt_ref(hno:hno+3): RTs de referencia
+
+mod_short{hno:hno+3}: etiquetas cortas (p.ej., K9acK14ac)
+
+outpath, outfile: ruta y prefijo para el PDF
+
+Otras claves heredadas del pipeline.
+
+hno: índice de la primera isoforma del bloque (se usan hno, hno+1, hno+2, hno+3).
+
+special:
+
+nDAmode: 1=DDA, 2=DIA
+
+nsource, nsubtype: usados para activar get_key_ionsH (modo NH-mass) en ciertos orígenes/subtipos.
+
+Otros flags heredados no críticos para esta función.
+
+Salidas
+
+cur_rts — (4 × nCargas)
+RT del ápice para cada isoforma (replicado a todas las cargas del péptido).
+
+cur_intens — (4 × nCargas)
+Área por isoforma y carga. Se reparte el área total MS1 según los ratios MS2.
+
+cur_mono_isointens — (nScans_MS1 × 4)
+Sub-trazas monoisotópicas separadas por isoforma, alineadas a la malla de MS1 (útiles para QC/plots).
+
+Además, se guarda un PDF:
+His.outpath / ['Iso_' His.outfile '_' <n_ac> 'ac_' His.mod_short{hno} '.pdf']
+que superpone la traza experimental y las 4 sub-trazas, con % relativo en el título.
+
+Flujo interno (resumen)
+
+Área total (MS1): llama a get_histone1 para obtener el área global del péptido en una ventana centrada en rt_ref(hno).
+
+Ventana y traza mono: extrae la traza monoisotópica en [rt_ref(hno)−Δ, rt_ref(hno+3)+Δ] (Δ≈0.5 min).
+
+Selección de MS2:
+
+DDA: acepta precursores M, M+1, M+2 dentro de ptol ppm.
+
+DIA: restringe a la ventana donde MS2_index(:,4) coincide con el bin de c_mz.
+
+Ratios por escaneo: con iones diagnósticos (get_key_ions / get_key_ionsH), calcula a, ab, abc y reconstruye [a b c d].
+
+Suavizado y normalización fila a fila (cada escaneo): se reparte la intensidad mono experimental en 4 sub-trazas.
+
+RT de ápice y área por isoforma: por spline se cuantifica cada subtraza y se derivan RTs y ratios globales.
+
+Resultado final: reparte el área MS1 total según los ratios y exporta la figura de control.
+
+Ejemplo mínimo
+% Parámetros básicos
+ptol     = 10;              % ppm
+unitdiff = 1.003355;        % 13C
+hno      = 27;              % primera isoforma del bloque
+special.nDAmode  = 1;       % DDA
+special.nsource  = 0;
+special.nsubtype = 0;
+
+% Llamada
+[cur_rts, cur_intens, cur_mono] = get_histone4( ...
+    MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+    ptol, unitdiff, Mods, His, hno, special);
+
+Dependencias internas
+
+get_histone1 (área total en MS1)
+
+GetProfiles (extracción de perfiles MS1)
+
+get_key_ions / get_key_ionsH (listas diagnósticas para MS2)
+
+MATLAB smooth, spline
+(y utilidades del mismo módulo: selección de ventanas, plotting, etc.)
+
+Consejos y resolución de problemas
+
+Sin evidencia MS2 suficiente (≤3 escaneos útiles en ventana): la función hace fallback a 4 partes iguales y distribuye la traza mono equitativamente (útil para QC; revisa luego manualmente).
+
+ptol == 100: por compatibilidad, se reinterpreta como 10 ppm.
+
+DIA sin coincidencia de ventana (MS2_index(:,4) ≠ c_mz del precursor): no hay ratios → revisa el binning de DIA o el centroid mapping.
+
+Instrumentos mixtos en la ventana: la función adapta tolerancia (IT/FT) y tipo de activación (CID/ETD/HCD) por escaneo.
+
+Índices fuera de rango (hno:hno+3): se sale con ceros y un aviso por consola.
+
+PDF no crítico: si falla el guardado de la figura, se informa por consola pero no se aborta la cuantificación.
+
+Buenas prácticas
+
+Asegura que His.rt_ref(hno:hno+3) estén razonablemente cercanos a los máximos esperados para mejorar la ventana inicial.
+
+Valida que Mods esté sincronizado con las series diagnósticas para cada combinación (isoforma_i vs isoforma_i+1, CID/ETD/HCD).
+
+En DIA, confirma que el precursor bin en MS2_index(:,4) esté exactamente en el valor esperado (o aplica tu tolerancia/normalización de bins antes).
+
+Cita y licencia
+
+Si reutilizas este módulo en publicaciones, cita tu repo EpiProfile_PLANTS y el EpiProfile original.
+
+Licencia recomendada: GPL-3.0 (alineada con EpiProfile 2.0). Ajusta si tu proyecto usa otra.
+
+Changelog (breve)
+
+v1.0 (2025-10-30): README en español; documentación ampliada; robustez en figura; misma lógica cuantitativa que el original.

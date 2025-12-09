@@ -1,0 +1,109 @@
+README (ESPAÑOL)
+¿Qué hace GetMS1ScanNo?
+
+Convierte un volcado de texto de MS1 en dos ficheros MAT compactos y cacheados:
+
+*_MS1scans.mat → MS1_index (metadatos por scan y punteros a picos) + MS1Type.
+
+*_MS1peaks.mat → MS1_peaks (todas las parejas m/z, intensidad concatenadas).
+
+Si ya existen, los reutiliza y sale con success = 1.
+
+Formato de entrada esperado (texto)
+
+El parser busca líneas con estos encabezados (con tabuladores \t):
+
+H\tDataType → un carácter con el modo: 'C' (centroid) o 'P' (profile).
+
+Si es 'P', no sigue: debes centroidar antes.
+
+S → inicio de un escaneo MS1 (a continuación viene el número de scan).
+
+I\tRetTime → tiempo de retención (normalmente segundos).
+
+I\tInstrumentType → código (p. ej., FTMS, ITMS).
+
+Luego, muchas líneas con: <m/z>\t<intensidad>.
+
+Salidas
+MS1_index (matriz nScans × 4):
+
+scan_no — número de scan.
+
+rt — minutos (si detecta que venían en segundos, divide entre 60).
+
+ptr — puntero de inicio a MS1_peaks para ese scan (ver abajo).
+
+baseline — umbral de línea base por scan (0 si no se calculó).
+
+Cómo recuperar los picos del scan i:
+
+start = MS1_index(i,3);
+stop  = (i<size(MS1_index,1)) * (MS1_index(i+1,3)-1) + ...
+        (i==size(MS1_index,1)) * size(MS1_peaks,1);
+scan_peaks = MS1_peaks(start:stop, :);   % cols: [mz, inten]
+
+MS1_peaks (matriz nPeaks × 2):
+
+Columna 1: m/z, Columna 2: intensidad (tras filtrar bajo el baseline cuando se estima).
+
+Algoritmo (resumen)
+
+Cache: si existen los MAT (y MS1Type), devolver.
+
+Cabecera: localizar H\tDataType; si es 'P' → abortar (requiere centroidar).
+
+Bucle de scans:
+
+Leer S (scan), I\tRetTime (RT), I\tInstrumentType.
+
+Leer pares m/z, intensidad hasta el siguiente S.
+
+Quitar intensidades ≤ 0.
+
+Si hay >100 puntos, calcular baseline (modo del histograma de log10(int)) y filtrar < baseline.
+
+Guardar en memoria: MS1_index (con npk temporalmente en col. 3) y añadir picos a MS1_peaks.
+
+Postproceso:
+
+Convertir col. 3 (npk) en punteros de inicio mediante cumsum + 1.
+
+Convertir RT a min si el último RT > 1000 (heurística: venía en s).
+
+Recortar las preasignaciones y guardar MATs.
+
+Parámetros y heurísticas
+
+maxpeaknum = 1e4: picos máx. por scan.
+
+maxMS1num = 1.5e5: scans preasignados.
+
+totalpeaknum = 4e7: picos totales preasignados.
+
+Baseline: histograma de log10(int) con paso 0.08; se usa el modo como umbral.
+
+Descarta scans con rango m/z < 10 (prov. ruido).
+
+Ajusta preasignaciones si te quedas corto en datasets muy grandes (habrá error de índice).
+
+Errores comunes y soluciones
+
+“MS1 is profile mode” → el fichero no está centroidado. Pásalo por el centroidador vendor/ProteoWizard.
+
+“can not open / does not exist” → ruta mal indicada o sin permisos.
+
+RT en s/min → la conversión a minutos es heurística. Si tus RTs son pequeños y ya están en min, no superarán 1000 y no se tocarán.
+
+Memoria → reduce totalpeaknum o procesa por bloques si tu RAM es limitada (este parser asume máquinas de análisis habituales).
+
+Validación rápida
+ok = GetMS1ScanNo('/ruta/mi_export_MS1.txt');
+load('/ruta/mi_export_MS1_MS1scans.mat');   % MS1_index, MS1Type
+load('/ruta/mi_export_MS1_MS1peaks.mat');   % MS1_peaks
+size(MS1_index), size(MS1_peaks)
+
+% Reconstruir el primer scan:
+s1 = MS1_index(1,3);
+s2 = MS1_index(2,3)-1;
+first_scan = MS1_peaks(s1:s2,:);

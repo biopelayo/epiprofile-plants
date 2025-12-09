@@ -1,0 +1,62 @@
+README (ES) — get_mod_postype.m
+¿Qué hace?
+
+Toma una cadena de texto con modificaciones formateadas como "pos,Nombre;" y devuelve dos vectores:
+
+modpos: posiciones donde hay modificación.
+
+modtype: índice de cada nombre de modificación dentro de Mods.name.
+
+No calcula masas ni suma efectos; solo identifica posiciones y “tipos” (vía índice).
+
+Formato de entrada
+
+c_sequence: secuencia peptídica (string).
+
+c_modification: lista con el formato exacto "pos,Nombre;pos,Nombre;..."
+Ejemplos:
+
+"3,ac;5,me1;" → posición 3 con “ac”, posición 5 con “me1”.
+
+"0,ac;8,ph;" → ver reglas de borde.
+
+Mods.name: celda con los nombres de modificaciones válidos (p. ej. {'ac','me1','ph',...}).
+
+Si la cadena no contiene comas ,, la función no procesa nada y devuelve vectores vacíos (comportamiento original).
+
+Reglas de borde (igual que el código original)
+
+C-terminal: si pos == peplen + 1 (longitud + 1), se remapea a pos = peplen (último residuo).
+
+N-terminal: no se remapea aquí. Si aparece pos == 0, se conserva como 0 en modpos. En otras partes del pipeline se interpreta ese valor.
+
+Qué devuelve
+
+modpos: vector con las posiciones tal cual se han leído (con el remapeo C-terminal mencionado).
+
+modtype: vector con índices numéricos; Mods.name{modtype(i)} es el nombre correspondiente.
+
+Si algún Nombre no existe en Mods.name, la función imprime no <Nombre> in Mods y sale inmediatamente.
+
+Ejemplo rápido
+
+Secuencia "PEPTIDE" (longitud 7):
+c_modification = "0,ac;3,me1;8,ph;"
+
+Se obtendrá modpos = [0, 3, 7] (el 8 se mapea a 7 por ser C-terminal).
+
+Si Mods.name = {'ac','me1','ph'}, entonces modtype = [1, 2, 3].
+
+Errores frecuentes
+
+Formato: falta el ; final en cada par, o falta la , entre posición y nombre.
+
+Nombre desconocido: si el nombre no está en Mods.name, la función avisa y termina.
+
+Posiciones inválidas: esta función no valida rangos (más allá del remapeo C-terminal). La lógica de validación suele hacerse aguas arriba o aguas abajo.
+
+Consejos
+
+Mantén Mods.name como la lista única de referencia de nombres válidos.
+
+Si necesitas trabajar con masas, combínalo con get_mod_mass.m, que usa Mods.mass.

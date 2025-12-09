@@ -1,0 +1,147 @@
+README (en castellano, extenso)
+Qué hace esta función
+
+OutputSinglePTMs resume la cuantificación de marcas postraduccionales de histonas (PTMs) a partir de resultados ya procesados (estilo EpiProfile). En concreto:
+
+Recorre, para cada muestra, una carpeta detail/ con muchos ficheros .mat (uno por región/ventana peptídica).
+
+En cada .mat espera encontrar:
+
+Un struct His con, al menos:
+
+pep_mz (vector con los precursores m/z por péptido).
+
+mod_short (etiquetas cortas de las modificaciones para cada péptido).
+
+Una matriz auc de tamaño [nPeptidos x 3] con:
+
+RT (tiempo de retención),
+
+Area (área del pico),
+
+Ratio (proporción normalizada de esa forma modificada frente al total de formas del mismo péptido).
+
+Construye una etiqueta por péptido (con la ventana posicional y la modificación).
+
+Para un listado de marcas objetivo (por ejemplo, H3K4me1, H3K79ac, H4K20me3, etc.), busca qué péptidos encajan por nombre y suma sus “ratios” por muestra.
+
+Devuelve una matriz final sratios de tamaño [nTargets x nMuestras] con la suma de ratios por marca y muestra.
+
+Escribe los resultados en:
+
+histone_ratios_single_PTMs.mat (variables targets y sratios).
+
+histone_ratios_single_PTMs.xls (tabla tabulada con primera columna = marca, y resto = muestras).
+
+Intuición: si la “ratio” de un péptido es “qué fracción de ese péptido está en una forma modificada concreta”, al sumar las ratios de todos los péptidos relevantes para una misma marca, obtenemos un indicador global de esa marca en la muestra (útil para comparar muestras). Es una heurística práctica muy usada; conviene contextualizarla con otros controles/normalizaciones.
+
+Entradas
+
+layout_path (cadena): ruta raíz donde están las carpetas de salida por muestra.
+
+raw_names (cell array de cadenas): nombres de las muestras, por ejemplo {'S1','S2','S3'}.
+
+Estructura de carpetas esperada
+
+Para cada muestra i (comenzando en 1), la función espera un path:
+
+<layout_path>/<prefix>_<raw_names{i}>/detail/
+
+
+donde <prefix> es un índice de dos dígitos (01, 02, …).
+Ejemplo:
+
+layout_path = '/proyecto/resultados'
+raw_names = {'SampleA','SampleB'}
+
+Se buscan:
+  /proyecto/resultados/01_SampleA/detail/*.mat
+  /proyecto/resultados/02_SampleB/detail/*.mat
+
+
+Cada .mat dentro de /detail/ debe contener las variables His y auc descritas arriba.
+
+Salidas
+
+histone_ratios_single_PTMs.mat
+
+targets: cell array con las marcas objetivo (orden fijo en el código).
+
+sratios: matriz [numTargets x numMuestras] con la suma de ratios.
+
+histone_ratios_single_PTMs.xls
+
+Fichero tab-separado (aunque la extensión sea .xls) con:
+
+Fila 1: encabezado con identificación de muestras.
+
+Filas siguientes: cada marca (targets) seguida de sus valores por muestra.
+
+Puedes abrir el .xls con Excel o LibreOffice; al ser texto tabulado, también se puede leer con readtable de MATLAB, pandas (Python), etc.
+
+Cómo se seleccionan y suman las señales
+
+La lista de marcas (targets) incluye variantes como H31... (H3.1) y H33... (H3.3).
+
+Para H31* la función restringe la búsqueda a péptidos cuyo nombre contenga H3_27_40.
+
+Para H33* la búsqueda se restringe a nombres con H33_27_40.
+
+Para el resto (p. ej., H3K4me1, H4K20me3), la búsqueda se hace en todos los péptidos.
+
+En todos los casos, se busca el sub-string de la modificación (K4me1, K9ac, K79me2, etc.) dentro de la etiqueta del péptido construida por el script.
+
+Las “ratios” (columna 3 de auc) de los péptidos que hacen match se suman por muestra para dar sratios(target, sample).
+
+Interpretación práctica de “ratio” y de la suma
+
+Ratio por péptido: fracción de ese péptido en una forma modificada concreta, comparada con la suma de sus formas alternativas.
+
+Suma de ratios a nivel de marca: agregación por “familia” de péptidos que informan de la misma marca (por ejemplo, varias ventanas peptídicas que contienen la lisina K4).
+
+Uso: comparar sratios entre muestras/condiciones (e.g., desarrollo, estrés, tratamientos).
+
+Precaución: la suma depende de qué péptidos se incluyan y de cómo se nombran; es sensible a convenciones y a posibles solapamientos. Complementa con QC y normalizaciones globales.
+
+Limitaciones y supuestos
+
+Naming y estructura rígidos: asume carpetas 01_name/detail, 02_name/detail, etc., y que todas las muestras tienen los mismos .mat (mismo orden) para mantener la alineación de filas.
+
+Variables esperadas: cada .mat debe tener His (con pep_mz y mod_short) y auc ([RT, Area, Ratio]). Si faltan o tienen otro nombre/formato, la función fallará o dará resultados incorrectos.
+
+Búsqueda por sub-strings: si cambian las convenciones (p. ej., K79me2 escrito de otra forma), habrá falsos negativos/positivos.
+
+“xls” no es binario Excel: es texto tabulado con extensión .xls por conveniencia.
+
+Ejemplo mínimo de uso (pseudo-ejemplo)
+layout_path = '/datos/EpiProfile_PLANTS/output';
+raw_names   = {'YNG_01','BOT_02','FLR_03','SEN_04'};  % 4 muestras
+
+OutputSinglePTMs(layout_path, raw_names);
+
+% Tras ejecutar:
+%   - /datos/EpiProfile_PLANTS/output/histone_ratios_single_PTMs.mat
+%   - /datos/EpiProfile_PLANTS/output/histone_ratios_single_PTMs.xls
+
+Errores típicos y cómo evitarlos
+
+“can not open: histone_ratios_single_PTMs.xls”
+→ No hay permisos de escritura en layout_path o la ruta no existe. Crea la carpeta y revisa permisos.
+
+Variables faltantes al cargar .mat
+→ Asegúrate de que los .mat contienen His (con pep_mz, mod_short) y auc con 3 columnas en ese orden.
+
+Resultados todos a cero
+→ Probablemente no están coincidiendo los nombres: revisa que las etiquetas de los péptidos incluyan K4me1, K79ac, etc., tal y como el script espera. Comprueba también las ventanas H3_27_40 / H33_27_40 para variantes.
+
+Buenas prácticas
+
+Versiona targets si los amplías/modificas (guarda la lista y la razón de cada cambio).
+
+Añade controles: por ejemplo, conserva también la suma de áreas o verifica cuántos péptidos contribuyen a cada marca para detectar outliers.
+
+Documenta la versión del pipeline que genera los .mat (EpiProfile original vs. EpiProfile_PLANTS, parámetros, tolerancias, etc.).
+
+Nota final
+
+Esta función no identifica ni detecta picos: solo agrega resultados ya calculados por otra etapa del pipeline. Su calidad depende completamente de la coherencia de nombres/ventanas y de la validez de los .mat de entrada.

@@ -1,0 +1,180 @@
+README (en castellano, extenso)
+¿Qué hace draw_layout?
+
+Genera un PDF con subplots (uno por forma del péptido/modificación) que muestra:
+
+La traza MS1 (XIC) mono-isotópica a lo largo del tiempo.
+
+El pico local y límites de integración (líneas verticales magenta).
+
+Una etiqueta con modificación, m/z, carga, RT e intensidad.
+
+Opcionalmente (si special.nDAmode == 2), una superposición MS2 tipo DIA:
+fragmentos b/y (CID/HCD) o c/z (ETD) con minitrazo coloreado y etiqueta por posición (b7, y10, c5, z8, …).
+
+El PDF se guarda como ../<out_filename>.pdf (un nivel por encima de cur_outpath).
+
+Entradas
+
+cur_outpath: ruta de trabajo de ese “peptide window” (se usa para resolver la carpeta del PDF).
+
+out_filename: nombre lógico del “peptide window” (también forma parte del título y del nombre del PDF).
+
+His (struct):
+
+pep_mz [n x 1]: m/z del precursor por fila.
+
+pep_ch [n x 1]: carga por fila.
+
+mod_short {n x 1}: etiqueta corta de la modificación (K9ac, K4me1, …).
+
+pep_seq char: secuencia del péptido para este window.
+
+display [n x 1]: 1 muestra, 0 oculta.
+
+pep_rts [n x 1]: RT nominal por fila (minutos).
+
+pep_intens [n x 1]: intensidad escalar por fila (si >0, se intenta buscar máximos).
+
+isorts [T x 1]: vector tiempo (min) para el eje X del XIC.
+
+mono_isointens [T x n]: intensidades mono-isotópicas MS1 (columna = fila/forma).
+
+MS2_index [S x …]: metadatos por escaneo MS2. Columnas usadas:
+
+(2) RT (min)
+
+(4) precursor m/z
+
+(6) tipo de instrumento (1..6) → comentario original: {'CIDIT','CIDFT','ETDIT','ETDFT','HCDIT','HCDFT'}
+
+(7) índice acumulado para trocear MS2_peaks.
+
+MS2_peaks [N x 2]: pares (m/z, intensidad) concatenados de todos los escaneos MS2.
+
+special (struct):
+
+nDAmode: si ==2, activa la superposición MS2 (DIA-like).
+
+nhmass : si ==1, usa get_key_ions1H (variación H-mass); si no, get_key_ions1.
+
+[Reality Filter — No verificado] La semántica exacta de las columnas (6 y 7) de MS2_index y algunos helpers (GetTopBottom11, GetLocal, GetMods, get_key_ions1/1H) no está incluida aquí. La he descrito según su uso en el código y comentarios presentes.
+
+Salida
+
+Un PDF: fullfile(fileparts(cur_outpath), [out_filename '.pdf'])
+
+Título: <histona> <inicio>-<fin> <pep_seq> +<carga> ions (según tokens en out_filename).
+
+Cada subplot: una forma modificada (fila del window).
+
+Cómo se decide qué filas se plotean
+
+Se filtra por:
+
+pep_rts > 4 minutos (descarta ruido muy temprano).
+
+His.display == 1 (respeta banderas previas de visualización).
+
+Ejes y límites
+
+Eje X: minutos (isorts).
+
+Eje Y: intensidad re-escalada a la máxima local del intervalo [st, tm] para la fila.
+
+st/tm: se fijan a partir de los límites más extremos de todas las filas visibles del window, alargando un poco (−5, +25) para contexto.
+
+Etiquetas y límites de integración
+
+Apex (magenta): se almacena en localmax_rt/inten, con etiqueta mod_short(m/z,+z), RT, Intensidad.
+
+Límites (magenta): verticales en los dos extremos de terminus (índices en isorts).
+
+Nota: si no se encuentra un contorno válido con GetLocal, se usa un límite degenerado [seed seed].
+
+Superposición MS2 (si special.nDAmode == 2)
+
+Se cotejan MS2 en la ventana RT [rt1, rt2] (los mismos límites del XIC, con +/-0.001 min).
+
+Se intenta encontrar el precursor m/z más cercano al de la fila (His.pep_mz(hno)).
+
+Se decide tipo de activación:
+
+CID/HCD → series b/y
+
+ETD → series c/z
+
+Se seleccionan iones clave (K1) con get_key_ions1 o get_key_ions1H (según nhmass y ActiveType).
+
+Se busca, por scan, el pico más cercano a cada m/z de K1 dentro de una tolerancia absoluta:
+
+Instrumento impar (IT): tol = 0.4
+
+Instrumento par (FT): tol = 0.02
+
+Se dibujan “mini-trazas” desplazadas ligeramente (−4 min para N-serie; +3 min para C-serie) y se rotulan (b7, y10, c5, z8, …).
+
+[Reality Filter — No verificado] El desplazamiento temporal de −4/+3 min parece ser una elección gráfica para separar visualmente las series; no representa un corrimiento físico real.
+
+Dependencias (helpers externos)
+
+GetTopBottom11(xic): heurística para detectar top/bottom locales.
+
+GetLocal(seed_index, times, xic, nb): devuelve apex local e índices de borde.
+
+GetMods(): catálogo de modificaciones para selección de iones clave.
+
+get_key_ions1/1H(His,hno,Mods,ActiveType): define lista de fragmentos (m/z) b/y o c/z.
+
+MatchMS2(...): helper local incluido al final del archivo (usa MS2_index y MS2_peaks).
+
+Limitaciones y cautelas
+
+Escalas relativas: el re-escalado fold para superponer MS2 depende de la intensidad local del MS1; no compare valores absolutos entre subplots.
+
+Tolerancias: tol fija se basa en el tipo de instrumento inferido; si los códigos no son correctos, el matching de fragmentos puede fallar.
+
+Precursors: si no hay coincidencia exacta en m/z de precursor, se usa fallback (todos los scans en la ventana).
+
+Selección de filas: pep_rts > 4 y display == 1 puede ocultar casos reales si ese umbral no se ajusta a tu LC.
+
+Fuentes no incluidas: las funciones auxiliares no están en este snippet; el comportamiento final depende de su implementación.
+
+Uso sugerido
+% Suponiendo ya poblado:
+%   - His, pep_rts, pep_intens, isorts, mono_isointens
+%   - MS2_index, MS2_peaks
+%   - special.nDAmode = 2 (para ver MS2), special.nhmass = 0/1
+
+cur_outpath  = '/ruta/proyecto/01_SampleA/detail';
+out_filename = 'H3_27_40_v1_...';  % el que corresponda a este window
+
+draw_layout(cur_outpath, out_filename, His, pep_rts, pep_intens, ...
+            isorts, mono_isointens, MS2_index, MS2_peaks, special);
+% Genera ../<out_filename>.pdf
+
+Interpretación rápida del PDF
+
+Cada fila del péptido (p. ej., K9ac, K9me1, …) ocupa un subplot.
+
+Azul: traza MS1 (intensidad vs tiempo).
+
+Magenta: apex y líneas verticales de integración.
+
+Rojo: texto con mod, m/z, carga, RT, intensidad.
+
+DIA activado: pequeños trazos coloreados con etiquetas b#/y# o c#/z# (fragmentos) a los lados del pico.
+
+Diagnóstico y resolución de problemas
+
+PDF vacío: probablemente ningún pep_rts > 4 o His.display está a 0.
+
+Sin fragmentos dibujados: revisa special.nDAmode == 2, la ventana [rt1,rt2], o los códigos de instrumento en MS2_index(:,6).
+
+Picos mal centrados: revisa GetLocal y el seeding de c_ms1pos (depende de pep_rts).
+
+Leyenda confusa: el título se construye parseando out_filename por _; usa convención consistente.
+
+Resumen en una frase
+
+draw_layout crea un PDF claro por ventana peptídica con los XICs MS1 y, si se activa, una superposición de fragmentos MS2 (b/y o c/z), marcando picos y límites para inspección visual y validación rápida.

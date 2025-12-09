@@ -1,0 +1,56 @@
+README (ESPAÑOL)
+¿Qué es H3_02_9_17?
+
+Cuantificación dirigida del péptido de histona H3 “KSTGGKAPR” centrado en K9 y K14. Evalúa 10 estados:
+unmod, K9me1, K9me2, K9me3, K9ac, K14ac, K9me1K14ac, K9me2K14ac, K9me3K14ac, K9acK14ac.
+
+Ancla la RT con la forma no modificada, recoloca ventanas para cada PTM (solo MS1 o asistido por MS2), extrae RT e intensidad, dibuja XICs y, opcionalmente, exporta un .plabel.
+
+Entradas
+
+MS1_index, MS1_peaks: MS1 en modo centroid (RT en minutos).
+
+MS2_index, MS2_peaks: MS2 en modo centroid.
+
+ptol (ppm): tolerancia m/z (algunas funciones normalizan 100→10).
+
+cur_outpath: carpeta de salida.
+
+special:
+
+nDAmode: 0/1 = MS1-only; 2 = MS2-assisted.
+
+ndebug: activa caminos alternativos de ajuste de RT.
+
+nhmass: variante de iones clave en MS2.
+
+raw_path: usado por check_ref.
+
+Lógica de ventanas RT (resumen)
+
+K9me1: tras unmod ([unmod+0.5, unmod+16]).
+
+K9me2 / K9me3: antes de unmod ([6, unmod−3]), se emparejan con find_pair_new (usa intensidad/consistencia).
+
+K9ac: entre me2 y unmod.
+
+K14ac: se ajusta en relación a K9ac (si K9ac se desplaza, se traslada).
+
+Combinaciones: se restringen entre las ventanas de sus componentes (p. ej., K9me1K14ac entre unmod+δ y K9me1−δ).
+
+En modo MS2-assisted (nDAmode==2), se sustituyen búsquedas get_rts por get_rts2/get_rts22 para reforzar apex con ion-fragmento diagnóstico.
+
+Salidas
+
+H3_02_9_17.mat: cuantificación por PTM × carga (RTs e intensidades).
+
+H3_02_9_17.plabel (si se activa, ver GetPSM): etiquetas simples de espectros.
+
+Figuras vía draw_layout.
+
+Requisitos (módulos externos)
+
+GetMods, calculate_pepmz, check_ref, get_rts, get_rts2, get_rts22,
+get_histone0/1/2/11, find_pair_new, output_histone, draw_layout, GetPSM.
+
+[Reality Filter] No puedo verificar aquí la presencia exacta de todos los helpers en tu árbol. Este archivo asume su disponibilidad en tu copia de EpiProfile_PLANTS.

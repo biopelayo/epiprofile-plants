@@ -1,0 +1,109 @@
+README — get_histone0 (ES)
+Resumen funcional
+
+Extrae, para un péptido de histona concreto (hno en la estructura His), su tiempo de retención (RT) y su intensidad integrada en MS1 por cada estado de carga disponible. Lo hace así:
+
+Primer estado de carga
+
+Construye XICs para 4 líneas isotópicas centrales: {M−1, M, M+1, M+2} (en m/z, usando unitdiff/charge).
+
+Define un rango de búsqueda de escaneos:
+
+Si His.rt_unmod_orig == His.rt_ref(1) y no estamos en modo debug ⇒ toda la corrida.
+
+Si no ⇒ ±5 minutos alrededor de His.rt_ref(hno).
+
+Con GetTopBottom, detecta picos candidatos en la traza monoisotópica (columna 2 de c_ref_isointens).
+
+Según special.ndebug, selecciona el apice más consistente con His.rt_ref(hno) (o con un RT derivado de fichero para paneles concretos).
+
+Integra el área de pico con get_area (corrección de solapamiento si ptol < 100).
+
+Guarda el vector completo de la XIC monoisotópica usada (cur_mono_isointens) para este primer estado de carga.
+
+Resto de cargas
+
+Centra un rango estrecho de ±delta (1 min) alrededor del RT encontrado en el primer estado de carga.
+
+Vuelve a construir XICs {M−1, M, M+1, M+2} para cada carga y busca el apice cercano al RT de referencia (±1 min).
+
+Integra el área con get_area. Si no encuentra candidato consistente ⇒ intensidad 0 y RT = RT del primer estado.
+
+Entradas
+
+MS1_index (matriz): mapa de índices por escaneo. Se usa (:,2) como RT y (:,3) como fila inicial en MS1_peaks.
+
+MS1_peaks (matriz Nx2): todos los picos MS1 concatenados por escaneos [m/z, intensidad].
+
+ptol (ppm): si == 100, se fuerza a 10 (comportamiento histórico del código). Si >100 y z≥3, se activa nC13=1 en GetProfiles.
+
+unitdiff (Da): diferencia isotópica (≈1.003355 Da).
+
+His (struct):
+
+pep_mz (nPept × nCharge), pep_ch (nPept × nCharge),
+
+rt_ref (nPept × 1), rt_unmod_orig (esc.),
+
+opcional outfile, outpath.
+
+hno (int): índice del péptido.
+
+special.ndebug: 0 normal; 1 modo debug (ventana estrecha alrededor de His.rt_ref(hno)); -1 normal pero con ventana asimétrica y excepciones para paneles 'H3_02_9_17' y 'H3_02a_9_17'.
+
+Salidas
+
+cur_rts (1 × nCharge): RT seleccionado por estado de carga.
+
+cur_intens (1 × nCharge): área integrada MS1 (0 si no se halló un candidato válido).
+
+cur_mono_isointens (N × 1): traza XIC monoisotópica usada en el primer estado de carga.
+
+Reglas clave de selección de ápice (primer estado de carga)
+
+Modo debug (ndebug==1): ventana en [ref_rt−1, ref_rt+1].
+
+Modo “relajado” (ndebug==-1): ventana en [ref_rt−2, ref_rt+{2 o 3}], siendo 3 si outfile ∈ {H3_02_9_17,H3_02a_9_17}.
+
+Si hay ≥2 candidatos en ese rango y se cumple el caso especial, elige entre los dos más intensos el que tenga RT menor; en caso contrario, el más intenso.
+
+Modo normal (ndebug==0):
+
+Si His.rt_unmod_orig ≠ His.rt_ref(1) ⇒ ancla en ref_rt = His.rt_ref(1) (±1 min).
+
+Si outfile == 'H3_04v3_27_40' ⇒ ref_rt se obtiene con get_H33_27_40_unmod_rt (lee H3_04_27_40.xls y aplica offset dependiente de gradient:
+gradient=1 ⇒ −0.3 min; gradient=2 ⇒ −1.6 min; si no hay fichero ⇒ His.rt_ref(1)).
+
+Si no aplica lo anterior y hay candidatos y c_isorts(nt(top1_idx)) > 4 ⇒ usa el mejor candidato de GetTopBottom; si no ⇒ cur_rts(1) = His.rt_ref(hno) e intensidad 0.
+
+Ventanas/umbrales
+
+Rango inicial: toda la corrida o ±5 min según His.rt_unmod_orig y ndebug.
+
+Selección por ndebug:
+
+ndebug==1 ⇒ llimit=−1, rlimit=+1 (min).
+
+ndebug==−1 ⇒ llimit=−2, rlimit=+2 (o +3 para 'H3_02_9_17', 'H3_02a_9_17').
+
+Resto de cargas: ±1 min alrededor del RT del primer estado.
+
+Dependencias
+
+GetProfiles(MS1_index,MS1_peaks,isomzs,z,ptol,nC13,scan_range) → devuelve c_isorts (RT por scan) y c_ref_isointens (XICs por m/z).
+
+GetTopBottom(xic) → candidatos de ápice (nt), fronteras (nb), índice top1, y inten_sum.
+
+get_area(...) → integración de área de pico (con posible deconvolución isotópica).
+
+get_H33_27_40_unmod_rt(His,gradient) → RT de referencia para panel H3 27–40 desde Excel/tab.
+
+Comentarios prácticos
+
+ptol==100 ⇒ 10: esta convención puede sorprender; si no la deseas, cámbiala aguas arriba (no aquí para mantener la fidelidad).
+
+Asegúrate de que MS1_index(:,2) sea tiempo real (min) y (:,3) indexe correctamente en MS1_peaks.
+
+cur_mono_isointens se devuelve solo para el primer estado de carga (útil para depurar el XIC original usado).
+
+Si cur_intens(1)==0, el código actual no sale (bloque return está comentado); así, intentará igualmente cuantificar otras cargas alrededor del RT ancla.

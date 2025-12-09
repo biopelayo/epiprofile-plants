@@ -1,0 +1,88 @@
+README — calculate_pepmz (ES)
+¿Qué hace?
+
+Calcula los m/z teóricos de péptidos (con o sin modificaciones) para varios estados de carga.
+Suma: (i) masas monoisotópicas por residuo (de Getaamass) + (ii) una molécula de H₂O (termini) + (iii) deltas por modificación (de get_mod_mass).
+Luego aplica: m/z = (M_neutral + z·m_proton) / z, con m_proton = 1.007276 Da.
+
+Entradas (estructura His)
+
+His.mod_type (cell N×1 o N×M): especificación de la modificación por fila i. Se pasa a get_mod_mass.
+
+His.pep_ch (matriz N×K): estados de carga por fila (i) y columna (j).
+
+His.pep_seq (char):
+
+Si ≠ 'unmod' → secuencia común para todas las filas.
+
+Si = 'unmod' → secuencia por fila desde His.mod_short{i} (ver “recorte por puntos”).
+
+His.mod_short (cell N×1): solo si pep_seq == 'unmod'. Si contiene puntos (.), se conserva solo lo que va tras el último punto.
+
+Salida
+
+pep_mz (double N×K): m/z teórico por fila i y columna j (carga His.pep_ch(i,j)).
+
+Dependencias internas
+
+GetMods() → catálogo/definiciones de modificaciones (estructura usada por get_mod_mass).
+
+Getaamass() → tabla de masas monoisotópicas por letra 'A'..'Z' (≥26×1).
+
+get_mod_mass(seq, mod, Mods) → vector de deltas por residuo (longitud = length(seq)).
+
+Constantes y supuestos
+
+H₂O: mH2O = 2*1.0078246 + 15.9949141.
+
+Protón: pmass = 1.007276.
+
+Índices de residuos: idx = seq - 'A' + 1 → asume mayúsculas A..Z sin símbolos raros.
+
+Flujo (resumen)
+
+Prealoca pep_mz (N×K).
+
+Carga Mods y aamass.
+
+Si pep_seq ≠ 'unmod': usa una sola secuencia para todas las filas.
+
+Obtiene masas base por residuo.
+
+Para cada fila i: calcula deltam con get_mod_mass y suma; añade H₂O; calcula m/z para cada columna j.
+
+Si pep_seq = 'unmod': para cada fila i toma mod_short{i}, recorta tras el último ., y repite el esquema del paso 3.
+
+Puntos críticos / errores comunes
+
+Recorte por puntos: 'K.PEPTIDE.R' → 'R'. Asegúrate de que esto es lo que quieres (algunas convenciones usan flancos y la secuencia central sería 'PEPTIDE').
+
+Longitud de deltas: get_mod_mass debe devolver un vector con una delta por residuo; si no, habrá inconsistencia.
+
+Letras no estándar: cualquier carácter fuera de A..Z romperá el índice (idx = seq - 'A' + 1).
+
+Dimensiones: size(His.mod_type,1) = size(His.pep_ch,1) (mismo N).
+
+Cargas cero o negativas: el código no las valida; deben ser enteros positivos.
+
+Validación rápida (checklist)
+
+unique(His.pep_ch(:)) ⊆ {2,3,4,...}
+
+all(ismember(His.pep_seq, 'A':'Z')) si pep_seq ≠ 'unmod'.
+
+Si pep_seq == 'unmod': tras el recorte, cada c_seq contiene solo A..Z.
+
+Para varias filas con la misma c_seq y carga z, m/z solo varía por mod_type.
+
+Ejemplo mínimo (ilustrativo)
+His.pep_seq   = 'STELLARPEPTIDE';         % secuencia común (rama pep_seq ~= 'unmod')
+His.mod_type  = {'unmodified'; 'K9ac'};   % dos filas
+His.mod_short = {'x'; 'y'};               % ignorado aquí
+His.pep_ch    = [2 3; 2 3];                % cargas por fila (N=2) y col (K=2)
+
+mz = calculate_pepmz(His);                 % devuelve matriz 2x2 de m/z
+
+Rendimiento
+
+Bucle doble (filas × columnas). Para N y K grandes, se puede considerar vectorizar a futuro, pero esta función es correcta y clara tal como está.

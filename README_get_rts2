@@ -1,0 +1,182 @@
+README (ESPAÑOL)
+¿Qué hace get_rts2?
+
+get_rts2 localiza tiempos de retención (RT) candidatos para un péptido diana (histona) dentro de una ventana [t1, t2], usando evidencia MS1 y MS2 combinada:
+
+MS1 (XIC isotópico): extrae el perfil de intensidades de las trazas isotópicas M−1, M, M+1, M+2 del precursor (m/z y carga del péptido se leen de His).
+
+Segmentación de picos: detecta regiones de elución y sus ápices en MS1, sumando sus intensidades.
+
+MS2 (iones diagnósticos): busca, cerca de cada ápice, espectros MS2 cuyo precursor coincide con el péptido y extrae intensidades de iones clave (calculados teóricamente).
+
+Similitud MS1–MS2: compara la forma temporal de MS1 y MS2 con coseno de similitud y umbral dinámico. Acumula la evidencia y elige el mejor ápice (top-1).
+
+Devuelve:
+
+rts: RTs candidatos (uno por pico).
+
+top1_rt: RT más consistente con MS1+MS2.
+
+inten_sum: suma de intensidades MS1 por candidato.
+
+top1_inten_sum: suma MS1 del candidato top-1.
+
+⚠️ Nota de unidades: asegúrate de que todas las RT (en MS1_index, MS2_index, t1, t2) están en la misma unidad (p. ej., minutos).
+
+Entradas: formato esperado
+MS1_index (N_MS1 x ≥2)
+
+Columna 1: ID de escaneo MS1 (entero).
+
+Columna 2: RT del escaneo MS1 (min o la unidad que uses).
+
+Otras columnas: no se usan aquí.
+
+MS1_peaks (∑picos_MS1 x 2)
+
+Columna 1: m/z (centroide).
+
+Columna 2: intensidad.
+
+Es un vector concatenado de picos de todos los escaneos MS1 (la función GetProfiles sabe reconstruir por escaneo).
+
+MS2_index (N_MS2 x ≥8)
+
+Columna 1: ID de escaneo MS2.
+
+Columna 2: RT del escaneo MS2.
+
+Columna 4: m/z precursor del escaneo MS2.
+
+Columna 6: código de instrumento (impar ≈ ion trap; par ≈ FT; 3/4 ≈ ETD).
+
+Columna 7: puntero de inicio en MS2_peaks para ese escaneo.
+
+Columna 8: estimador de ruido/umbral (se usa 3× para filtrar picos).
+
+Otras columnas: ignoradas.
+
+MS2_peaks (∑picos_MS2 x 2)
+
+Columna 1: m/z (centroide).
+
+Columna 2: intensidad.
+
+Vector concatenado de picos MS2 de todos los escaneos.
+
+Otros parámetros
+
+ptol:
+
+Si ptol == 100 → internamente se usa 10 (herencia de EpiProfile).
+
+Si ptol > 100 y carga ≥ 3 → activa manejo de ^13C (nC13=1).
+
+unitdiff: diferencia de masa por ^13C, típicamente ≈ 1.00335 Da.
+
+His: struct con al menos:
+
+pep_mz(:,1): m/z monoisotópico del péptido.
+
+pep_ch(:,1): carga del precursor.
+
+hno: índice del péptido diana en His.
+
+nsplit: modo de partición de picos (en este código, ambos caminos llaman a la misma función).
+
+t1, t2: ventana de búsqueda en RT.
+
+nhmass (0/1): elige entre get_key_ions1 y get_key_ions1H.
+
+Flujo del algoritmo (paso a paso)
+
+Comprobación de ventana: si [t1, t2] no intersecta el RT de MS1, devuelve vacío.
+
+Isótopos MS1: construye m/z de M−1, M, M+1, M+2 como c_mz + k*(unitdiff/c_ch).
+
+GetProfiles: extrae intensidades en esas 4 trazas isotópicas a lo largo de los escaneos MS1 entre rt_i1:rt_i2. Usamos la columna 2 (M) como traza principal.
+
+GetTopBottom11: segmenta la traza M en regiones de elución; devuelve índices de ápices (nt), límites (nb), el mejor ápice inicial (top1_idx) y la suma de intensidades por candidato (inten_sum).
+
+MatchMS2: dentro de [rt1, rt2] local (región de elución), selecciona escaneos MS2 cuyo precursor m/z coincide exactamente con el del péptido (si tu data tiene ligeros redondeos, adapta a tolerancia m/z). Determina tipo de fragmentación (ETD vs CID/HCD) a partir del instrumento y fija tolerancia m/z (0.4 trap, 0.02 FT). Calcula iones diagnósticos teóricos y extrae sus intensidades por escaneo (filtrando picos < 3×ruido).
+
+Similitud: alinea la forma temporal MS1 (suavizada) con cada familia de iones MS2 alrededor del ápice (ventana definida por la mediana del espaciamiento RT entre MS2 vecinos × 3.5). Calcula coseno de similitud y suma evidencias que superan un umbral dinámico (get_thr).
+
+Selección top-1: si la similitud acumulada es fuerte (relativa al nº de familias de iones), elige entre los máximos de similitud el de mayor inten_sum. Si no, conserva el top1_idx original pero penaliza su intensidad (/1e4) para señalar poca evidencia MS2.
+
+Filtro RT temprano: si top1_rt < 4, devuelve vacío (heurística: frente de disolvente/ruido).
+
+Ejemplo mínimo de uso
+% Supongamos que ya tienes:
+% MS1_index, MS1_peaks, MS2_index, MS2_peaks, His (con pep_mz y pep_ch)
+
+hno      = 42;         % tu péptido diana en 'His'
+t1       = 10.0;       % RT inicial (min)
+t2       = 35.0;       % RT final   (min)
+ptol     = 10;         % tolerancia para MS1 (ppms o key de EpiProfile)
+unitdiff = 1.00335;    % ~13C
+nsplit   = 1;          % modo de segmentación
+nhmass   = 0;          % usa get_key_ions1
+
+[rts, top1_rt, inten_sum, top1_inten_sum] = get_rts2( ...
+    MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+    ptol, unitdiff, His, hno, nsplit, t1, t2, nhmass);
+
+disp(table(rts(:), inten_sum(:), 'VariableNames', {'RT', 'MS1_Sum'}))
+fprintf('Top-1 RT = %.2f min; Top-1 MS1 Sum = %.3g\n', top1_rt, top1_inten_sum);
+
+Consejos prácticos y “gotchas”
+
+Coincidencia de precursor en MS2: el código exige igualdad exacta de MS2_index(:,4) con el m/z objetivo. Si observas que no recupera MS2 cuando debería, cambia esa igualdad por una ventana de tolerancia (p. ej., ±0.005 Da o en ppm).
+
+Unidades de RT: mezcla de unidades (segundos vs minutos) es un error frecuente. Asegúrate de que MS1_index(:,2), MS2_index(:,2), t1 y t2 usan la misma.
+
+Códigos de instrumento: si tu fichero no sigue la convención (impar/par/3/4), ajusta la lógica para ActiveType y la tolerancia tol.
+
+Ruido en MS2: el filtro inten >= 3×MS2_index(pno,8) asume que la columna 8 es un estimador de ruido. Si no lo es, adapta ese criterio.
+
+ptol “mágico”: el caso ptol==100 → 10 reproduce un comportamiento heredado. Si no lo necesitas, puedes fijar ptol explícitamente a un valor ppm razonable y eliminar esa rama.
+
+Penalización /1e4: cuando no hay evidencia MS2 suficiente, top1_inten_sum se divide por 1e4 para “marcar” baja confianza. Si prefieres un flag explícito, añade una salida booleana.
+
+Dependencias (no incluidas aquí)
+
+GetProfiles.m
+
+GetTopBottom11.m
+
+GetMods.m
+
+get_key_ions1.m
+
+get_key_ions1H.m
+
+Asegúrate de tenerlas en el path de MATLAB y de que aceptan/entregan las estructuras descritas arriba.
+
+Validación rápida
+
+Elige un péptido con señales claras (alto pep_mz, carga 2–4).
+
+Define una ventana [t1, t2] que lo contenga (mirando un TIC o un XIC previo).
+
+Llama a get_rts2 y comprueba que:
+
+rts contiene 1–3 picos plausibles.
+
+top1_rt coincide con el ápice esperado visualmente.
+
+Si desactivas MS2 (p. ej., filtrando MatchMS2), la penalización /1e4 aparece.
+
+FAQ
+
+¿Qué significa posn y posc?
+Son dos grupos de iones diagnósticos (p. ej., diferentes series o complementarios). Se suman sus evidencias si superan el umbral.
+
+¿Por qué top1_rt < 4 devuelve vacío?
+Heurística para evitar falsas detecciones en el frente de disolvente. Adáptalo si tu gradiente es muy corto o tu cromatografía es distinta.
+
+¿Se puede suavizar MS1/MS2 con otra ventana?
+Sí. Aquí se usa smooth(...,3). Cambia el parámetro si tus datos son más ruidosos o más densos.
+
+¿Puedo usar ppm para el “match” MS2?
+Sí. Cambia la igualdad exacta por un test en ppm alrededor del target.

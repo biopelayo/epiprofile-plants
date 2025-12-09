@@ -1,0 +1,28 @@
+README (ESPAÑOL, breve)
+¿Qué hace H3_02b_9_17?
+
+Panel dirigido para H3 KSTGGKAPR (9–17) centrado en S10ac y S10pr, más combinaciones con K9 (me1/2/3 o ac) y K14ac. El flujo:
+
+Ancla en la entrada #1 (S10ac), recalibra RTs.
+
+Reubica ventanas (solo MS1 o con ayuda MS2).
+
+Extrae RT e intensidad por estado PTM.
+
+Guarda .mat, dibuja XICs y, opcionalmente, exporta .plabel.
+
+Entradas
+
+MS1_index/MS1_peaks, MS2_index/MS2_peaks, ptol, cur_outpath, special (nDAmode, ndebug, nhmass, raw_path).
+
+Salidas
+
+H3_02b_9_17.mat, figuras del layout y opcional H3_02b_9_17.plabel.
+
+Detalles reseñables
+
+Región S10pr/K9me1: si están bien separadas (>0.4 min) usa get_histone10; si no, usa get_histone2 (pareado) para resolver co-elución.
+
+Parejas me2/me3 y combinaciones con K14ac: se asignan con heurísticas de ventana y find_pair_new.
+
+Corrección K9me1K14ac: se hace un swap temporal de metadatos entre K9me1 (idx 2) y K9me1K14ac (idx 8) para mejorar la extracción pareada final (sin cambiar la lógica cuantitativa).

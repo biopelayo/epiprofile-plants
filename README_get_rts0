@@ -1,0 +1,72 @@
+README (ES) — get_rts0.m
+¿Para qué sirve?
+
+Dado un listado de espectros MS1 ordenados en el tiempo, estima dónde (en minutos) está el pico principal de la señal de un péptido y cuánta intensidad integrada tiene ese pico. Devuelve:
+
+top1_rt → tiempo de retención (min) del pico dominante (o 0 si no hay un pico fiable).
+
+top1_inten_sum → suma de intensidades alrededor de ese pico (una métrica tipo “área”).
+
+Piensa en ello como: “construyo la curva intensidad-vs-tiempo del péptido y me quedo con su punto más alto”.
+
+Entradas esperadas
+
+MS1_index (N×2):
+
+Columna 1: número de scan (entero creciente).
+
+Columna 2: tiempo de retención (minutos).
+
+MS1_peaks: estructura/tabla de picos que usa internamente GetProfiles (no hace falta conocer su formato aquí).
+
+ptol (ppm): tolerancia de masa. Reglas heredadas del código original:
+
+Si ptol == 100, se usa 10 ppm.
+
+Si ptol > 100 y la carga del péptido es ≥ 3, se activa un ayudante para isótopos (nC13=1).
+
+His (struct) con:
+
+His.pep_seq{hno}: secuencia del péptido.
+
+His.pep_mz(hno): m/z del precursor.
+
+His.pep_ch(hno): carga del precursor.
+
+hno: índice del péptido en His.
+
+Qué hace por dentro (resumen)
+
+Construye un conjunto de m/z isotópicos (pico monoisotópico ± vecinos naturales) a partir de His.pep_mz y His.pep_ch.
+
+Llama a GetProfiles(...) para obtener la traza temporal (intensidad a lo largo del tiempo) del canal monoisotópico.
+
+Llama a GetTopBottom(...) para detectar máximos locales y escoge el dominante.
+
+Devuelve el tiempo de ese máximo y su intensidad sumada.
+
+Caso especial (heurístico)
+
+Para cuatro secuencias concretas (TKQTAR, KSTGGKAPR, KSAPATGGVKKPHR, KVLR) se hace un pre-escaneo con un ligero desplazamiento de m/z (+14.01565/carga) para acotar el rango de búsqueda temporal. Si ese pre-escaneo no da nada útil, se busca en todo el rango.
+
+Salidas
+
+top1_rt (min): tiempo del pico dominante. Si es < 4 min o no se encuentra, vale 0.
+
+top1_inten_sum: métrica de intensidad integrada alrededor del pico (útil como “área relativa”).
+
+Requisitos implícitos
+
+Las funciones auxiliares GetProfiles y GetTopBottom deben estar disponibles. Aquí se asume:
+
+GetProfiles devuelve times y una matriz de intensidades por isótopo, donde la columna 2 es el canal monoisotópico.
+
+GetTopBottom devuelve índices de máximos (nt), mínimos (nb), el índice del máximo principal (top1_idx) y inten_sum (la suma/área asociada a cada máximo).
+
+Consejos prácticos
+
+Si obtienes top1_rt = 0, probablemente no hay señal consistente o el pico cae muy pronto (< 4 min). Revisa el archivo, la ventana de búsqueda o la tolerancia ptol.
+
+Si tu péptido no está en el caso especial, no pasa nada: se usa el flujo general.
+
+Usa la misma ptol y carga que hayas empleado al generar o anotar los precursores.

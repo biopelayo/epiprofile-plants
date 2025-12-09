@@ -1,0 +1,112 @@
+README — H4_04_40_45 (documentación clara para no-bioinfos, estilo EpiProfile_PLANTS)
+1) Qué cuantifica este panel
+
+Péptido de H4 (aa 40–45): RGGVKR
+Estados incluidos:
+
+unmod → patrón de derivatización estándar (propionilo en el N-terminal del péptido y en Lys internas).
+
+K44ac → acetilación de la lisina que cae en la posición 44 de H4 (dentro del péptido, la Lis es el índice 5), con N-terminal del péptido propionilado.
+
+[Reality Filter] Este panel es sensible a la química de derivatización: en el estado “unmod” esperamos N-term propionilado (0,pr) y Lys propionilada (5,pr). En K44ac la Lys va acetilada (5,ac), por tanto no debe aparecer propionilo en esa Lys. Confirmar en tus reactivos/protocolo (hidroxilamina, tiempos, etc.). Si aparece señal “mixta” (ac+pr en la misma Lys), suele indicar derivatización incompleta o reasignación isobárica.
+
+2) Entradas y salidas de la función
+
+Entradas
+
+MS1_index (n×2): índice de scans y RT en minutos (columna 2).
+
+MS1_peaks: picos centroidados MS1 (mz, intensidad, rt_idx… según tu estructura base).
+
+MS2_index, MS2_peaks: análogo para MS2 (opcional pero recomendable para DA).
+
+ptol: tolerancia en ppm (p. ej., 5–10 ppm Orbitrap; 10–20 ppm Q-TOF).
+
+cur_outpath: carpeta de salida.
+
+special: estructura de control:
+
+ndebug: (0/1) modo diagnóstico mínimo (1 usa relocateD).
+
+nDAmode: 0/“MS1-only”; 2 = MS2-asistido para relocalización; 1 = además exporta PSM.
+
+nhmass: helper neutro/ajustes de masa para MS2 si procede.
+
+raw_path: ruta a RAW/MGF para check_ref.
+
+Salidas
+
+H4_04_40_45.mat con:
+His (definición del panel), pep_rts (RT por carga), pep_intens (áreas/intensidades por carga), mono_isointens (traza monoisotópica a lo largo del gradiente).
+
+Figuras de layout/XIC generadas por draw_layout.
+
+(si nDAmode==1) PSM/listas ancladas para revisión.
+
+3) Cómo codifica el panel las modificaciones
+
+pep_seq = 'RGGVKR'.
+
+mod_type usa índices relativos al péptido:
+
+0,pr → N-terminal del péptido propionilado.
+
+5,pr / 5,ac → Lys en posición 5 del péptido (la Lis de RGGVKR).
+
+Cargas consideradas: 1+ y 2+ (reordenadas para que la carga “principal” 2+ quede en la primera columna de las matrices internas).
+
+4) Semillas de RT y ventanas esperadas
+
+Semillas (His.rt_ref):
+unmod ≈ 20.47 min, K44ac ≈ 18.70 min (K-ac eluye antes que su análogo propionilado).
+
+Ventana de relocalización para K44ac:
+[unmod − 14 min, unmod − 0.1 min].
+Esto refleja que la acetilación reduce la retención frente a propionilo (menos hidrofobicidad).
+
+5) Flujo interno (resumen)
+
+Anclaje de unmod con check_ref; si nDAmode==2, se refina con MS2 en ±5 min (o todo el gradiente si no hay cambio).
+
+Extracción de unmod con get_histone0 → calcula delta de deriva y desplaza rt_ref del resto.
+
+Relocalización de K44ac:
+
+MS1-only → relocate + get_rts
+
+MS2-asistido → relocate2 + get_rts2
+
+Extracción de K44ac con get_histone1.
+
+Salida (output_histone) y gráficas (draw_layout); opcionalmente PSM (GetPSM) si nDAmode==1.
+
+6) QC rápido y problemas comunes
+
+Orden esperado de elución: K44ac antes que unmod. Si ocurre lo contrario, revisa columna/gradiente y la anotación de mods.
+
+Coelución o solapamiento: usa nDAmode==2 (MS2) para anclar con iones diagnósticos.
+
+Señal K44ac muy baja: posible biología (bajo stoichiometry) o pérdida de acetilo. Verifica colisión y pH del buffer.
+
+Doble asignación pr+ac en Lys: error común de derivatización; revisa la fase de des-O-acilación y pureza de reactivos.
+
+7) Ejemplo mínimo de uso
+special = struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/data/run1.raw');
+ptol = 10;  % ppm
+H4_04_40_45(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,'results/AT/H4',special);
+
+8) Ficheros generados y lectura posterior
+
+H4_04_40_45.mat → puedes cargar y acceder a His.pep_mz, pep_rts, pep_intens.
+
+Figuras .png/.pdf de XICs → inspección visual por carga.
+
+Si nDAmode==1, exportará PSM asociados (útiles para tabla final y validación manual).
+
+9) Recomendaciones instrumentales
+
+ppm (ptol): mantener a 10±5 ppm para Orbitrap a alta resolución.
+
+unitdiff=1.0032: separación isotópica (C-13) para trazas monoisotópicas; no tocar salvo validación expresa.
+
+MS2: activar fragmentación adecuada del precursor 2+ (principal).

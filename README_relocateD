@@ -1,0 +1,172 @@
+README (en castellano, extenso)
+¿Qué hace relocateD?
+relocateD refina (o invalida) el tiempo de retención de referencia (His.rt_ref) para cada entrada de péptido/histona, buscando señal MS1 en una ventana pequeña alrededor del RT actual y quedándose con el mejor pico según la función auxiliar get_rts.
+
+
+Si encuentra un pico claro en MS1 → actualiza rt_ref(hno) con el mejor RT devuelto por get_rts.
+
+
+Si no encuentra nada → pone a 0 rt_ref(hno) para indicar que no hay señal fiable en esa zona.
+
+
+
+Es un paso de “realineación fina” de RTs: muy útil tras una identificación inicial para corregir pequeños desfases de cromatografía o picos mal centrados.
+
+
+Entradas
+
+
+MS1_index: índice/meta de los escaneos MS1 (por ejemplo, mapeo escaneo→RT). El formato exacto depende del resto del pipeline; aquí se pasa tal cual a get_rts.
+
+
+MS1_peaks: datos de picos/señales MS1 (intensidades, m/z, etc.). Estructura dependiente del pipeline; se usa dentro de get_rts.
+
+
+ptol: tolerancia de masa (ppm o similar). Regla heredada: si ptol == 100, el código lo fuerza a 10.
+
+
+unitdiff: diferencia de masa isotópica por carga (o parámetro afín), que get_rts usa para construir ventanas en m/z.
+
+
+His: estructura con, al menos, el campo:
+
+
+rt_ref: vector con RTs de referencia (en minutos). Esta función modificará las posiciones 2..end.
+
+
+
+
+
+Salida
+
+
+His: mismo struct de entrada, pero con His.rt_ref actualizado:
+
+
+rt_ref(hno) = top1_rt2 si se encontró un pico en MS1 dentro de [rt_ref±1].
+
+
+rt_ref(hno) = 0 si no se encontró señal (marca explícitamente “no válido”).
+
+
+
+
+
+Detalles operativos
+
+
+Ventana de búsqueda: fija en ±1 minuto respecto a rt_ref(hno) (parámetro delta=1).
+
+
+Índice inicial: el bucle empieza en hno=2. No se toca rt_ref(1) (por diseño histórico del código).
+
+
+Función auxiliar get_rts:
+
+
+Firma esperada:
+[rts2, top1_rt2] = get_rts(MS1_index,MS1_peaks,ptol,unitdiff,His,hno,1,t1,t2)
+
+
+nsplit=1 implica no dividir más la ventana.
+
+
+Devuelve posibles RTs (rts2) y el mejor RT (top1_rt2).
+
+
+
+
+Si rts2 está vacío → no hay candidatos; se invalidará rt_ref(hno).
+
+
+
+
+
+Supuestos y límites
+
+
+[Reality Filter] No puedo verificar la implementación de get_rts aquí. Este relocateD depende totalmente de que get_rts:
+
+
+entienda la estructura de MS1_index y MS1_peaks,
+
+
+aplique correctamente ptol y unitdiff,
+
+
+devuelva top1_rt2 como la mejor estimación de RT.
+
+
+
+
+Si His.rt_ref(hno) es NaN o negativo, la ventana [t1,t2] podría ser extraña; el código no valida esos casos.
+
+
+ptol == 100 se reemplaza silenciosamente por 10 (convención heredada que podría sorprender si no se documenta).
+
+
+Si no hay señal en la ventana (por cromatografía inestable o RT inicial muy desviado), el valor se pone a 0, no a NaN (diferencia semántica a tener en cuenta).
+
+
+
+Efectos colaterales (side effects)
+
+
+Se modifica His.rt_ref en memoria (y en el His devuelto). Si necesitas comparar “antes/después”, haz una copia antes de llamar:
+His_before = His;
+His_after  = relocateD(MS1_index,MS1_peaks,ptol,unitdiff,His);
+
+
+
+
+Complejidad y rendimiento
+
+
+Complejidad ≈ O(N · coste(get_rts)), donde N = length(His.rt_ref) - 1.
+
+
+Si get_rts inspecciona muchos escaneos, ajusta delta (si haces una variante) o precalcula índices para acelerar.
+
+
+
+Buenas prácticas
+
+
+Valida tras ejecutar qué porcentaje de entradas quedó a 0. Si es alto, quizá la ventana ±1 min es demasiado estrecha o los RTs iniciales están desplazados.
+
+
+Traza un histograma de desplazamientos (top1_rt2 - rt_ref(hno)) para entender sesgos sistemáticos.
+
+
+Si tu LC es muy estable, un delta pequeño es razonable. Si no, considera ampliar (en una versión propia controlada; aquí está fijo a 1 min).
+
+
+
+Ejemplo mínimo de uso (esquemático)
+% Suponiendo que ya tienes:
+%   - MS1_index, MS1_peaks preparados para get_rts
+%   - His.rt_ref con RTs iniciales
+
+ptol     = 10;        % ppm (si pones 100, internamente lo bajará a 10)
+unitdiff = 1.003355;  % ejemplo típico (ajusta al pipeline real)
+
+His = relocateD(MS1_index, MS1_peaks, ptol, unitdiff, His);
+
+% Ahora His.rt_ref tiene RTs afinados (o 0 si no hay señal en ±1 min).
+
+
+Errores y diagnóstico
+
+
+Muchos ceros en rt_ref: revisa RTs iniciales, delta, y que get_rts esté funcionando (tolerancias y m/z correctos).
+
+
+Desplazamientos grandes: puede apuntar a un shift global de cromatografía; quizá necesites un pre-alineado de RTs.
+
+
+ptol==100: recuerda que se fuerza a 10. Si realmente querías 100 ppm, tendrás que cambiar esa línea en el código (o documentarlo).
+
+
+
+Resumen en una frase
+relocateD busca, en ±1 minuto alrededor del RT esperado, el mejor pico MS1 para cada entrada y actualiza His.rt_ref; si no hay señal, lo marca como 0 para indicar ausencia de una referencia fiable.

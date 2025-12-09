@@ -1,0 +1,151 @@
+README — output_histone2.m (exportar, combinar y normalizar cuantificaciones/RT entre archivos)
+
+[Reality Filter] No puedo verificar desde aquí tus rutas ni el contenido exacto de los .mat que cargas; describo el comportamiento tal cual está codificado y señalando supuestos y límites.
+
+1) ¿Qué hace esta función?
+
+output_histone2:
+
+Genera un .xls (TSV legible por Excel/LibreOffice) con:
+
+Bloque [area]: áreas por estado de carga y fracciones normalizadas por fila y globales.
+
+Bloque [rt]: tiempos de retención por estado de carga.
+
+Genera un .mat con:
+
+auc: matriz n×3 → [RT_de_carga1, Área_total_todas_las_cargas, Fracción_global].
+
+His: estructura de péptidos después de combinar con un conjunto previo (si existe) mediante combineLH.
+
+Combina y renormaliza la cuantificación actual con otra ya guardada en disco (misma out_filename) localizada en una carpeta “hermana” según una convención de rutas (ver §5).
+
+Diferencias clave frente a output_histone:
+
+output_histone2 siempre exporta todos los péptidos al .mat (no filtra por His.display).
+
+Llama a combineLH para fusionar el conjunto actual con uno preexistente y recalcular las fracciones globales.
+
+Acepta el flag onlyme para, en la combinación, quedarse solo con metilaciones (o con “unmod” en dos casos especiales).
+
+2) Entradas
+
+cur_outpath (char): carpeta de salida actual.
+
+out_filename (char): base del nombre de salida (sin extensión).
+
+His (struct) alineado con pep_intens/pep_rts:
+
+pep_seq (char), mod_short (cellstr n×1), mod_type (cellstr n×1)
+
+pep_mz (double n×c), pep_ch (double n×c), rt_ref (double n×1)
+
+pep_intens (double n×c): áreas por péptido y carga.
+
+pep_rts (double n×c): RT por péptido y carga.
+
+onlyme (scalar lógico/numérico):
+
+Si onlyme==1, en la combinación previa (archivo que se carga) se filtran péptidos: por defecto, aquellos con 'me' en mod_type.
+
+Excepción: si out_filename es 'H3_08_117_128' o 'H4_06_79_92', se filtra 'unmod' en mod_short (caso especial codificado).
+
+Supuesto: Las dimensiones size(pep_intens) == size(pep_rts) == size(His.pep_mz) = [npep, ncharge]. Todas las filas comparten el mismo vector de cargas en His.pep_ch(1,:).
+
+3) Salidas
+
+Fichero tabulado: <cur_outpath>/<out_filename>.xls (TSV)
+
+Cabecera: His.pep_seq
+
+[area]: por carga → área absoluta (%e) y fracción por fila (%f); al final de la fila: área total y fracción global.
+
+[rt]: RT por carga (%.2f).
+
+Fichero MATLAB: <cur_outpath>/<out_filename>.mat
+
+auc: n×3 = [RT(carga1), sum(áreas en todas las cargas), fracción normalizada globalmente].
+
+His: estructura combinada (ver §4–§5).
+
+Nota: La fracción global se recalcula tras combinar (si procede) para que todas las filas resultantes sumen 1 (salvo el uso de eps contra ceros).
+
+4) Flujo interno (resumen)
+
+Calcula row_intens (suma por fila de pep_intens) y total_intens.
+
+Escribe el .xls con bloques [area] y [rt].
+
+Construye auc:
+
+Col.1 = pep_rts(:,1) (solo primera carga).
+
+Col.2 = suma por fila de pep_intens (todas las cargas).
+
+Col.3 = normaliza por la suma total (usa eps).
+
+Llama a combineLH(cur_outpath,out_filename,His,auc,onlyme):
+
+Intenta cargar otro .mat “de referencia” (ver §5).
+
+Si existe, fusiona ambos conjuntos y renormaliza la columna 3 de auc sobre el total combinado.
+
+Si onlyme==1, el conjunto cargado se filtra previamente como se explicó.
+
+Guarda el nuevo .mat con auc y His combinados.
+
+5) Convención de rutas de combinación (combineLH)
+
+Se calcula un path objetivo a partir de cur_outpath:
+
+(path1, name1) = fileparts(cur_outpath) → name1 es la carpeta actual (p.ej. H4).
+
+(path2, name2) = fileparts(path1) → sube otro nivel (p.ej. .../<condición>).
+
+El destino final es:
+
+out_file1 = fullfile( fileparts(path2), name2, name1, [out_filename '.mat'] )
+
+
+Es decir: sube dos niveles, toma el nombre del segundo nivel (name2), y reconstruye una ruta hermana con el mismo name1 (carpeta de histona) y mismo out_filename.
+
+Si ese archivo no existe, se informa por fprintf y no hay combinación: se devuelve His/auc intactos.
+
+[Reality Filter] Esta convención asume una estructura paralela de carpetas (p. ej., L/H corridas distintas o condiciones). Si no coincide con tu layout real, ajusta esta lógica o pasa a una resolución de rutas explícita.
+
+6) Detalles del flag onlyme
+
+Si onlyme==1 y el .mat de referencia existe:
+
+Si out_filename es 'H3_08_117_128' o 'H4_06_79_92', se seleccionan únicamente las filas cuyo mod_short contiene 'unmod'.
+
+En caso contrario, se seleccionan únicamente las filas cuyo mod_type contiene 'me' (cualquier metilación).
+
+Tras filtrar, se reancla el His cargado (subset) y auc (subset).
+
+Si onlyme~=1, no se filtra el archivo cargado.
+
+7) Casos límite y buenas prácticas
+
+Apertura de .xls: si falla fopen, la función retorna sin escribir .mat.
+
+Archivo de referencia inexistente: no hay combinación; se continúa con los datos actuales.
+
+RT de la primera carga: auc(:,1) usa columna 1 de pep_rts. Si necesitas una métrica de RT distinta (promedio por carga, carga dominante…), modifica aguas arriba o aquí con criterio reproducible.
+
+Cabecera de cargas: usa His.pep_ch(1,:) para rotular. Asegura coherencia de cargas por columna en todas las filas.
+
+Ceros en intensidades: se evita división por cero usando eps.
+
+Renormalización: tras combinar, se recalcula auc(:,3) usando la suma total combinada.
+
+8) Ejemplo de uso mínimo
+cur_outpath  = 'results/H4';
+out_filename = 'H4_06_79_92';     % p.ej.
+onlyme       = 1;                  % filtrar metilaciones (o 'unmod' en este caso especial) del archivo de referencia
+
+% Se asume que His, pep_intens, pep_rts ya están poblados y alineados:
+output_histone2(cur_outpath, out_filename, His, pep_intens, pep_rts, onlyme);
+
+% → results/H4/H4_06_79_92.xls  (TSV con [area] y [rt])
+% → results/H4/H4_06_79_92.mat  (auc+His combinados/filtrados y renormalizados, si hay ref)

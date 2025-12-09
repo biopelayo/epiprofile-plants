@@ -1,0 +1,245 @@
+README — H3_06a_53_63 (Documentación técnica extensa)
+1) Alcance y motivación
+
+Este panel cuantifica el péptido de histona H3 RYQKSTELLIR (residuos 53–63) y dos variantes inmediatas codificadas históricamente como:
+
+unmod — péptido derivatizado de referencia (convención EpiProfile: pr = propionilación química en extremos a nivel de péptido, propia del sample prep).
+
+S57pr — propionilación adicional asociada al índice de residuo 5 en la codificación compacta (mod_type).
+
+Y54pr — propionilación adicional asociada al índice 2 en la codificación compacta.
+
+[Reality Filter] El mapeo exacto entre índices de mod_type (p. ej., 0,pr;4,pr;5,pr;) y la posición real en la secuencia depende del núcleo de EpiProfile que usas. Este panel no redefine ese mapeo; asume el indexado canónico de tu build. Si tu núcleo usa índices distintos, ajusta mod_type para mantener coherencia.
+
+Por qué este panel:
+
+El 53–63 es un péptido medio (10 aa) que suele dar buenas XIC y un set de estados de carga 1+/2+/3+/4+ informativo.
+
+Las formas S57pr y Y54pr pueden co-eluir o quedar cercanas en RT; aquí se implementa una lógica de desambiguación que explota intensidades, proximidad en RT y, cuando aplica, MS2 asistido.
+
+El panel está preparado para campañas de alto rendimiento, con ventanas cortas ancladas al unmod y recolocación DA opcional.
+
+2) Entradas, salidas y pipeline
+Entradas
+
+MS1_index ([n x 2]): índice de escaneo MS1 y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno del core).
+
+MS2_index, MS2_peaks: MS2 centroidado (necesario para recolocación DA y para get_rts2/get_histone2).
+
+ptol: tolerancia de masa (ppm u otra unidad; se reenvía tal cual).
+
+cur_outpath: carpeta de salida para .mat y figuras.
+
+special (struct):
+
+ndebug — si 1, usa relocateD (diagnóstico; recolocación mínima).
+
+nDAmode — semántica histórica:
+
+Recolocación: == 2 → DA (relocate2 + get_rts2); en otro caso, solo MS1 (relocate + get_rts).
+
+Exportación PSM: == 1 → activa GetPSM tras cuantificar.
+
+nhmass — pista de masa (precursor/pérdida neutra) para get_rts2 (si DA).
+
+raw_path — requerido por check_ref para ajustar el ancla unmod.
+
+Salidas (a disco)
+
+H3_06a_53_63.mat con:
+
+pep_rts (3 × 4): RT por PTM × carga (0 si no se encuentra).
+
+pep_intens (3 × 4): áreas/intensidades por PTM × carga.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica por PTM (para draw_layout).
+
+Figuras (layout, XIC por carga) según tu draw_layout.
+
+Opcional: tablas PSM si nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init His: secuencia, tabla de PTMs (mod_short, mod_type), rejilla de cargas [1 2 3 4], cálculo de pep_mz, semillas rt_ref, display.
+
+Ancla unmod: corregir His.rt_ref(1) vía check_ref. En DA, opcionalmente sondear con get_rts2.
+
+Extraer unmod (get_histone0): si aparece, calibrar deriva global (desplazar rt_ref de los modificados).
+
+Recolocación:
+
+Solo MS1 → relocate (ventanas cortas desde el ancla).
+
+DA → relocate2 (usa MS2 diagnóstica).
+
+Desambiguación S57pr vs Y54pr:
+
+Si la separación semilla rt_ref(3) – rt_ref(2) > 0.4 min, usar get_histone10 (resuelve cada uno por separado).
+
+En caso contrario (alta posible co-elución), usar get_histone2 (resolución conjunta MS1/MS2).
+
+Guardar, dibujar y exportar PSM si procede.
+
+3) Estructura His (detalle)
+
+pep_seq = 'RYQKSTELLIR'.
+
+mod_short = {'unmod','S57pr','Y54pr'}.
+
+mod_type (codificación compacta; core-dependiente):
+
+unmod: '0,pr;4,pr;'
+
+S57pr: '0,pr;4,pr;5,pr;'
+
+Y54pr: '0,pr;2,pr;4,pr;'
+
+pep_ch: se replica [1 2 3 4] por fila (permitir 1+ a 4+).
+
+pep_mz: via calculate_pepmz(His).
+
+rt_ref: semillas [37.0, 41.58, 42.0] min.
+
+display = zeros(...): por defecto no mostrar en las figuras (útil para depurar sin saturar el layout; la cuantificación sí se realiza).
+
+Reordenación de cargas: se coloca 2+ como primera columna en pep_mz/pep_ch (convención que armoniza paneles). Internamente se reindexa manteniendo coherencia.
+
+4) Estrategia de RT (anclaje, ventanas y deriva)
+
+El unmod es el ancla; se intenta refinarlo con check_ref.
+
+Si get_histone0 devuelve RT válida, se aplica calibración de deriva: delta = found_unmod - rt_unmod_orig; se suma a los rt_ref del resto.
+
+Ventanas de búsqueda:
+
+En recolocación se abre [unmod + 0.1, unmod + 30] para S57pr.
+
+La posición de Y54pr se ajusta por:
+
+Emparejamiento por dos máximos cercanos (si hay dos candidatos suficientemente intensos y próximos).
+
+O bien, propagar desplazamiento desde S57pr si solo aparece una de las dos (fallback coherente).
+
+5) Tolerancia de masa e isótopos
+
+ptol → a get_rts/get_rts2/get_histone*. Sugerencias:
+
+Orbitrap/FT-MS centroidado: 5–10 ppm.
+
+TOF/Q-TOF centroidado: 10–20 ppm.
+
+unitdiff = 1.0032 (^13C) para seguimiento monoisotópico.
+
+6) Modo DA vs solo MS1 (semántica heredada)
+
+Recolocación:
+
+nDAmode == 2 → DA (relocate2 + get_rts2).
+
+En otro caso → solo MS1 (relocate + get_rts).
+
+Exportación PSM:
+
+nDAmode == 1 → exporta PSM tras cuantificar.
+
+Si prefieres una semántica unificada, homogeneiza los if para que un mismo valor active DA + PSM.
+
+7) Desambiguación S57pr vs Y54pr (núcleo del panel)
+
+Vía recolocación (relocate/relocate2)
+Se buscan candidatos para S57pr; si existen dos picos:
+
+Se ordenan por intensidad (inten_sum).
+
+Si el 2º tiene intensidad ≥ 1/30 del 1º y |ΔRT| < 5 min, se asignan:
+
+S57pr = el más temprano.
+
+Y54pr = el más tardío.
+
+Si no se cumple, se fija S57pr con el máximo principal y Y54pr hereda un desplazamiento respecto a la semilla previa (fallback).
+
+Vía extracción final (calculate_layout)
+Si las semillas de S57pr e Y54pr están bien separadas (> 0.4 min), se cuantifican por separado con get_histone10.
+Si no, se llama a get_histone2 (modelo conjunto) que devuelve ambas (MS1+MS2), mitigando co-elución.
+
+8) Ejecución mínima reproducible
+cur_outpath = 'results/AT/H3/';
+special = struct();
+special.ndebug  = 0;
+special.nDAmode = 2;         % recolocación asistida por MS2
+special.nhmass  = 0;         % pista neutral-loss/precursor (ajústala si tu método la requiere)
+special.raw_path = '/data/run1.raw';
+
+ptol = 10;  % ppm
+
+H3_06a_53_63(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+
+Salidas: results/AT/H3/H3_06a_53_63.mat + figuras en la misma ruta (según draw_layout).
+
+9) Estructura del .mat de salida
+
+pep_rts (3 × 4): filas {unmod, S57pr, Y54pr}, columnas {2+, 1+, 3+, 4+} (tras reordenación con 2+ primero).
+
+pep_intens (3 × 4): intensidades integradas alineadas con pep_rts.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica por PTM (para figuras/QC).
+
+10) QC rápido
+
+Unmod próximo a ~37.0 min tras corrección de deriva.
+
+S57pr e Y54pr: ¿existen dos picos razonablemente próximos? ¿La regla de ≥ 1/30 y ΔRT < 5 min se cumple?
+
+En DA, ¿PSMs/fragmentos diagnósticos** apoyan la asignación temprana/tardía?
+
+¿Alguna carga domina (p. ej., 2+ o 3+)? Revisa centroidado y saturación.
+
+11) Extensiones
+
+Añade PTMs ampliando mod_short/mod_type y rt_ref.
+
+Si introduces variantes con otras derivatizaciones en Tyr/Ser del tramo 53–63, ajusta calculate_pepmz(His) y las ventanas en relocate/relocate2.
+
+Para co-elución severa, prioriza get_histone2 (modo conjunto con MS2).
+
+12) Integración en EpiProfile_PLANTS
+
+Mantén carpetas por especie (AT/, MP/, CR/) y salidas por especie.
+
+Conserva un .mat de “good-run” con RT estables como bootstrap de semillas.
+
+Aplica la misma convención de reordenación de cargas en todos los paneles (2+ primero).
+
+13) Versionado y procedencia
+
+Identificador estable: H3_06a_53_63.
+
+Registro de cambios (sugerido):
+
+Ajustes en ventanas de recolocación (Δ0.1–30 min).
+
+Umbral 1/30 y ±5 min para emparejado S57pr/Y54pr.
+
+Cambios en mod_type/rt_ref.
+
+Sincronización de semántica DA.
+
+14) Notas finales
+
+La interpretación depende de la química real de derivatización y la clase de instrumento.
+
+Para comparativas entre corridas, usar normalización consistente (p. ej., qsmooth/ComBat a nivel proyecto).
+
+Reality Filter: donde este README hace recomendaciones (umbrales, ventanas), son prácticas habituales, no garantías universales. Verifica con tus datos.
+
+15) Apéndice — Parámetros prácticos sugeridos
+
+ptol: 10 ppm (TOF/Q-TOF), 5–7 ppm (Orbitrap alta resolución).
+
+nDAmode: 2 cuando haya sospecha de co-elución S57pr/Y54pr.
+
+Ventanas: si tu gradiente es muy corto, reduce +30 → +18–20 min y sube el delta inicial a 0.2–0.3

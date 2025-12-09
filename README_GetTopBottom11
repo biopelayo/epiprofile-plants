@@ -1,0 +1,41 @@
+README (ESPAÑOL)
+¿Qué hace GetTopBottom11?
+
+Segmenta una traza 1D w en ventanas de pico basándose solo en los tramos no nulos que quedan tras una puerta de ruido (todo punto < 1,5% del máximo global se pone a cero). Para cada ventana calcula:
+
+nt(i): ápice (centroide ponderado por intensidad).
+
+inten_sum(i): área de la ventana.
+
+nb: límites (la ventana i es nb(i):nb(i+1)).
+
+top1_idx: ventana más intensa (mayor área).
+
+Diferencia clave vs GetTopBottom
+
+GetTopBottom11 no intenta dividir una ventana en picos múltiples usando valles internos.
+Ese código está comentado para mantener una segmentación conservadora y rápida.
+Si quieres separar hombros/solapes, usa GetTopBottom (o re-habilita el bloque comentado).
+
+Parámetros y decisiones
+
+Puerta de ruido: 1,5% del máximo → crea “huecos” de ceros que delimitan ventanas.
+
+Ápice: centroide (más estable que el máximo puntual cuando hay mesetas).
+
+Bordes: se ajustan para evitar ceros a ambos lados.
+
+Cuándo usar esta versión
+
+Lotes grandes donde prima velocidad y reproducibilidad.
+
+Datos con picos claros y separados, donde el “partido fino” por valles no aporta mucho.
+
+Etapas previas del pipeline donde quieres estimar RT y áreas sin “over-split”.
+
+Si, en cambio, hay picos solapados o hombros frecuentes y te interesa separarlos, utiliza GetTopBottom (que hace una doble pasada de división por valles con umbrales de profundidad/balance).
+
+Validación rápida
+w = [0 2 5 9 7 0 0 3 6 8 7 0];
+[nt, nb, top1_idx, inten_sum] = GetTopBottom11(w);
+nb, nt, inten_sum, top1_idx

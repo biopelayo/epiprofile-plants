@@ -1,0 +1,90 @@
+README (ESPAÑOL)
+¿Qué es GetMods?
+
+Devuelve un catálogo de modificaciones (PTMs y etiquetas isotópicas) para histonas, con:
+
+Mods.set{n}: letras de los residuos permitidos (p. ej., K, R, STY).
+
+Mods.name{n}: código corto de la modificación (p. ej., ac, me1, ph).
+
+Mods.mass(:,n): delta de masa en Da
+
+Fila 1 = monoisotópica, Fila 2 = promedio.
+
+Estas masas son incrementos respecto al residuo sin modificar. En flujos de histonas con propionilación química, algunos códigos (como me1 en K) ya incluyen esa derivatización en el delta total (ver abajo).
+
+Grupos principales (resumen rápido)
+
+Ac(etilación): ac (+42.010565, K/S/T/Y).
+
+Pr(opionilación): pr (+56.026215, K/S/T/Y).
+
+Me tilaciones:
+
+me1 en K: [Inferencia] me1 + propionilo = 56.026215 + 14.01565 = +70.041865.
+
+Me1 en R: +14.015650.
+
+me2 (K/R): +28.031300.
+
+me3 (K): +42.046950.
+
+Fosforilación ph (S/T/Y): +79.966331.
+
+Crotonilación cr (K): +68.026215.
+
+Ubiquitina (resto di-Gly) ub (K): +114.042927.
+
+Oxidación ox (M): +15.994915.
+
+Etiquetado isotópico y combinaciones
+
+SILAC:
+
+lak (Lys8, K) +8.014199.
+
+lar (Arg10, R) +10.008269.
+
+Pesados en acetilo:
+
+hac (K) [Inferencia] acetilo pesado (p. ej., ¹³C₂-Ac) ≈ +44.0173.
+
+Metilos pesados (CD3):
+
+hme1/2/3 (K): sustituyen 1/2/3 metilos CH₃ → CD₃ (Δ≈ +3.01883 c/u) sobre las bases me1/me2/me3 (en K; con propionilo implícito en me1).
+
+me11/21/22/31/32/33 (K): variantes con ¹³CD₃ (Δ≈ +4.022185 por metilo), p. ej., me22 = me2 + 2×4.022185.
+
+Combinadas con SILAC (K):
+
+prlak, aclak, me1lak, me2lak, me3lak = (mod) + Lys8.
+
+[Inferencia] Las familias hme# (CD₃) y me#1/2/3 (¹³CD₃) permiten distinguir cuántos metilos pesados hay en un sitio me1/me2/me3. Útil para ensayos de metiltransferasas con S-adenosilmetionina marcada.
+
+Cómo usar esta tabla en el pipeline
+
+Validar compatibilidad: antes de aplicar un mod a una posición, verifica que la letra del residuo esté en Mods.set{n}.
+
+Sumar deltas: construye el vector Δm por residuo (p. ej., con tu get_mod_mass) usando Mods.mass(1, idx) para monoisotópica.
+
+Consistencia: si tu flujo no usa propionilación, ajusta aquellos códigos donde el delta ya la incluye (p. ej., me1 en K) o crea variantes “puras” separadas.
+
+Decisiones de diseño (por qué así)
+
+Derivatización-aware: en histonas, la propionilación se usa para bloquear K no modificadas; por eso hay códigos que ya suman esa química.
+
+Isótopos: se incluyen Lys8/Arg10 (SILAC) y metilos CD₃/¹³CD₃ para cuantificar transferencia de metilos y diferenciar estados.
+
+Extender/editar la tabla
+
+Si necesitas Khib (2-hidroxiisobutirilación), formilación, butirilación, etc., añade entradas nuevas y documenta: set, name, mass.
+
+Para cumplir estrictamente con Unimod, cruza nombres/masas y, si cambias valores, anótalo (fecha, motivo, referencia).
+
+Mantén la convención: fila 1 = mono, fila 2 = promedio.
+
+Advertencias (Reality Filter)
+
+[Inferencia] La interpretación exacta de hme#, me#1/2/3 y hac depende del reactivo isotópico usado (CD₃ vs ¹³CD₃, ¹³C₂-Ac, etc.). Los valores encajan con esas hipótesis, pero verifica con tu protocolo.
+
+Si cambias de protocolo (sin propionilación), revisa las entradas me1/combos de K para que el delta refleje sólo la PTM.

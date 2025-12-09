@@ -1,0 +1,181 @@
+README (en castellano, extenso)
+¿Qué hace OutputTogether?
+
+Genera una tabla única y legible (texto tabulado con extensión .xls) que reúne y alinea para todas las muestras los valores por péptido y modificación que ya calculó previamente el pipeline (por ejemplo, EpiProfile/EpiProfile_PLANTS).
+
+En términos prácticos:
+
+Cuenta cuántas filas de péptido hay en total (sumando todas las .mat del primer sample).
+
+Construye una gran matriz info con tres columnas por muestra:
+
+RT (tiempo de retención, min),
+
+Area (área del pico),
+
+Ratio (proporción normalizada).
+
+Escribe un fichero .xls (en realidad tabulado de texto) con:
+
+Una cabecera donde los nombres de muestra aparecen tres veces (para Ratio, Area y RT).
+
+Para cada peptide window (cada .mat):
+
+Una línea de grupo con la secuencia del péptido (y, por defecto, una etiqueta posicional histone_pos).
+
+Varias líneas (una por modificación dentro de ese péptido) con los valores:
+
+Primero todas las Ratios (una por muestra),
+
+Luego todas las Areas,
+
+Finalmente todos los RTs.
+
+Es ideal para abrir en Excel/LibreOffice y explorar rápidamente qué modificaciones hay por péptido y comparar entre muestras.
+
+Entradas
+
+layout_path (cadena): ruta raíz que contiene las carpetas por muestra.
+
+El nombre final de esta carpeta afecta al nombre del fichero de salida (ver más abajo).
+
+raw_names (cell array de strings): nombres de las muestras, p. ej. {'S1','S2','S3'}.
+
+Estructura de carpetas esperada
+
+Para cada muestra i (empezando en 1) se busca:
+
+<layout_path>/<ii>_<raw_names{i}>/detail/
+
+
+donde <ii> es un índice de dos dígitos (01, 02, …).
+Ejemplo:
+
+layout_path = '/datos/EpiProfile/output'
+raw_names   = {'YNG_01','BOT_02'}
+
+Se leerán:
+  /datos/EpiProfile/output/01_YNG_01/detail/*.mat
+  /datos/EpiProfile/output/02_BOT_02/detail/*.mat
+
+Contenido mínimo de cada .mat
+
+Struct His, con al menos:
+
+pep_mz — vector (nFilas x 1) con m/z del precursor (sirve para contar filas).
+
+pep_seq — secuencia del péptido para ese “peptide window”.
+
+mod_short— celdas (nFilas x 1) con el nombre corto de la modificación (p. ej. K4me1, K9ac).
+
+Matriz auc (nFilas x 3) con:
+
+RT (min),
+
+Area,
+
+Ratio.
+
+Importante: El orden (RT, Area, Ratio) se mantiene estrictamente. El script usa esos índices fijos.
+
+Salida y nombre del fichero
+
+Si layout_path termina en histone_layouts:
+
+El fichero se escribe en la carpeta padre:
+../histone_ratios.xls
+
+En caso contrario:
+
+Se escribe un nivel por encima de la carpeta padre con el patrón:
+../histone_ratios_<nombreFinalDeLayoutPath>.xls
+
+Se genera un único fichero que contiene todas las muestras de raw_names.
+
+Organización de la tabla (columnas y filas)
+
+Cabecera (2 líneas):
+
+Línea 1: los nombres de las muestras tres veces (para reflejar los 3 bloques: Ratio | Area | RT).
+
+Línea 2: Peptide y después etiquetas repetidas: Ratio (N veces), Area (N veces), RT(min) (N veces).
+
+Cuerpo:
+
+Líneas de grupo (una por cada .mat):
+
+Si el proyecto (carpeta final de layout_path) se llama SILAC o C13, se imprime solo la secuencia (pep_seq), con un pequeño ajuste histórico para H3_04v3 → se fuerza prefijo H33.
+
+En caso general, se imprime pep_seq(histone_pos) donde histone_pos es algo como H3v?_27_40 o H3_27_40, construido a partir del nombre del .mat.
+
+Líneas de datos (una por modificación en ese .mat):
+
+Primera columna:
+
+SILAC/C13 → solo mod_short.
+
+General → histone_pos + espacio + mod_short.
+
+Después, N columnas con Ratios, N con Areas, N con RTs (N = nº de muestras).
+
+Qué significa cada métrica
+
+RT (Retention Time, min): posición temporal del pico cromatográfico (útil para control de coherencia entre muestras).
+
+Area: área bajo el pico en la extracción cuantitativa (indicador de abundancia absoluta relativa a la señal).
+
+Ratio: fracción normalizada de esa forma modificada frente a la suma de formas del mismo péptido (muy usado en histonas para comparar PTMs entre condiciones).
+
+Esta función no calcula nada nuevo; solo vuelca ordenado lo que ya viene de auc.
+
+Supuestos y limitaciones
+
+Mismo conjunto de .mat en todas las muestras (mismo orden).
+Si falta alguno o cambia el orden, se desalinean las filas entre muestras.
+
+Estructura mínima de cada .mat (variables His y auc en el formato descrito).
+Si cambian nombres o dimensiones, fallará la lectura o saldrá algo incoherente.
+
+El .xls es texto tabulado. Excel lo abre bien, pero no es un binario de Excel.
+
+Casos SILAC/C13: se cambia el encabezado impreso de la secuencia y, en un caso histórico (H3_04v3), se adapta a H33.
+
+Uso típico (ejemplo)
+layout_path = '/datos/ontogenia_AT/histone_layouts';   % p.ej.
+raw_names   = {'YNG_01','YNG_02','BOT_01','BOT_02','FLR_01','SEN_01'};
+
+OutputTogether(layout_path, raw_names);
+
+% Salida (si layout_path termina en histone_layouts):
+%   /datos/ontogenia_AT/histone_ratios.xls
+%
+% Abrir en Excel/LibreOffice para explorar:
+%   - Cada bloque (grupo) empieza con la secuencia del péptido (y su ventana).
+%   - Cada modificación tiene su fila con [Ratios | Areas | RTs] por muestra.
+
+Errores frecuentes y soluciones
+
+“can not open: …/histone_ratios.xls”*
+→ La ruta de salida no existe o no hay permisos de escritura. Crea el directorio padre o ejecuta MATLAB con permisos adecuados.
+
+Valores desalineados o filas “raras”
+→ Asegura que todas las muestras contienen los mismos .mat en /detail/ y que dir('*.mat') devuelve el mismo orden (nombres de archivo idénticos).
+
+Celdas vacías o números extraños
+→ Verifica que auc tiene exactamente 3 columnas (RT, Area, Ratio) y que His.mod_short tiene el mismo número de filas que His.pep_mz.
+
+Buenas prácticas
+
+Congelar la lista de .mat (mismo set y orden) para cada cohorte antes de generar tablas finales.
+
+Guardar un diccionario de nombres (qué significa cada histone_pos, cómo se construye) para trazabilidad.
+
+Inspeccionar rápidamente en Excel las primeras docenas de filas:
+
+¿RTs similares entre muestras?
+
+¿Áreas/ratios con órdenes de magnitud coherentes?
+
+Resumen en una frase
+
+OutputTogether crea una tabla única, tabulada y “amigable” que reúne, por péptido y modificación, Ratios, Áreas y RTs de todas las muestras, lista para inspección manual o para importarla en R/Python/Matlab para análisis posteriores.

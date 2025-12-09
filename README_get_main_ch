@@ -1,0 +1,43 @@
+README (ES) — get_main_ch.m
+¿Qué hace?
+
+Reordena las columnas de las matrices His.pep_mz y His.pep_ch para que la carga elegida como “principal” (la columna main_ch_idx) pase a ser la primera columna. El resto de columnas se mantiene en su orden relativo.
+
+Filas = péptidos/isoformas
+
+Columnas = estados de carga disponibles para ese péptido
+
+Tras la función, la columna 1 representa siempre la carga “principal”.
+
+¿Para qué sirve?
+
+Muchos pasos posteriores dan por hecho que la primera columna es la referencia. Esta función garantiza esa condición una única vez, dejando los datos alineados para cálculos de perfiles/intensidades.
+
+Entradas
+
+His.pep_mz (npep × ncharge): m/z por péptido y carga.
+
+His.pep_ch (npep × ncharge): valor de carga (p. ej., 2, 3, 4) por columna.
+
+main_ch_idx (entero 1-based): índice de columna actual que quieres promover a primera columna.
+
+Nota: La función asume que el conjunto de cargas por columnas es consistente para todas las filas (la columna 2 es el mismo estado de carga para todos). No añade chequeos de errores para no tocar la lógica original.
+
+Salida
+
+His con las columnas permutadas de forma idéntica en pep_mz y pep_ch, de manera que la carga seleccionada queda en la primera columna.
+
+Ejemplo mínimo
+% Queremos que la columna 3 sea la “principal”
+His = get_main_ch(His, 3);
+
+% Ahora, His.pep_ch(:,1) contiene el valor de carga que antes estaba en col 3,
+% y pep_mz/pep_ch mantienen el mismo reordenamiento de columnas.
+
+Problemas frecuentes
+
+Índice fuera de rango: asegúrate de que main_ch_idx ∈ [1, ncharge].
+
+Cargas duplicadas por columna (raro): la búsqueda coge la primera que encuentre.
+
+Inconsistencias por fila: si cada fila tuviera un set de cargas distinto por columna, este método no aplica (pero eso rompería también el resto del pipeline).G

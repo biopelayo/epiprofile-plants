@@ -1,0 +1,203 @@
+README (castellano, extenso)
+¿Qué hace H4_06_79_92?
+
+Esta función cuantifica un péptido concreto de la histona H4 (secuencia KTVTAMDVVYALKR, posiciones 79–92) en cuatro estados químicos:
+
+unmod: estado base con derivatización (N-terminal y lisinas propioniladas para simplificar cargas/retención).
+
+M84ox: oxidación de metionina en la posición peptídica 6 (+15.9949 Da).
+
+Y88pr: propionilación en tirosina posición 10 (+56.0262 Da).
+
+M84oxY88pr: combinación de ambas.
+
+El objetivo es anclar la RT (tiempo de retención) del estado no modificado y, a partir de ahí, buscar los modificados en ventanas de tiempo coherentes químicamente (oxidado suele eluir antes; propionilado suele eluir después). La función:
+
+Extrae XICs (curvas intensidad vs. tiempo) monoisotópicos de MS1.
+
+Integra intensidades por carga/estado.
+
+Genera un .mat con matrices y metadatos.
+
+Dibuja un PDF con las curvas y, si procede, superpone MS2 (modo DIA).
+
+En modo DDA (special.nDAmode==1), exporta además un resumen tipo PSM.
+
+Entradas
+
+MS1_index (matriz): índice de scans MS1. La columna 2 es el tiempo de retención (RT) en minutos.
+
+MS1_peaks (Nx2): pares [m/z, intensidad] de picos MS1.
+
+MS2_index (matriz): índice de scans MS2.
+
+Col 2: RT, Col 4: m/z precursor, Col 6: tipo de instrumento, Col 7: puntero a MS2_peaks.
+
+MS2_peaks (Lx2): pares [m/z, intensidad] de MS2 concatenados.
+
+ptol (ppm): tolerancia de masa precursor.
+
+cur_outpath (string): carpeta “detail” donde se guardan los resultados.
+
+special (struct):
+
+ndebug: 1 = modo diagnóstico (relocación sencilla), otro = normal.
+
+nDAmode: 0 = sólo MS1; 2 = DIA (usa MS2 para ayudar); 1 = DDA (exporta PSM).
+
+nhmass: flag técnico para cálculo de iones clave MS2 (H vs no H).
+
+raw_path: ruta a ficheros de origen (para check_ref).
+
+Requisitos previos: ficheros .mat con índices y picos MS1/MS2 ya generados (pasos previos del pipeline), y helpers del ecosistema (por ejemplo check_ref, get_rts, get_rts2, get_histone0/1, draw_layout, output_histone, GetPSM, calculate_pepmz).
+
+Salidas (archivos)
+
+H4_06_79_92.mat en cur_outpath:
+
+His: metadatos (secuencia, estados, mapa de PTMs, cargas, m/z teórico, RT seeds).
+
+pep_rts (nEstados × nCargas): RT por estado×carga.
+
+pep_intens (nEstados × nCargas): intensidad integrada por estado×carga.
+
+mono_isointens (nRT × nEstados): curva monoisotópica vs. RT para cada estado.
+
+H4_06_79_92.pdf en la carpeta superior a detail:
+
+Subplots de XIC por estado visible (por defecto, sólo unmod) con:
+
+Pico local anotado (RT e intensidad).
+
+Límites de integración.
+
+Texto con modificación, m/z, carga, RT, intensidad.
+
+Si special.nDAmode==2 (DIA), superposición de fragmentos MS2 (iones b/y o c/z) escalados.
+
+(Opcional, sólo DDA) Exportación PSM vía GetPSM.
+
+La función es idempotente: si ya existe el .mat del panel, no repite el cálculo.
+
+Flujo de trabajo (resumen operativo)
+
+Inicialización (init_histone)
+
+Define la secuencia, los 4 estados y su mapa de PTMs.
+
+Construye una rejilla de cargas [+1 +2 +3 +4].
+
+Calcula m/z teórico por estado×carga (calculate_pepmz).
+
+Establece semillas de RT razonables (minutos) y qué mostrar en las figuras.
+
+Anclaje del estado unmod (calculate_layout)
+
+Si nDAmode != 2: usa check_ref (MS1-only) para refinar la RT.
+
+Si nDAmode == 2 (DIA): check_ref + get_rts2 en ventana ±5 min (o todo el gradiente si no cambió).
+
+Extrae el XIC de unmod con get_histone0. Si hay apex confiable:
+
+Ajusta la RT de unmod.
+
+Propaga el desplazamiento (drift) observado al resto de semillas de RT.
+
+Relocalización de ventanas para estados modificados
+
+Si ndebug==1: relocateD (diagnóstico simple).
+
+Si nDAmode != 2: relocate (MS1-only).
+
+Si nDAmode == 2: relocate2 (usa get_rts2/MS2 de apoyo).
+
+Ventanas:
+
+M84ox: desde unmod−15 a unmod−0.1 min.
+
+Y88pr: desde unmod+0.1 a unmod+20 min.
+
+M84oxY88pr: desde unmod−10 a unmod+5 min.
+
+Extracción de estados modificados (get_histone1)
+
+Para cada estado (2..4) calcula XIC/intensidad y actualiza matrices de salida.
+
+Salida y figuras
+
+Guarda matrices y metadatos en .mat (output_histone).
+
+Dibuja PDF (draw_layout), con opción de fragmentos MS2 si DIA.
+
+Si nDAmode==1 (DDA), exporta PSM (GetPSM).
+
+Interpretación química (por qué esas ventanas)
+
+Oxidación de Met (M84ox) → aumenta polaridad → suele eluir antes que unmod.
+
+Propionilación de Tyr (Y88pr) → añade masa y hidrofobicidad → suele eluir después.
+
+Doble mod → efecto combinado → RT normalmente intermedia (ventana estrecha alrededor de unmod).
+
+Las ventanas son heurísticas robustas que se usan como punto de partida. El anclaje de unmod permite corregir deriva de columna/gradiente entre inyecciones.
+
+Modo DIA vs DDA
+
+DIA (nDAmode==2): hay MS2 casi continuo sobre todo el rango; la función:
+
+Reajusta el anclaje con evidencia MS2 (get_rts2).
+
+En la figura, superpone fragmentos (iones b/y para CID/HCD; c/z para ETD), escalados sobre el XIC.
+
+DDA (nDAmode==1): MS2 existe sólo para precusores seleccionados; al final exporta resumen PSM.
+
+MS1-only (nDAmode==0): se fía de la forma/posición del XIC sin apoyo MS2.
+
+Cómo se usa (ejemplo típico)
+% Supón que ya tienes MS1_index, MS1_peaks, MS2_index, MS2_peaks cargados
+ptol = 10;  % ppm
+cur_outpath = fullfile(layout_path, '01_sampleA', 'detail');
+
+special = struct();
+special.ndebug   = 0;        % normal
+special.nDAmode  = 2;        % DIA (con superposición MS2)
+special.nhmass   = 0;        % según tus helpers
+special.raw_path = '/ruta/a/raws';  % para check_ref()
+
+H4_06_79_92(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+
+Resultados esperados en cur_outpath:
+
+H4_06_79_92.mat con matrices pep_rts, pep_intens, mono_isointens y His.
+
+../H4_06_79_92.pdf con XIC(s) y, si DIA, fragmentos.
+
+Errores y soluciones frecuentes
+
+“Ya existe H4_06_79_92.mat y no hace nada”
+→ Es idempotente. Borra el .mat si quieres recalcular.
+
+PDF sin curvas o muy planas
+→ Verifica que el panel aplica a tu química (derivatización similar).
+→ Comprueba ptol (ppm) y la calidad de picos en MS1_peaks.
+
+Sin fragmentos MS2 en la figura (en DIA)
+→ Revisa que nDAmode==2 y que MS2_index/MS2_peaks contengan datos.
+→ Instrumento/tolerancias (códigos en col 6) influyen en la búsqueda de iones.
+
+picos “desplazados” respecto a lo esperado
+→ Observa el anclaje de unmod. Si deriva mucho, el algoritmo propaga ese
+desplazamiento. Ajusta semillas o revisa check_ref.
+
+Rendimiento y reproducibilidad
+
+Es rápido (un solo panel) pero depende del tamaño de MS1_peaks/MS2_peaks.
+
+El diseño reproducible: idempotencia, semillas RT estables, guardar todo en .mat.
+
+Consejo: versiona His.mod_type y calculate_pepmz para trazabilidad.
+
+Relación con EpiProfile_PLANTS
+
+Este panel sigue la filosofía EpiProfile para peptides/ventanas específicas y la adapta a un escenario histona-centrado con derivatización. Es compatible con tu repositorio multi-especie siempre que calculate_pepmz, check_ref, get_rts/get_rts2, get_histone0/1, draw_layout, output_histone y GetPSM estén disponibles en el path.

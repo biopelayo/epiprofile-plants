@@ -1,0 +1,74 @@
+README — check_ref (ES)
+¿Qué hace?
+
+Intenta resolver el tiempo de retención de referencia (rt_ref) para una combinación secuencia+modificación (codificada en new_seq) a partir del archivo:
+
+<raw_path>/histone_layouts/0_ref_info.mat
+
+
+Si encuentra una coincidencia, actualiza rt_ref y fija ndebug = -1 (indicando que se ha usado la referencia).
+Si no encuentra o no debe buscar, no cambia nada.
+
+Entradas
+
+raw_path (string): ruta base del proyecto que contiene histone_layouts/0_ref_info.mat.
+
+new_seq (string): clave de consulta; debe corresponder a la concatenación
+[pep_seq, mod_type] usada en el fichero de referencia.
+
+rt_ref (double): valor actual/por defecto del RT (se usa como retorno si no hay match).
+
+ndebug (double): controla si se hace la búsqueda:
+
+Se busca solo si ndebug == 0 o ndebug == -1.
+
+En otros valores, se omite la búsqueda.
+
+Salidas
+
+rt_ref (double): si hay match (único o desambiguado), se actualiza con AllUnHis.rt_ref(i).
+
+ndebug (double): se pone a -1 cuando se aplica la referencia; en caso contrario, se mantiene.
+
+Cómo busca la coincidencia
+
+Clave Gödel-like: calcula
+
+new_godel = sum((new_seq-'0'+49) .* log(2:1+length(new_seq)))
+
+
+y busca entradas con AllUnHis.seq_godel == new_godel.
+
+Desambiguación (si hay varias coincidencias por clave): compara cadena exacta
+new_seq con [AllUnHis.pep_seq{i}, AllUnHis.mod_type{i}].
+Si coincide, usa ese índice.
+
+Nota: la comparación con == en valores en coma flotante (para seq_godel) asume que el MAT se generó con idéntica fórmula/precisión. En pipelines nuevos puede ser más seguro usar una tolerancia, pero esta función hace igualdad exacta.
+
+Requisitos del MAT
+
+Debe existir AllUnHis con al menos:
+
+seq_godel (vector numérico)
+
+rt_ref (vector numérico)
+
+pep_seq (cellstr N×1)
+
+mod_type (cellstr N×1)
+
+Cuándo no hará nada
+
+ndebug no es 0 ni -1.
+
+No existe el archivo MAT.
+
+No hay coincidencias de seq_godel (ni exacta por cadena en caso de múltiples).
+
+Consejos prácticos
+
+Asegúrate de construir new_seq exactamente como en el MAT: concatenación sin separador de pep_seq y mod_type.
+
+Si cambias la forma de generar seq_godel, regenera todo el campo en el MAT antes de usar esta función.
+
+Documenta en el changelog cuándo y por qué ndebug pasa a -1 (marca de “ref aplicada”).

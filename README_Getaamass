@@ -1,0 +1,73 @@
+README (ESPAÑOL)
+¿Qué devuelve Getaamass?
+
+Una tabla 26×2 con masas de residuo (no del aminoácido libre), alineada con las letras 'A'..'Z':
+
+Columna 1 (mono): masa monoisotópica del residuo (lo que aporta dentro de la cadena peptídica).
+
+Columna 2 (avge): masa promedio del residuo.
+
+“Masa de residuo” = masa de AA menos H₂O (18.01056… Da), que es lo que se usa en las fórmulas de iones b/y (CID) y c/z (ETD).
+
+¿Cómo se usa?
+
+Para una secuencia en mayúsculas:
+
+seq  = 'PEPTIDE';
+idx  = seq - 'A' + 1;          % mapa 'A'..'Z' -> 1..26
+tbl  = Getaamass();
+mono = tbl(idx,1)';            % vector de masas monoisotópicas por residuo
+Mres = sum(mono);              % suma de masas de residuo (sin extremos)
+
+
+Si quieres masa de fragmentos (b/y, c/z) o precursor, los términos de extremo (p. ej., +H, +H₂O, +NH₃) se añaden en funciones específicas (como get_theo_mz).
+
+Las modificaciones (fijas/variables) no se aplican aquí; se suman después con tu capa de mods (p. ej., get_mod_mass).
+
+Letras “especiales” y legado
+
+I/L: isobáricos → misma masa (I y L = 113.08406).
+
+X: “desconocido” → se asigna por defecto a la masa de I/L (legado).
+
+B, J, O, Z: valores heredados del proyecto:
+
+B y Z suelen usarse como comodines (Asx/Glx) en algunos flujos; aquí tienen números placeholder compatibles con el código legado.
+
+J aparece mapeado a 114.04293 (coincide con Asparagina, N), no al uso común de “I/L”.
+
+O (114.07931) se ha usado históricamente para ornitina u otros no canónicos.
+
+U (Selenocisteína): puesto a 0.0 (no soportado en esta tabla). Si necesitas U, sustituye la fila 21 por la masa de residuo correcta.
+
+[Nota] Estas asignaciones no son “estándar PSI” universales; son compatibles con el resto del código del proyecto. Si necesitas estricto Unimod/PSI, ajusta estas filas y documenta el cambio.
+
+Monoisotópica vs Promedio
+
+Monoisotópica (columna 1): lo que se usa para MS/MS y cálculos de alta precisión.
+
+Promedio (columna 2): rara vez necesaria en identificación por fragmentación; mantenida por compatibilidad.
+
+Buenas prácticas
+
+Siempre en mayúsculas la secuencia ('PEPTIDE'). Si tu input llega en minúsculas, conviértelo: upper(seq).
+
+Modificaciones en capa aparte: no “parches” la tabla para meter mods; usa get_mod_mass (per-residuo) y súmalo al vector resultante.
+
+Cisteína: aquí es no modificada. Si usas carbamidometilación fija (+57.021464), aplícala desde la capa de mods.
+
+Revisión de letras ambiguas: si tu repositorio (o especie no estándar) usa otras convenciones para B/J/O/X/Z, cámbialas aquí y déjalo anotado.
+
+Validación rápida
+
+Comprueba que I y L dan idéntico (113.08406).
+
+sum(Getaamass()('G'-'A'+1,1)) coincide con 57.02146 (Gly).
+
+Para seq='ACD', verifica que la suma monoisotópica es 71.03711 + 103.00919 + 115.02694.
+
+¿Cuándo cambiar esta tabla?
+
+Si incorporas aminoácidos no canónicos (p. ej., U real, O real), o si quieres estandarizar B/J/Z/X según PSI/Unimod.
+
+Si cambias el sistema de masas (p. ej., pasas todo a average por algún motivo —no habitual en MS/MS—).

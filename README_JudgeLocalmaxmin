@@ -1,0 +1,88 @@
+README — JudgeLocalmaxmin (detectar máximos y mínimos locales en una traza)
+1) ¿Qué hace esta función?
+
+JudgeLocalmaxmin(w) recibe un vector de intensidades w (por ejemplo, una traza XIC o cualquier serie 1D) y devuelve los índices de:
+
+nt → máximos locales (local tops)
+
+nb → mínimos locales (local bottoms)
+
+Incluye una lógica para:
+
+Manejar series muy cortas (len==1 o len==2).
+
+Eliminar mesetas adyacentes (valores iguales consecutivos) antes de buscar cambios de pendiente, y mapear de vuelta a los índices originales.
+
+Asegurar que, si la serie empieza o termina con pendiente positiva/negativa, los extremos se consideren como min/max globales coherentes.
+
+[No verificado] Este patrón es el clásico basado en el signo de la derivada discreta: donde la pendiente cambia de + a − hay un máximo; de − a + hay un mínimo.
+
+2) Entradas / salidas
+
+Entrada
+
+w — vector fila/columna de intensidades (numérico, longitud ≥ 1).
+
+Salidas
+
+nt — vector de índices (en la escala original de w) que marcan máximos locales o extremos coherentes.
+
+nb — vector de índices (en la escala original de w) que marcan mínimos locales o extremos coherentes.
+
+Ambos vectores están ordenados crecientemente y pueden incluir los extremos 1 y/o len si la lógica de pendientes así lo dicta.
+
+3) Algoritmo (resumen)
+
+Casos cortos
+
+len==1: devuelve nb=1, nt=1.
+
+len==2: devuelve índice del mínimo a nb y del máximo a nt (si son iguales: nb=1, nt=2).
+
+Colapsar mesetas
+
+Calcula x=diff(w) y elimina posiciones donde x==0 (valores consecutivos iguales) generando un índice filtrado ii; luego trabaja con nw = w(ii) (serie sin mesetas contiguas).
+
+Si tras filtrar nlen==1 o nlen==2, aplica la misma lógica de extremos pero mapeando de vuelta a los índices originales mediante ii.
+
+Cambios de pendiente (núcleo)
+
+nx = diff(nw); define vecinos izquierdo/derecho (xl, xr).
+
+Máximo local donde xl>0 y xr<0.
+
+Mínimo local donde xl<0 y xr>0.
+
+Maneja los bordes: si la serie comienza subiendo (nx(1)>0), el primer punto es un mínimo; si comienza bajando, el primer punto es un máximo. De forma análoga, si termina subiendo, el último punto es un máximo; si termina bajando, es un mínimo.
+
+Convierte los índices detectados en nw a índices de w con ii.
+
+Ajustes finales de extremos
+
+Garantiza coherencia al principio y al final: fuerza que el primer elemento de nt/nb sea 1 cuando corresponda y que el último sea len cuando la pendiente lo sugiera.
+
+Complejidad: O(n) en tiempo, O(n) en memoria (por copias/índices).
+
+4) Casos límite que contempla
+
+Constante (w = [c,c,...,c]): tras filtrar mesetas queda una sola muestra → nb=1, nt=len.
+
+Monótona creciente: nb=1, nt=len.
+
+Monótona decreciente: nt=1, nb=len.
+
+Mesetas internas: al eliminar adyacentes iguales se evita marcar múltiples picos/vales en la misma meseta; el mapeo a originales se hace vía ii.
+
+5) Buenas prácticas / advertencias
+
+Si w es ruidosa, suaviza antes (movmean, sgolayfilt, etc.) para evitar falsos máximos/mínimos por ruido de un solo punto.
+
+Si hay mesetas largas (p. ej., muchos puntos idénticos), esta función elimina solo un índice por transición; si necesitas representar la meseta completa como pico/valle, tendrás que extender la lógica.
+
+Los extremos (1 y len) pueden contarse como min/max según la pendiente inicial/final; esto es deseable cuando interpretas trazas que comienzan/terminan en subida/bajada.
+
+6) Ejemplo rápido
+w = [1 3 2 4 3 5];
+[nt, nb] = JudgeLocalmaxmin(w)
+% nt ≈ [2 4 6] (picos locales y máximo al final)
+% nb ≈ [1 3 5] (valles + mínimo inicial)

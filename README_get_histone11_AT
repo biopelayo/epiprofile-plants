@@ -1,0 +1,166 @@
+¡Perfecto! Este nuevo get_histone11 no cambia la idea central, pero endurece validaciones y evita caídas/cuantificaciones erróneas. Te lo comparo, explico cómo/por qué afecta y te doy ejemplos concretos.
+
+Qué hace diferente (antes vs ahora) y efecto
+Aspecto	Antes (original)	Ahora (tu versión)	¿Cómo afecta? / ¿Por qué?
+rt_ref(hno) <= 0	No se comprobaba.	Se comprueba y devuelve ceros con warning.	Evita buscar picos donde no hay ancla de RT. Reduce falsos positivos y errores de índice.
+Ventana RT (p(1), pp(end))	Asumía que siempre había scans.	Valida que p/pp no estén vacíos; si lo están, lanza error(...).	En vez de reventar con “index out of range” confuso, aborta con mensaje claro. (Si prefieres continuar, puedes degradar a warning + ceros.)
+ptol == 100	Se convertía a 10 (comportamiento implícito).	Se documenta y mantiene conversión 100 → 10.	Coherencia con el resto del pipeline; evita ventanas demasiado anchas por accidente.
+Flag nC13 (coarse tol + z≥3)	Igual lógica.	Igual, pero más claro.	Misma extracción, mejor legibilidad.
+Validación cur_pos	No se validaba.	Se valida entero y en rango.	Evita índices erróneos si GetTopBottom11 devolviera algo raro; asegura RT correcto.
+Ajuste de límites nb	Usaba nb(x(1)) y nb(x(end)+1) sin chequear.	Chequea que x(end)+1 ≤ length(nb); si no, warning y mantiene nb.	Evita “Array indices must be positive integers...” y áreas corruptas.
+Mensajería de error	Caídas por indexing.	Mensajes explícitos (qué RT falla, qué índice).	Debug más rápido y trazabilidad.
+Estructura/RT window	Implícita.	Variables rt_min/rt_max explícitas.	Misma función, más fácil de auditar y tunear para LC distintas.
+
+Impacto neto: más robustez y transparencia. En datasets vegetales (ontogenia, multiespecie), donde RTs pueden desplazarse y abundancias ser bajas, esto reduce crashes y falsas integraciones.
+
+Por qué afecta a los resultados
+
+Menos falsos positivos en RT erróneo
+Si rt_ref(hno) está mal (p. ej., por cambio de gradiente/columna), antes podía seleccionar un hombro cercano y cuantificarlo; ahora no: o bien avisa y pone 0, o aborta con mensaje → mejor precisión frente a señales ambiguas.
+
+Integraciones más seguras cuando hay múltiples picos
+El control de nb(x(end)+1) evita integraciones “extendidas” fuera de rango → áreas más estables y sin errores de índice.
+
+Fallos anticipados y trazables
+Mensajes claros (sin stacktraces crípticos) → debug y QA más rápidos, ideal cuando automatizas EpiProfile_PLANTS sobre 30–100 corridas.
+
+Ejemplos de cómo afecta (con números sencillos)
+Ejemplo A — rt_ref fuera del cromatograma
+
+MS1_index(:,2) = [1.0, 1.5, 2.0, 2.5, 3.0] (min)
+
+His.rt_ref(hno) = 10.0 → ventana [9.5, 10.5]
+
+Antes: p = find(RT>=9.5) está vacío → al hacer p(1) → error por índice (crash).
+
+Ahora: detecta p vacío y lanza error con mensaje claro (“No hay ningún RT_MS1 ≥ 9.5”).
+Si cambias error por warning + ceros, el pipeline no se detiene y esa cuantificación queda a 0 (mejor para lotes largos).
+
+Ejemplo B — rt_ref(hno) = 0
+
+Muchos layouts iniciales traen RT=0 como “desconocido”.
+
+Antes: buscaba igualmente y podía coger ruido cercano al inicio → falso positivo.
+
+Ahora: warning y todo 0 para ese péptido → tu matriz refleja “no cuantificado” en vez de “ruido cuantificado”.
+Efecto EDA: más ceros → revisa si prefieres imputar/filtrar; en PLANTS suele ser mejor 0/NaN que intensidades espurias.
+
+Ejemplo C — Múltiples candidatos cerca y nb fuera de rango
+
+Supón x = [4,5,6] y length(nb) = 6. El original usa nb(x(end)+1) = nb(7) → índice fuera de rango.
+
+Ahora: detecta que 7 > length(nb) → warning y mantiene nb original (o ajusta solo el límite izquierdo) → no se cae y el área no se infla artificialmente.
+
+Consejos rápidos para EpiProfile_PLANTS
+
+RTs por especie/condición: si cambias gradiente/columna entre AT/MP/CR u ontogenia, espera desplazamientos; estas validaciones te protegen.
+
+Política de error: en batch grande, te conviene no abortar por un péptido. Cambia los error(...) por warning(...) + salida cero para seguir procesando todo el set.
+
+Post-procesado: marca en un log los hno con rt_ref<=0 o “ventana vacía” y revisa si debes reaprender RTs o relajar delta (p. ej., 0.7 min) para esa especie/corrida.
+
+1) Motivación proteómica-técnica de las mejoras
+
+Ventana RT estricta + validaciones (±0,5 min, checks de p, pp)
+
+Por qué: en HPLC/LC-MS hay deriva de RT, colas/hombros y co-elución. Una ventana controlada y comprobada reduce falsos positivos (integrar ruido o un isóbaro) y evita caídas por índices vacíos.
+
+Efecto: si el RT de referencia está algo desplazado o no hay scans en la ventana, no cuantificas basura: pones 0 (o abortas con mensaje claro). En histonas esto es clave: muchos péptidos son cortos y de baja abundancia.
+
+Elegir el apex por área (inten_sum) entre candidatos cercanos al RT_ref
+
+Por qué: si hay hombros o picos solapados, el “más cercano en RT” puede no ser el mayor pico; el criterio por área suele ser más robusto frente a asimetrías.
+
+Efecto: mejora la reproducibilidad de la cuantificación, especialmente con co-elución típica en hPTMs.
+
+Control de ptol (100→10) y flag nC13 (ptol>100 & z≥3)
+
+Por qué: para ITMS/baja resolución la envolvente isotópica es más ancha/borrosa; con cargas altas (z≥3) se compacta en m/z y se solapa. El flag permite a GetProfiles adaptar cómo busca el patrón.
+
+Efecto: menos capturas espurias de “isótopos” que en realidad son ruido o interferencias; mejor especificidad.
+
+Validaciones de índices (cur_pos, nb(x(end)+1))
+
+Por qué: previene integraciones fuera de rango cuando hay varios candidatos; evita los típicos errores de MATLAB por índice y sobreintegraciones involuntarias.
+
+Efecto: integraciones más estables y pipeline que no se cae en lotes grandes.
+
+2) Cómo afecta al código y a la cuantificación
+
+Código: añades ramas de control (if/else). Coste computacional mínimo; gran ganancia en robustez.
+
+Resultados:
+
+Menos falsos positivos: antes podías integrar un hombro o un pico tangencial; ahora, si no pasa los checks, es 0.
+
+Más ceros cuando el RT_ref está desactualizado o la ventana es estrecha → trade-off entre precisión y sensibilidad.
+
+Áreas algo distintas cuando hay varios candidatos: el nuevo criterio (máxima área) puede cambiar el pico elegido vs. “más cercano”.
+
+3) Susceptibilidades / riesgos nuevos (y mitigación)
+
+Ventana RT fija (±0,5 min)
+
+Riesgo: si cambias columna/gradiente, el RT puede desplazarse >0,5 min → falsos negativos (ceros).
+
+Mitigación: hacer alineación de RT previa (iRT/anchors) o ventana adaptable (p.ej., empezar en ±0,5 y abrir a ±0,8 si no hay candidatos).
+
+Criterio “máxima área”
+
+Riesgo: si una interferencia co-eluyente cae en la misma ventana m/z (o si ptol es demasiado laxo), podría captar el interferente.
+
+Mitigación: comprobar patrón isotópico completo (M/M+1/M+2), correlación de forma entre isótopos y/o evidencia MS2 (si está disponible) antes de fijar el apex definitivo.
+
+Conversión ptol 100→10
+
+Riesgo: si 10 es demasiado estricto para tu instrumento/centroidado, puedes perder señal → más ceros.
+
+Mitigación: exponer ptol real en paras.txt por instrumento (FT vs IT) y permitir override sin conversión automática, o convertir solo si ndebug lo pide.
+
+Heurística nC13 (ptol>100 & z≥3)
+
+Riesgo: es heurística; en algunos TOF/Orbitrap con ajustes raros, el umbral podría no ser el óptimo.
+
+Mitigación: parametrizar la regla (activar por config) y validar con estándares (p. ej., histona H4 K20Ac en QC).
+
+Más ceros → impacto en downstream
+
+Riesgo: normalizaciones (qsmooth/ComBat) y tests (limma) son sensibles a sparsidad; puede cambiar tus p-values.
+
+Mitigación: aplicar filtros de presencia, imputación controlada (solo MNAR/MAR cuando proceda) o usar modelos robustos a ceros.
+
+cur_mono_isointens solo para la 1ª carga
+
+Riesgo: si la 1ª carga es débil, tu QC visual puede parecer “malo” cuando otra carga va perfecta.
+
+Mitigación: opcionalmente exportar también la mejor carga (por S/N) para diagnósticos.
+
+4) ¿Has “hecho algo mal” respecto a la v1 sin corregir?
+
+No: lo que has hecho es endurecer el control de calidad. Eso sí, espera diferencias:
+
+Donde antes había una cuantificación “por los pelos” (hombro/ruido), ahora verás 0 → parece “peor”, pero es más fiel.
+
+Donde había varios picos cerca, puede cambiar el apex elegido → áreas distintas (normal).
+
+Si tu rt_ref está antiguo (otro gradiente/columna), verás más ceros hasta que realinees RT o amplíes ventana.
+
+Regla práctica: si sube el nº de ceros, no es un fallo; es señal de que necesitas mejor anclaje de RT o ajustar tolerancias al instrumento/lote.
+
+5) Ejemplo corto del efecto
+
+Corrida con deriva de RT de +0,7 min para H3K79me2 (z=3).
+
+Antes: con ventana ±0,5 y sin checks, podía “cazar” un hombro cercano (área pequeña pero >0).
+
+Ahora: no encuentra candidato en ±0,5 → 0 (o error claro). Si activas ventana adaptable (±0,8 si falla), entonces sí encuentra el verdadero apex a ~RT_ref+0,7 y cuantifica mejor.
+
+6) Recomendaciones rápidas para PLANTS
+
+Alinea RT por lote/especie (anclas o iRT) y re-estima His.rt_ref tras cada cambio de LC.
+
+Parametriza delta, ptol, y la regla nC13 en paras.txt.
+
+Añade un fallback: si no hay candidatos en ±0,5, reintenta con ±0,8 (loggeándolo).
+
+Considera un chequeo de patrón isotópico (M/M+1/M+2) o confirmación MS2 en picos dudosos.

@@ -1,0 +1,34 @@
+H3_04a_27_40 — Panel H3 KSAPATGGVKKPHR (27–40) con S28 (ph/ac/pr) y K27/K36
+¿Qué hace H3_04a_27_40?
+
+Panel específico para el péptido H3 KSAPATGGVKKPHR (27–40) que cuantifica combinaciones de S28ph / S28ac / S28pr con K27me1/2/3 y, en algunos estados, K36me1/2. Este panel no ancla en “unmod”: toma RTs de referencia del panel base H3_04_27_40 (fichero H3_04_27_40.xls, bloque [rt]) y, a partir de ellas, reubica ventanas para los estados con S28.
+
+Flujo: leer RTs base → reubicar (MS1 o MS2-asistido) → extraer RT/intensidad por estado (XIC) → guardar .mat + figuras; PSMs si procede.
+
+Pares / co-elución relevantes
+
+K27me2S28ph vs K27me3S28ph (find_pair con MS1 o MS2): resuelve la escalera de metilación con S28ph.
+
+K27me2S28phK36me2 vs K27me3S28phK36me2: doblete adicional dependiente de K36me2.
+
+K27me2S28ac vs K27me3S28ac: análogo en acetilación.
+
+K27me3S28acK36me1: estado tardío condicionado por el hallazgo previo de K27me3S28ac.
+
+Detalles prácticos
+
+Entrada de RTs: get_KSAPATGGVKKPHR_rt lee H3_04_27_40.xls → sección [rt]. Si no existe, no reubica (retorna).
+
+Ventanas RT (MS1): delta = 0.3 min; S28ph/ac generalmente tarde respecto a K27me1; K27me2/3 con S28 tienden a antes que el ancla base.
+
+MS2 asistido (nDAmode=2): usa get_rts2 en todas las búsquedas, manteniendo los mismos límites temporales.
+
+Visualización: por defecto se oculta S28pr en figuras (His.display(8)=0) para evitar ruido diagnóstico.
+
+Salida: H3_04a_27_40.mat, figuras de layout y PSMs si special.nDAmode == 1.
+
+Uso típico
+special = struct('raw_path', rawfile, 'ndebug', 0, 'nDAmode', 2, 'nhmass', 0);
+ptol    = 10;        % ppm
+outdir  = 'results/';
+H3_04a_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,outdir,special);

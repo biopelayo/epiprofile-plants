@@ -1,0 +1,80 @@
+README (ES) — get_histone6.m
+¿Qué hace esta función?
+
+get_histone6 separa la señal MS1 de un mismo péptido en seis componentes (seis isoformas/estados de modificación). Para ello:
+
+Calcula la cantidad total del péptido en MS1 (área bajo la curva).
+
+Dentro de una ventana de RT pequeña, extrae la traza monoisotópica (la “línea principal” del péptido).
+
+Busca los MS2 en ese intervalo y, con iones diagnósticos, estima cinco ratios por parejas de isoformas.
+
+Con esos ratios, reconstruye la mezcla de seis partes (no negativas y que suman 1) para cada escaneo.
+
+Multiplica la traza MS1 por esas fracciones → seis sub-trazas. Integra cada una para obtener área y RT de máximo (apice).
+
+Resultado: seis cantidades (una por isoforma), sus RTs de máximo y las seis sub-trazas a lo largo del tiempo.
+
+Entradas
+
+MS1_index, MS1_peaks: definiciones de scans MS1 y picos [m/z, intensidad].
+
+MS2_index, MS2_peaks: definiciones de scans MS2 y picos [m/z, intensidad].
+
+ptol: tolerancia en ppm (si pones 100, internamente usa 10 por compatibilidad).
+
+unitdiff: separación isotópica (13C ≈ 1.003355 Da).
+
+Mods: iones diagnósticos por parejas de isoformas (proporcionados por la librería).
+
+His: metadatos del péptido/isoformas (pep_mz, pep_ch, rt_ref, mod_short, outpath, outfile).
+
+hno: índice de la primera isoforma (se asume bloque de seis: hno..hno+5).
+
+special: modo
+
+nDAmode: 1=DDA, 2=DIA (DIA usa el canal exacto).
+
+nsource, nsubtype: activan variantes de iones con masa de H si procede.
+
+Salidas
+
+cur_rts (6 × nCargas): RT del pico de cada isoforma (replicado por carga).
+
+cur_intens (6 × nCargas): área por isoforma y carga (la suma ≈ total MS1).
+
+cur_mono_isointens (nScans × 6): sub-trazas monoisotópicas por isoforma (sobre la malla de MS1).
+
+Además, guarda un PDF de control de calidad (QC) con la traza experimental y las seis sub-trazas con sus porcentajes.
+
+Uso mínimo
+ptol = 10; unitdiff = 1.003355; hno = 21;
+special.nDAmode = 1; special.nsource = 0; special.nsubtype = 0;
+
+[cur_rts, cur_intens, cur_mono] = get_histone6( ...
+  MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+  ptol, unitdiff, Mods, His, hno, special);
+
+Consejos prácticos
+
+Si no hay suficientes MS2 en la ventana (≤3), la función reparte la señal 1/6 (fallback) para fines visuales, pero no es concluyente.
+
+En DIA, asegúrate de que el canal (MS2_index(:,4)) coincide con el precursor del péptido.
+
+Empieza con 10 ppm como tolerancia a menos que tu instrumento necesite otra.
+
+Revisa el PDF: si una isoforma domina (>90%), los MS2 favorecen fuertemente esa isoforma (no es un error).
+
+Errores típicos
+
+Índices inconsistentes (hno..hno+5 no existen en His).
+
+Ventana de RT demasiado estrecha (sin MS2 dentro).
+
+Canal DIA mal mapeado → ratios vacíos.
+
+Licencia y cita
+
+Recomendado: GPL-3.0, coherente con EpiProfile.
+
+Cita el repositorio original y este módulo en tus publicaciones.

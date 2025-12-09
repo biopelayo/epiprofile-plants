@@ -1,0 +1,112 @@
+README — H4_05_68_78 (documentación exhaustiva, estilo EpiProfile_PLANTS)
+1) Qué cuantifica este panel
+
+Péptido de H4 (aa 68–78, canónico): DAVTYTEHAKR
+Estados incluidos:
+
+unmod → estado “basal” de derivatización: N-terminal del péptido propionilado (0,pr) y Lys interna propionilada (10,pr, la K del péptido).
+
+Y72pr → igual que “unmod” pero con propionilación adicional en Tyr (posición 5 del péptido; corresponde a Y72 en la numeración de H4). En matrices biológicas reales esta señal puede aparecer por derivatización química del anillo fenólico de Tyr con anhídrido propiónico.
+
+[Reality Filter] Aunque la propionilación de N-term y Lys es el objetivo del método (bloqueo de sitios basados en aminas), Tyr puede propionilarse de forma lateral en ciertas condiciones (pH, exceso de reactivo, tiempos), generando especies más hidrofóbicas que eluyen más tarde. Este panel separa explícitamente Y72pr para: (i) cuantificarla si existe y (ii) evitar que contamine la cuantificación del estado “unmod”. Confirma experimentalmente tus condiciones de derivatización si esta vía te aparece con abundancia relevante.
+
+2) Entradas y salidas
+
+Entradas
+
+MS1_index (n×2): índice de scans y tiempo de retención en minutos (col. 2).
+
+MS1_peaks: picos centroidados MS1 (estructura propia del proyecto).
+
+MS2_index, MS2_peaks: análogo MS2 (para anclajes y filtros DA).
+
+ptol: tolerancia de masa (ppm).
+
+cur_outpath: ruta de salida para el .mat y figuras.
+
+special (struct):
+
+ndebug (0/1): 1 usa ruta diagnóstica relocateD.
+
+nDAmode: 0 = solo MS1; 2 = realineación asistida por MS2; 1 = además exporta PSM.
+
+nhmass: parámetro auxiliar de masa neutra (si tu get_rts2 lo requiere).
+
+raw_path: fichero bruto/MGF para check_ref.
+
+Salidas en disco
+
+H4_05_68_78.mat con: His (definición del panel), pep_rts (RT por carga), pep_intens (intensidades/áreas por carga), mono_isointens (traza monoisotópica vs RT).
+
+Gráficas de layout/XIC mediante draw_layout.
+
+Si nDAmode==1: exportación de PSM con GetPSM.
+
+3) Cómo se codifican las modificaciones (convención EpiProfile)
+
+mod_type usa índices relativos al péptido:
+
+0,pr → N-terminal del péptido propionilado.
+
+10,pr → Lys del péptido (posición 10) propionilada.
+
+5,pr → Tyr del péptido (posición 5) con aducto de propionilo (evento no canónico, pero contemplado).
+
+pep_ch define cargas evaluadas (1+,2+,3+,4+) y se reordena internamente para que la carga principal (2+) quede en la primera columna de las matrices.
+
+4) Semillas de RT y expectativas cromatográficas
+
+His.rt_ref = [31.08; 37.08] → “unmod” ~31.1 min; Y72pr ~37.1 min.
+
+Expectativa: añadir propionilo en Tyr incrementa la hidrofobicidad → retiene más (RT mayor) que “unmod”.
+
+Las semillas se refinan:
+
+MS1-only: check_ref + extracción con get_histone0.
+
+DA (MS2-asistido, nDAmode==2): check_ref → ventana local (±5 min) → get_rts2.
+
+5) Flujo interno (paso a paso)
+
+Anclaje del estado basal (“unmod”) con check_ref.
+
+Extracción “unmod” con get_histone0 → se calcula el delta de deriva y se corrigen las demás semillas de RT (rt_ref).
+
+Relocalización de Y72pr:
+
+MS1-only → relocate (ventana [unmod+0.1, unmod+30] min) + get_rts.
+
+DA → relocate2 con get_rts2 (misma ventana; prioriza evidencia MS2).
+
+Extracción de Y72pr con get_histone1.
+
+Salida (output_histone) y figuras (draw_layout). PSM si nDAmode==1.
+
+6) QC y problemas típicos
+
+Y72pr ausente: habitual si la derivatización del anillo fenólico no ocurre; señal esperada 0.
+
+Y72pr domina: revisa proporción de anhídrido, pH, tiempos y temperatura; puede ser artefactual.
+
+Falsos positivos con fosfo-Tyr (Yp): fosforilación añade +79.9663 Da, propionilo añade +56.0262 Da. En DA, inspecciona fragmentos diagnósticos para descartar Yp.
+
+Coelución o hombros: usa DA para anclar; si persiste, estrecha ventana RT o incrementa especificidad de iones.
+
+7) Ejemplo de ejecución
+special = struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/data/run1.raw');
+ptol = 10;  % ppm
+H4_05_68_78(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,'results/AT/H4',special);
+
+8) Recomendaciones instrumentales y de búsqueda
+
+Tolerancia (ptol): 10±5 ppm en Orbitrap HR, 10–20 ppm en Q-TOF.
+
+unitdiff=1.0032 (espaciado C-13): mantener para estimar monoisotópico.
+
+MS2: habilitar suficiente cobertura del precursor 2+ y fragmentos que discriminen Y72pr frente a alternativas (oxidaciones, fosfos, aductos).
+
+9) Archivos de salida
+
+H4_05_68_78.mat: estructura His (secuencia, mods, m/z, RT semillas y recalibradas), pep_rts, pep_intens, mono_isointens.
+
+Figuras XIC por carga para inspección visual y reporte.

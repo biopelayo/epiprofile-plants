@@ -1,0 +1,68 @@
+README (ESPAÑOL)
+¿Qué hace GetLocal?
+
+Dado un ápice MS1 (índice cur_ms1pos) y una matriz de intensidades por canal isotópico c_ref_isointens (nEscaneos × nIsótopos), busca el segmento cromatográfico que contiene ese ápice (usando los límites nb) y devuelve, para cada canal isotópico, el máximo local (intensidad y su RT) dentro de ese segmento.
+
+Salidas:
+
+localmax_rt (nIsótopos×1): RT del máximo local por canal.
+
+localmax_inten (nIsótopos×1): intensidad del máximo local por canal.
+
+IX (1×L): vector de índices [i1:i2] del segmento usado; vacío si no se encontró segmento que contenga cur_ms1pos.
+
+Entradas esperadas
+
+cur_ms1pos — índice (1-based) del ápice/candidato en el grid de MS1.
+
+isorts — vector de RTs (longitud nEscaneos) alineado con filas de c_ref_isointens.
+
+c_ref_isointens — matriz MS1 (nEscaneos × nIsótopos) con las trazas por canal isotópico (p. ej., M−1, M, M+1, M+2…).
+
+nb — límites de segmentos (vector de índices, p. ej. salida de GetTopBottom11, donde cada segmento es nb(k):nb(k+1)).
+
+Convención del proyecto: la columna 1 de c_ref_isointens se usa como traza guía para definir/limpiar el segmento (histórico). No implica que sea “monoisotópica”; el objetivo es solo navegar.
+
+Flujo interno (resumen)
+
+Traza guía: coge c_ref_isointens(:,1) y fija a 0 los valores <1.5% del máximo (limpia colas/ruido).
+Si esa limpieza deja a 0 el valor en cur_ms1pos, se revierte a la traza sin limpiar (para no perder el ápice).
+
+Segmento: recorre los intervalos nb(k):nb(k+1), elimina ceros al principio/fin y busca el que contiene cur_ms1pos.
+Si no lo encuentra, devuelve IX=[] y vectores de 0.
+
+Máximos por canal: dentro de IX, para cada columna j, toma max(c_ref_isointens(IX,j)) y su posición; mapea a RT con isorts.
+
+Uso típico
+% Supón que vienes de GetProfiles + GetTopBottom11:
+% c_isorts, c_ref_isointens (nScans×nIsotopes), nt (ápices), nb (límites)
+ino = 1;                                % el candidato #1
+cur_ms1pos = nt(ino);                   % índice del ápice en la malla MS1
+
+[local_rt, local_int, IX] = GetLocal(cur_ms1pos, c_isorts, c_ref_isointens, nb);
+
+% local_rt(j) y local_int(j) son el RT e intensidad del máximo para el canal isotópico j en ese segmento
+
+Buenas prácticas
+
+Coherencia de índices: cur_ms1pos, isorts y c_ref_isointens deben referirse al mismo subconjunto de escaneos y orden.
+
+Segmentación (nb): asegúrate de que nb venga de la misma traza/ventana; mezclar ventanas distintas produce IX incoherentes.
+
+Columna guía: si en tu flujo la columna 1 no es representativa (p. ej., es M−1 muy débil), considera usar otra columna como guía (requiere cambiar el código).
+
+Smoothing: hay un smooth(...,3) comentado. Puedes activarlo si notas picos dentados; documenta el cambio (afecta a la detección del segmento).
+
+Umbral 1.5%: es una heurística para “apagar” colas muy bajas; si trabajas con LC cortos/ruidosos, podría merecer ajustarlo.
+
+Errores/edge cases frecuentes
+
+IX vacío: cur_ms1pos no cae en ningún segmento (desajuste en nb o índices fuera de rango). Revisa que los nb provengan del mismo XIC.
+
+RTs 0 o NaN: si isorts no está alineado o c_ref_isointens tiene filas de ceros en el segmento.
+
+Canales isotópicos planos: para algunos j, si no hay señal en IX, el máximo puede ser 0; factible en M+3/M+4 para péptidos pequeños.
+
+Rendimiento
+
+Complejidad O(nSegmentos + |IX|×nIsótopos). Para XICs de cientos de puntos y 3–4 canales, es instantáneo.

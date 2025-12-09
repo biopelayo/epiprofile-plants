@@ -1,0 +1,144 @@
+README — get_area (ES)
+¿Qué hace?
+
+Calcula el área de pico de un péptido en MS1 a partir de su traza monoisotópica y una ventana cromatográfica IX que contiene el scan ancla cur_pos. Integra la XIC monoisotópica suavizada y, si la tolerancia en ppm (ptol) indica posible solapamiento entre isótopos o interferencias, aplica una corrección de solapamientos (judgeOverlap1) usando:
+
+el espectro MS1 del scan ancla,
+
+una escalera isotópica de 8 líneas 
+[
+𝑀
+−
+7
+]
+…
+[
+𝑀
+]
+[M−7]…[M] centrada en cur_mz,
+
+y el vector teórico de probabilidades isotópicas (IPV) recuperado por GetIPV() según la masa nominal floor(M).
+
+Finalmente escala el área monoisotópica estimada multiplicando por sum(IPV) para aproximar el área total del clúster isotópico.
+
+Entradas clave
+
+c_isorts — tiempos cromatográficos por scan (vector).
+
+c_ref_isointens — matriz de XICs; la columna 2 es la monoisotópica usada aquí.
+
+nb — índices de fronteras de segmentos (p. ej., cortes de región detectados).
+
+cur_pos — índice del scan ancla.
+
+cur_mz, cur_ch — m/z objetivo y carga.
+
+MS1_index, MS1_peaks — acceso al espectro MS1 por scan (índices y tabla [m/z, intensidad]).
+
+unitdiff — Δm isotópico (Da) por paso (típicamente ~1.003355).
+
+ptol — tolerancia ppm:
+
+< 100 ⇒ activar corrección de solapamientos (judgeOverlap1).
+
+≥ 100 ⇒ integrar por spline sin corrección.
+
+Pasos del algoritmo
+
+Preprocesado de la XIC “mono”
+
+Usa c_ref_isointens(:,2) como traza monoisotópica.
+
+Aplica umbral de 1.5% del máximo para poner a 0 el fondo muy bajo.
+
+Si el umbral anula el punto cur_pos, revierte a la traza original sin umbral.
+
+Elección de la ventana IX
+
+Recorre los intervalos definidos por nb y expande sus extremos al primer/último punto no cero.
+
+Selecciona el único intervalo que contenga cur_pos. Si no hay, devuelve 0.
+
+Integración básica (sin solapamiento)
+
+Dentro de IX, suaviza la traza mono (smooth con ventana 3).
+
+Interpola por spline a paso 0.005 en RT y suma área absoluta.
+
+Corrección de solapamiento (si ptol<100) — judgeOverlap1
+
+Recupera el espectro MS1 del cur_pos.
+
+Construye 8 posiciones de m/z: M-7 … M (con pasos unitdiff/charge).
+
+Para cada posición, toma la intensidad máxima dentro de ±ptol ppm → tmp_intens.
+
+Obtiene el IPV teórico tIPV = IPV(floor(M), 1:5).
+
+Calcula razones observadas/teóricas (r_at*) y razones adyacentes (b*), y define banderas (cc*) que verifican consistencia de la escalera.
+
+Según patrones en esas banderas y razones, elige un conjunto de isótopos de referencia c_ref_isomzs y sus índices idx (p. ej., {M-4, M-1, M}).
+
+Llama a GetProfiles(..., IX) para construir XICs de esos isótopos, suaviza e integra cada una por spline.
+
+Capea cada área basándose en la relación entre área del último isótopo vs intensidad escalar en el espectro (Factor).
+
+Si nflag=1, resta una contribución IPV-pesada del isotopo inmediatamente inferior.
+
+Finalmente, realiza una sustitución hacia atrás con tIPV para deducir el área monoisotópica a partir de isótopos superiores.
+
+Escalado a clúster completo
+
+Calcula fCali = sum(tIPV) y multiplica el área monoisotópica para aproximar el área del clúster isotópico.
+
+Umbrales y ventanas importantes
+
+Umbral XIC: 1.5% del máximo de la traza mono para anular ruido de fondo.
+
+Selección IX: entre fronteras nb ajustadas al primer/último punto no nulo.
+
+Integración: resampleo con spline a paso 0.005 en RT.
+
+Con/sin solapamiento: ptol < 100 ⇒ con corrección; ptol ≥ 100 ⇒ sin corrección.
+
+Escalera isotópica: 8 líneas {M−7,…,M} con paso unitdiff/charge.
+
+Banda de coherencia para ratios r_at* frente a IPV: 
+1
+/
+5
+,
+5
+1/5,5.
+
+Elección de conjuntos de referencia: ramas if/elseif con combinaciones {M-6,M-4,M-2,M}, {M-6,M-3,M}, {M-4,M-2,M}, {M-3,M}, {M-2,M}, {M-1,M}, o solo {M} según el patrón.
+
+Dependencias y contrato de datos
+
+GetIPV() — tabla IPV(m_nominal, 1:5); se usa floor(M).
+
+GetProfiles(MS1_index,MS1_peaks,c_ref_isomzs,cur_ch,ptol,1,IX) — devuelve RT (c_isorts) y matriz de XICs (c_ref_isointens) alineadas con IX.
+
+smooth, spline — funciones de MATLAB.
+
+MS1_index, MS1_peaks — deben indexar correctamente los límites de filas por scan (columna 3 en MS1_index).
+
+Interpretación del resultado
+
+pep_area es un estimador robusto del área monoisotópica corregida por solapamiento y escalada para aproximar el total de isótopos.
+
+Si el espectro local es pobre o el patrón isotópico no es coherente, se usan conjuntos reducidos (p. ej., solo {M}), lo que aumenta la incertidumbre.
+
+Si ptol es grande (≥100 ppm), el método omite la corrección: útil en casos de baja resolución o cuando el vecindario no es fiable.
+
+Consejos prácticos
+
+Mantén unitdiff coherente con el modelo isotópico (usar 1.003355… según el instrumento).
+
+Verifica que c_ref_isointens(:,2) corresponda realmente a la traza mono.
+
+Ajusta nb para cubrir segmentos cromatográficos completos del pico.
+
+Si observas áreas negativas (antes del max(…,0)), revisa el capping y la selección de isótopos de referencia.
+
+Para estudios comparativos, fija ptol y unitdiff constantes entre muestras/runs.

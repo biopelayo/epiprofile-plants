@@ -1,0 +1,72 @@
+README — get_histone13 (ES)
+¿Qué hace?
+
+Realiza la extracción e integración súper enfocada (ultra-estrecha) de un péptido de histona (índice hno en His) para todas sus cargas:
+
+Ventana de extracción de escaneos: ±0,1 min alrededor de His.rt_ref(hno).
+
+Puerta de aceptación de candidatos: ±0,5 min alrededor de His.rt_ref(hno) (algo más laxa).
+
+Para cada carga:
+
+Construye XICs en {M−1, M, M+1, M+2} (espaciadas unitdiff / z) con GetProfiles.
+
+Sobre la traza monoisotópica (columna 2), detecta candidatos con GetTopBottom.
+
+Acepta candidatos dentro de ±0,5 min y elige el de mayor intensidad integrada (inten_sum).
+
+Integra el área con get_area (que corrige solapamientos cuando procede).
+
+Devuelve el RT del ápice y el área por carga; además, para la primera carga devuelve la XIC mono completa.
+
+Uso típico: cuando el RT de referencia es muy fiable (estándares internos, retención muy estable) y se busca precisión máxima reduciendo interferencias fuera de ±0,1 min.
+
+Entradas
+
+MS1_index (matriz): (:,2) = RT (min), (:,3) = fila inicial en MS1_peaks.
+
+MS1_peaks (Nx2): picos MS1 [m/z, intensidad].
+
+ptol (ppm): si == 100, se fuerza a 10 (convención del código). Si >100 y z≥3, se activa nC13=1 en GetProfiles.
+
+unitdiff (Da): diferencia isotópica (~1.003355 Da).
+
+His (struct): pep_mz, pep_ch, rt_ref.
+
+hno (int): índice del péptido.
+
+Salidas
+
+cur_rts (1 × nCharge): RT del ápice por carga; si no hay aceptados, rt_ref(hno).
+
+cur_intens (1 × nCharge): área integrada por carga (0 si no se acepta ningún candidato).
+
+cur_mono_isointens (vector): XIC monoisotópica para la primera carga.
+
+Detalles y umbrales
+
+Extracción de escaneos: rt_i1:rt_i2 cubre rt_ref±0,1 min (muy ceñido).
+
+Aceptación: candidatos con |RT − rt_ref| ≤ 0,5 min.
+
+Selección: entre los aceptados, el máximo inten_sum (no el más cercano en RT).
+
+Isótopos: {M−1, M, M+1, M+2} con paso unitdiff/z.
+
+Regla ptol: ptol==100 ⇒ 10 ppm.
+
+Dependencias
+
+GetProfiles(...) — genera XICs para líneas isotópicas en el rango de escaneos.
+
+GetTopBottom(xic) — devuelve candidatos (nt), fronteras de segmentos (nb) y inten_sum.
+
+get_area(...) — integra el área con manejo de solapamientos (usa espectro MS1 local e IPV).
+
+Consideraciones prácticas
+
+La combinación ventana de extracción ultracorta (±0,1) + puerta de aceptación (±0,5) es útil cuando existe confianza en el RT esperado, pero quieres tolerar desviaciones mínimas en el picking.
+
+Si observas picos truncados o falta de candidatos, prueba a ampliar delta (la extracción) en una variante de la función, o usa get_histone1 (±2 min) / get_histone10.
+
+Confirma la coherencia de MS1_index(:,2) (RT) con la corrida; un desfase de cronología invalida los rangos.

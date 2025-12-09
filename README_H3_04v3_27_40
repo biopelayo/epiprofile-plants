@@ -1,0 +1,123 @@
+README (explicativo, en castellano)
+Qué hace esta función
+
+Construye el layout de cuantificación para el péptido H3(27–40) (KSAPTTGGVKKPHR, diagnóstico de H3.3 en A. thaliana) y un panel de PTMs en K27/K36: unmod, K27/36 me1/me2/me3, K27ac y combinaciones (hasta 17 estados).
+
+Extrae perfiles MS1 (y, cuando procede, confirma con MS2) para cada estado, integrando áreas por carga z = 2,3,4.
+
+Calibra los tiempos de retención (RT) del panel a tu corrida usando el no modificado como ancla.
+
+(Opcional) Realinea RTs con:
+
+relocate (MS1) o
+
+relocate2 (MS1+MS2)
+según special.nDAmode / special.ndebug.
+
+Guarda resultados (.mat) y dibuja figuras para informe.
+
+(Opcional) Si special.nDAmode==1, extrae PSMs (GetPSM).
+
+Por qué está así (diseño)
+
+Hay PTMs que co-eluyen (p. ej., K36me1/K27me1) o están muy próximas. Por eso:
+
+Si están separadas >0.4 min, se tratan por separado (MS1).
+
+Si están pegadas, se usa extractor acoplado con MS2 (get_histone2) para desambiguar.
+
+El realineado de RTs evita que pequeños shifts del gradiente/columna te hagan fallar la extracción. Se puede:
+
+Usar un ancla externa (H3_04_27_40.xls) y buscar en una ventana estrecha (relocate/relocate2 “cortos”), o
+
+Aplicar el enfoque completo (comentado) con patrones de co-elución y find_triple (más sensible pero también más específico de un método).
+
+Dónde cambiar cosas (parámetros prácticos)
+
+Secuencia péptido: His.pep_seq.
+
+Para A. thaliana: H3.3 → KSAPTTGGVKKPHR.
+
+Si quieres H3.1 (canónica planta): KSAPATGGVKKPHR.
+
+Ojo: cambiar la secuencia cambia m/z y RTs esperados; mantén coherente calculate_pepmz(His) y His.rt_ref.
+
+Panel de PTMs:
+
+His.mod_short y His.mod_type. Añade/quita estados.
+
+His.pep_ch si quieres otras cargas (por defecto 2/3/4).
+
+m/z teóricos:
+
+Se calculan con calculate_pepmz(His). No metas valores “a mano” salvo validación previa.
+
+RTs iniciales:
+
+His.rt_ref: son prioris empíricos de tu método. Se recalibran automáticamente con el unmod.
+
+Visualización:
+
+His.display: 1/0 para mostrar/ocultar estados en figuras (por defecto oculta 15 y 16).
+
+Realineado:
+
+relocate / relocate2 (activos).
+
+Los completos con find_triple están comentados al final como referencia para extender EpiProfile_PLANTS.
+
+El fichero externo H3_04_27_40.xls debe existir si quieres el realineado corto basado en H3.1; si no, se omite.
+
+Ventanas: delta = 0.5 y desplazamiento global nshift = 0.3 (≤90 min de gradiente) o 1.6 (>90 min). Ajusta según tu LC.
+
+Tolerancia de masa:
+
+ptol: si pasas 100, internamente las funciones lo mapean a 10 (ppm) en varios extractores. Mantén consistencia con tus datos (Orbitrap vs IT, etc.).
+
+Isótopo:
+
+unitdiff = 1.0032. No cambies salvo justificación (afecta extracción de isotopos 0/+1/+2).
+
+Cómo afecta a EpiProfile_PLANTS
+
+Este layout encapsula la lógica planta-específica (peptide TT de H3.3; tabla RT hermana AT con AT en KSAPATGGVKKPHR).
+
+En EpiProfile_PLANTS conviene:
+
+Parametrizar secuencias/PTM-panel/RTs por especie (AT/MP/CR) en params_*.json.
+
+Exponer nshift, delta, ventanas y umbrales (0.4 min) como parámetros por columna/gradiente.
+
+Permitir alternar relocate corto (fichero externo) vs relocate completo (con find_triple) según dataset.
+
+Registrar logs cuando un estado queda en 0 (no encontrado) y re-intentar con ventanas adaptativas.
+
+Riesgos / buenas prácticas
+
+Si falta H3_04_27_40.xls, el realineado corto no se aplica (no es error). Comprueba que ref_rts no esté vacío.
+
+Un nshift mal calibrado puede “persuadir” a un pico incorrecto. Ajusta 0.3/1.6 a tu gradiente real (mira el end_rt).
+
+Cambiar His.pep_seq sin recalibrar His.rt_ref y mod_type → incongruencias m/z/RT. Mantén todo sincronizado.
+
+El umbral 0.4 min para separar K36me1/K27me1 es empírico; valida en tus corridas (Evosep 30 SPD vs otros).
+
+Si ptol es demasiado amplio en matrices complejas, puede colarse interferencia; si es muy estrecho, puedes perder picos.
+
+Camino mínimo para probar
+
+Genera MS1_index/MS1_peaks y MS2_index/MS2_peaks con tu parser habitual.
+
+Crea special con:
+
+special.nDAmode = 2;   % usa relocate2 (MS1+MS2)
+special.ndebug  = 0;
+special.nhmass  = 0;   % o 1 si hay N15
+
+
+Llama:
+
+H3_04v3_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,100,'./output',special)
+
+
+Revisa ./output/H3_04v3_27_40.mat y las figuras.

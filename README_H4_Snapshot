@@ -1,0 +1,101 @@
+README — H4_Snapshot (resumen de PTMs a lo largo de H4)
+1) ¿Qué hace esta función?
+
+H4_Snapshot agrega las modificaciones detectadas en distintos paneles peptídicos de histona H4 y genera un resumen por posición a lo largo de la secuencia completa de H4. El resultado es una tabla (TSV con extensión .xls) en la que cada línea corresponde a un residuo de H4 y, si en ese residuo se detectó alguna modificación biológica (p. ej., ac, me1/2/3, ph, bu, etc.), se listan en columnas separadas por tabuladores.
+
+Nota: la salida se llama .xls por compatibilidad con Excel, pero el contenido es tab-separado (TSV).
+
+2) Entradas y salidas
+
+Entrada
+
+cur_outpath: carpeta que contiene los resultados .mat por panel peptídico (p. ej. H4_01_4_17.mat, H4_02_20_23.mat, H4_04_40_45.mat, etc.).
+Cada .mat debe incluir, como mínimo:
+
+His: estructura del panel (con His.mod_type).
+
+auc: matriz con áreas integradas por estado ([nEstados × …]); se considera detectado si auc(estado,2) > 0.
+
+Salida
+
+H4_Snapshot.xls en la carpeta padre de cur_outpath. Es un TSV con:
+
+Columna 1: aminoácido (una letra) en esa posición de la H4 canónica utilizada en el análisis (variable H4 dentro de la función).
+
+Columnas siguientes (opcionales): etiquetas de modificaciones biológicas detectadas en esa posición (una por celda).
+Se excluyen explícitamente pr (propionilo de bloqueo químico) y ox (oxidación, a menudo artefactual) para no confundir la lectura biológica.
+
+3) ¿Cómo mapea posiciones peptídicas a posiciones de la proteína?
+
+Cada archivo .mat proviene de un panel denominado con el patrón H4_XX_start_end, donde start y end son índices 1-basados del tramo dentro de la proteína H4.
+La función:
+
+Extrae start del nombre de archivo (entre el segundo y tercer guion bajo).
+
+Calcula start_pt = start - 1.
+
+Recorre His.mod_type{estado} (cadenas estilo 0,pr;3,ac;…) y toma los índices relativos al péptido (0=N-terminal del péptido; 1…L posiciones internas).
+
+Suma start_pt para convertir la posición relativa en posición absoluta sobre la proteína H4.
+
+Filtra modificaciones pr y ox (no las incluye en el snapshot).
+
+Ejemplo: si el panel cubre H4_01_4_17, entonces start=4 ⇒ start_pt=3. Una modificación en cur_pose=5 (quinta posición del péptido) corresponde a la posición 8 de la proteína: 5 + 3 = 8.
+
+4) Criterio de “modificación detectada”
+
+Para cada estado ino del panel, la función comprueba auc(ino,2).
+
+Si auc(ino,2) == 0, no se considera detectado ese estado y se omite.
+
+Si auc(ino,2) > 0, el estado cuenta como detectado y se parsean las modificaciones de His.mod_type{ino} para cada posición (trasladada a coordenadas de proteína).
+
+Se descartan las etiquetas pr y ox en el volcado final; el resto se vuelcan como evidencia positiva.
+
+5) Resolución de duplicados
+
+Es posible que varios paneles reporten la misma modificación para la misma posición (solapamiento de tramos).
+El bloque “get unique”:
+
+Ordena por posición.
+
+Elimina duplicados exactos (misma posición y misma etiqueta de modificación), conservando una sola ocurrencia.
+
+6) Flujo interno (alto nivel)
+
+Define la secuencia completa de H4 en la variable H4.
+
+Inicializa listas vacías: poses (posiciones absolutas) y modis (etiquetas).
+
+Llama secuencialmente a get_pos_modi(cur_outpath, out_filename, poses, modis) para cada panel que quieras incluir en el snapshot (en el código actual: H4_01_4_17, H4_02_20_23, H4_04_40_45).
+
+Cada llamada carga <out_filename>.mat, recorre estados con auc(:,2)>0, parsea His.mod_type, y acumula en poses/modis.
+
+Ordena, desduplica por (posición, etiqueta).
+
+Escribe H4_Snapshot.xls (TSV): una línea por residuo de H4; imprime el aminoácido y, si hay, las modificaciones biológicas detectadas en esa posición (separadas por tabuladores).
+
+7) Extender el snapshot a otros paneles
+
+Para sumar más regiones de H4 (p. ej., H4_02a_18_23, H4_02b_20_35, H4_02c_20_36, H4_03_24_35, H4_05_68_78, H4_06_79_92, etc.), añade más bloques:
+
+out_filename = 'H4_02a_18_23';
+[poses,modis] = get_pos_modi(cur_outpath,out_filename,poses,modis);
+
+
+Asegúrate de que exista el correspondiente .mat en cur_outpath.
+
+8) Buenas prácticas y QC
+
+Consistencia de nombres: usa siempre H4_XX_start_end con start/end correctos; la inferencia de offset depende de ello.
+
+Verifica auc: si un panel no tiene auc(:,2) no nulos, no aportará líneas nuevas (esperado).
+
+TSV vs .xls: si tu pipeline necesita Excel nativo, considera renombrar a .tsv o escribir cabeceras/BIFF en una variante de la función (pero no cambies este archivo si buscas reproducibilidad con resultados anteriores).
+
+Lista blanca/negra: ahora se filtra pr y ox. Si necesitas excluir otras etiquetas artefactuales, amplía la lista en ismember(cur_modi,{'pr','ox'}).
+
+9) Ejemplo de uso
+cur_outpath = 'results/AT/H4/panels';
+H4_Snapshot(cur_outpath);
+% Se generará ../H4_Snapshot.xls (TSV) con el resumen por posición.

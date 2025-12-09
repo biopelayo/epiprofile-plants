@@ -1,0 +1,144 @@
+README ampliado — get_histone11.m
+¿Qué hace?
+
+Para un péptido de histona concreto (hno) y todas sus cargas posibles (columnas en His.pep_mz/pep_ch), la función:
+
+Delimita una ventana de RT estrecha (±0,5 min) alrededor de His.rt_ref(hno).
+
+Extrae las trazas isotópicas MS1 en las posiciones m/z teóricas [M−1, M, M+1, M+2] (espaciadas por unitdiff / z).
+
+Selecciona los picos candidato (apex) de la traza monoisotópica (M) usando GetTopBottom11.
+
+Filtra los candidatos a los más cercanos (±0,5 min) al RT de referencia y se queda con el de mayor área (inten_sum).
+
+Integra el área del pico con get_area usando los límites devueltos por GetTopBottom11.
+
+Devuelve por carga:
+
+cur_rts (RT del apex seleccionado),
+
+cur_intens (área integrada),
+
+y adicionalmente la traza monoisotópica completa cur_mono_isointens (solo para la primera carga), útil para QC/plots.
+
+Si no hay candidato válido cerca del RT de referencia, devuelve RT = His.rt_ref(hno) y área = 0 para esa carga (mantiene matrices consistentes).
+
+Entradas
+
+MS1_index [nScans × 2]: columna 2 es el tiempo de retención (min).
+
+MS1_peaks: estructura/tabla con picos MS1 (formato esperado por GetProfiles).
+
+ptol: tolerancia de masa para extracción de XIC (si == 100, internamente se usa 10; ver más abajo).
+
+unitdiff: diferencia de masa isotópica por unidad de carga (≈ 1.00335 u para ^13C, dividida por z).
+
+His: biblioteca con m/z y carga por péptido y RT de referencia:
+
+His.pep_mz(hno, j), His.pep_ch(hno, j), His.rt_ref(hno).
+
+hno: índice de péptido (fila).
+
+Salidas
+
+cur_rts [1 × ncharge]: RT (min) del apex elegido por carga.
+
+cur_intens [1 × ncharge]: área integrada por carga (a partir de la traza isotópica).
+
+cur_mono_isointens [nTimepoints × 1]: traza monoisotópica (solo primera carga).
+
+Pasos clave (cómo y por qué)
+
+Ventana RT ±0,5 min: reduce el ruido y el coste computacional, centrando la extracción donde esperamos el péptido (His.rt_ref).
+
+Isótopos [M−1, M, M+1, M+2]:
+
+Se extraen 4 trazas por simetría/robustez (la de interés primaria es M).
+
+[M−1] ayuda como control/baseline alrededor de la región de interés.
+(Inferencia basada en el patrón del código original).
+
+ptol:
+
+Si entra 100, se convierte a 10 internamente (histórico del pipeline).
+
+Si ptol > 100 y z ≥ 3, se activa nC13 = 1 para que GetProfiles ajuste la lógica de isótopos en instrumentos de baja resolución (ITMS) con cargas altas.
+(Comportamiento específico dentro de GetProfiles).
+
+Selección de apex:
+
+GetTopBottom11 propone picos candidatos y devuelve límites de integración y un proxy de área (inten_sum).
+
+Se filtra a los candidatos cercanos a rt_ref (±0,5 min) para evitar falsos positivos.
+
+Entre los cercanos, se elige el de mayor área, más robusto que “el más cercano en RT” si hay hombros/picos solapados.
+
+Integración de área:
+
+Si hay ≥2 candidatos cercanos, se ensancha el intervalo de integración de nb para abarcar de primero a último candidato.
+
+get_area integra usando todas las trazas isotópicas de c_ref_isointens y el apex cur_pos.
+
+Dónde tocar parámetros/código
+
+Ventana RT: cambia delta = 0.5 si tu cromatografía lo requiere (p. ej., 0.3 o 0.7 min).
+
+Política de ptol:
+
+Mantén la conversión 100 → 10 si así está en tus otros módulos.
+
+Ajusta el umbral “coarse” (ptol > 100) según tu instrumentación.
+
+Selección de apex:
+
+Para preferir proximidad en RT en vez de área, sustituye la línea de selección por la versión comentada (min distancia).
+
+Isótopos extraídos:
+
+Si quieres extraer más/menos isótopos, modifica c_ref_isomzs y valida el resto de funciones (GetProfiles/get_area).
+
+Adaptación a EpiProfile_PLANTS
+
+Biblioteca vegetal (His):
+
+Asegúrate de que His.pep_mz/pep_ch/rt_ref reflejen secuencias y clivajes reales de plantas (AT, MP, CR), incluyendo derivatizaciones si las hay (p. ej., propionilación con 13CD3).
+
+H3K79: incorpora me1/2/3/ac en la tabla base para que este extractor las encuentre por m/z y RT esperados.
+
+RT de referencia:
+
+His.rt_ref(hno) debe venir de corridas de anclaje o promedios de muestras QC. Si cambias de columna/gradiente, re-aprender RTs.
+
+Tolerancias por instrumento:
+
+Orbitrap/TOF: ptol fino (ppm/mDa) → deja ptol <= 100.
+
+ITMS: ptol grueso (activar rama nC13 con z ≥ 3) → revisa que GetProfiles gestione bien los envelopes.
+
+Salida diagnóstica:
+
+cur_mono_isointens (primera carga) es muy útil para QC por péptido: grafícalo por especie/estadio (ontogenia).
+
+Errores/edge cases frecuentes
+
+Ventana sin scans (si rt_ref cae fuera del rango): find(...) podría fallar. Aquí asumimos que rt_ref ± delta está cubierto; si no, añade guardas.
+
+Sin candidatos cercanos: el código ya devuelve RT = rt_ref y área = 0.
+
+Hombros múltiples: si length(x) ≥ 2, se amplían límites (nb) para no infra-integrar.
+
+Sugerencias de validación (PLANTS)
+
+Genera plots (por péptido/carga) de:
+
+traza M y apex elegido (línea vertical),
+
+área integrada (sombreado entre nb).
+
+Compara replicados y condiciones (Young/Bottom/Floor/Senescence) para H3K79*:
+
+¿coherencia de RT?
+
+¿shape del pico?
+
+¿áreas relativas entre estadios?

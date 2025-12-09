@@ -1,0 +1,62 @@
+README (ES) — get_key_ions.m
+¿Qué hace?
+
+get_key_ions genera dos listas alineadas de m/z teóricos de fragmentos (K1 y K2) para el mismo péptido bajo dos estados de modificación diferentes (isoformas pno y qno). Cada índice i en K1 y K2 corresponde al mismo corte del esqueleto peptídico (misma posición), pero con masas distintas por las modificaciones. Estas parejas K1(i)–K2(i) son los “iones diagnósticos” que luego se usan para calcular proporciones p/ q en los espectros MS2.
+
+Entradas
+
+His.pep_seq: secuencia del péptido (misma para p y q).
+
+His.mod_type{pno}, His.mod_type{qno}: descriptores de modificaciones para cada isoforma.
+
+Mods: definición de modificaciones (nomenclatura interna de librería).
+
+ActiveType: tipo de fragmentación (p. ej. 'CID' o 'ETD'), que afecta a los iones teóricos generados por get_theo_mz.
+
+La función depende de dos utilidades ya existentes:
+
+get_mod_postype(seq, modString, Mods) → devuelve posiciones y tipos de mod.
+
+get_theo_mz(seq, modString, charge, Mods, ActiveType) → devuelve m/z y un código de “tipo+posición” para cada ión teórico.
+
+Salidas
+
+K1, K2: vectores fila de igual longitud L. Cada par K1(i), K2(i) representa el m/z teórico del mismo punto de corte en las dos isoformas.
+
+Cómo lo consigue (en simple)
+
+Convierte las modificaciones de cada isoforma en códigos POS*10000 + TYPE para comparar rápida y exactamente.
+
+Determina el rango de posiciones donde p y q difieren (mínima y máxima posición afectada).
+
+Calcula iones teóricos para cada isoforma (serie N-terminal y C-terminal) con get_theo_mz y mapea esos iones a posiciones de corte.
+
+Recorre las posiciones del rango y, si existe el ión en ambas isoformas, añade el par de m/z a K1 y K2.
+
+Elimina entradas sin valor (cero).
+
+Uso mínimo (pseudocódigo)
+[K1, K2] = get_key_ions(His, pno, qno, Mods, 'CID');  % o 'ETD'
+% Luego, en MS2: buscar señales cerca de K1(i) y K2(i) y comparar intensidades.
+
+Consejos y notas
+
+pno y qno deben referirse a la misma secuencia; si no, no habrá alineamiento útil.
+
+ActiveType debe ser coherente con cómo simulas/esperas fragmentos (CID → b/y; ETD → c/z, etc.; lo gestiona get_theo_mz).
+
+Si K1 y K2 salen vacíos, puede que:
+
+Las isoformas no difieran en un rango útil.
+
+No existan iones teóricos coincidentes en el rango seleccionado.
+
+Las definiciones de modificaciones no estén bien mapeadas en Mods.
+
+Errores típicos
+
+His.mod_type{pno} o {qno} vacíos o mal formateados.
+
+Mods sin definir el tipo de ión esperado para ActiveType.
+
+Secuencia o índices fuera de rango.

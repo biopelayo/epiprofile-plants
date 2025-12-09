@@ -1,0 +1,62 @@
+README — check_layout (ES)
+¿Qué hace?
+
+Utilidad interactiva para cargar, revisar/editar en depuración y guardar (si así se desea) la variable AllUnHis dentro del archivo:
+
+<raw_path>/histone_layouts/0_ref_info.mat
+
+
+El flujo previsto es bajo breakpoint en la última línea: puedes inspeccionar y modificar AllUnHis y luego decidir si guardar (continuar) o descartar (salir del depurador).
+
+Entradas / salidas
+
+Entradas: no tiene argumentos. Lee paras.txt mediante ReadInput('paras.txt') para obtener raw_path.
+[Inferencia] El formato de paras.txt depende de tu proyecto; normalmente incluye rutas/basepaths.
+
+Salidas: no devuelve variables. Efecto lateral: si continúas la ejecución hasta el final, sobrescribe (o crea) el MAT 0_ref_info.mat guardando solo AllUnHis.
+
+Dependencias
+
+ReadInput('paras.txt') → debe devolver [bOK, raw_path].
+
+Archivo existente <raw_path>/histone_layouts/0_ref_info.mat con las variables de referencia; se espera AllUnHis.
+[Inferencia] Si AllUnHis no existe tras load, el save(...,'AllUnHis') fallará.
+
+MATLAB con permisos de lectura/escritura en esa ruta.
+
+Uso recomendado (paso a paso)
+
+Poner breakpoint: sitúa el cursor en la última línea (save(...)) y pulsa F12.
+
+Ejecutar: pulsa F5.
+
+Se limpia la consola (clc), se intenta leer paras.txt, se comprueba y carga el MAT.
+
+La ejecución se detiene en la línea save(...) (por el breakpoint).
+
+Revisión/edición: examina y, si procede, edita AllUnHis (en el workspace de la función).
+
+Decidir:
+
+Guardar cambios → pulsa F5 para continuar y ejecutar save(mat_file,'AllUnHis').
+
+No guardar → pulsa Quit Debugging (botón rojo) para salir antes del save.
+
+Comportamiento ante errores (silencioso)
+
+Si ReadInput falla (bOK==0) → return sin error.
+
+Si no existe el MAT → return sin error.
+
+Solo se reporta por fprintf el inicio de comprobación (“checking layouts…”).
+Si AllUnHis no está definido al intentar guardar, MATLAB lanzará un error en save.
+
+Buenas prácticas
+
+Verifica que 0_ref_info.mat contiene AllUnHis antes de editar.
+
+Mantén un backup del MAT por si necesitas revertir cambios.
+
+Documenta en un changelog qué se modificó en AllUnHis (fecha, motivo).
+
+Si la estructura de AllUnHis evoluciona, acompáñalo de validaciones en otro script (no aquí, para no romper el flujo minimalista de depuración).

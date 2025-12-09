@@ -1,0 +1,249 @@
+README — H3_05_41_49 (Documentación técnica extensa)
+1) Alcance y justificación
+
+Este panel cuantifica el péptido de histona H3 YRPGTVALR (residuos 41–49) y sus variantes inmediatas de PTM encontradas con mayor frecuencia en flujos de trabajo de histonas (plantas/animales) bajo derivatización estilo EpiProfile:
+
+unmod — péptido derivatizado de referencia (en la convención EpiProfile, la etiqueta pr indica propionilación química en los extremos a nivel de péptido, propia de la preparación de muestra).
+
+Y41pr — atajo histórico: propionilación adicional asociada al índice de residuo 1 en la codificación compacta del panel (ver notas de mod_type).
+
+Y41ph — fosforilación en tirosina.
+
+¿Por qué un panel dedicado?
+
+Los péptidos cortos (como 41–49) suelen mostrar comportamiento cromatográfico limpio y distribuciones de carga bien diferenciadas (1+ puede ser dominante en algunos equipos TOF/Q-TOF).
+
+La fosforilación en Y41 es biológicamente interesante y puede servir como ancla diagnóstica en ciertos contextos.
+
+El panel aísla un espacio mínimo de PTMs manteniendo rapidez y robustez en campañas de alto rendimiento.
+
+[Reality Filter] El mapeo exacto entre los índices de mod_type (p. ej., 0,pr;1,ph;) y los residuos del péptido depende del núcleo de EpiProfile que uses. Este panel no redefine ese mapeo; asume el indexado canónico de tu build. Si tu núcleo usa índices distintos, actualiza mod_type para mantener la coherencia.
+
+2) Entradas, salidas y flujo de proceso
+Entradas
+
+MS1_index ([n x 2]): índice de espectro MS1 y tiempo de retención (RT, min).
+
+MS1_peaks: picos MS1 centroidados (formato interno del core).
+
+MS2_index, MS2_peaks: escaneos/picos MS2 centroidados (solo necesarios en modo DA).
+
+ptol: tolerancia de masa (ppm u otra unidad específica del instrumento; se reenvía tal cual).
+
+cur_outpath: destino para el .mat y las figuras.
+
+special (struct):
+
+ndebug — si vale 1, usa relocateD (diagnóstico; recolocación mínima).
+
+nDAmode — semántica histórica mixta:
+
+Etapa de recolocación: si nDAmode == 2, usa recolocación asistida por MS2 (relocate2 → get_rts2); en otro caso, recolocación solo MS1 (relocate → get_rts).
+
+Exportación de PSM: si nDAmode == 1, habilita GetPSM tras la cuantificación.
+
+nhmass — pista de masa (precursor/pérdida neutra) para get_rts2 (modo DA).
+
+raw_path — lo usa check_ref para corregir el ancla no modificada.
+
+Salidas (a disco)
+
+H3_05_41_49.mat con:
+
+pep_rts (3 × 3): RT por PTM × carga (0 si no se encuentra).
+
+pep_intens (3 × 3): intensidades/áreas por PTM × carga.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica a lo largo del RT para cada PTM.
+
+Figuras: resumen de layout y XIC (formato según tu draw_layout).
+
+Opcional: tablas de PSM si nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init: construye His (secuencia, tabla de PTMs, rejilla de cargas, m/z, RTs semilla).
+
+Chequeo del ancla unmod: refina His.rt_ref(1) con check_ref; en modo DA puede sondearse con get_rts2 alrededor de esa ancla.
+
+Extracción unmod: ejecuta get_histone0; si aparece, calibra el resto de RTs semilla con el desplazamiento observado (delta = hallado − original).
+
+Recolocación:
+
+Solo MS1 → relocate (ventanas pequeñas ancladas al unmod).
+
+Modo DA → relocate2 (get_rts2 añade diagnóstico MS2).
+
+Extracción modificados: ejecuta get_histone1 para filas 2–3 (Y41pr/Y41ph).
+
+Guardar y dibujar; opcionalmente exportar PSMs (si nDAmode == 1).
+
+3) Estructura His en detalle
+
+pep_seq = 'YRPGTVALR'.
+
+mod_short = {'unmod','Y41pr','Y41ph'}.
+
+mod_type (codificación compacta de PTMs; no mezclar con etiquetas de residuo salvo que conozcas el mapeo del core):
+
+unmod: '0,pr;'
+
+Y41pr: '0,pr;1,pr;'
+
+Y41ph: '0,pr;1,ph;'
+
+pep_ch: réplica de [1 2 3] por cada fila (sí, permitir 1+).
+
+pep_mz: calculado vía calculate_pepmz(His) (mantiene el panel portable).
+
+rt_ref: semillas [31.2, 38.18, 34.0] min.
+
+display(2)=0: ocultar Y41pr en las figuras por defecto (se cuantifica igualmente).
+
+Reordenación de cargas: se reordenan las columnas para que la entrada central (2+) sea la primera columna de pep_mz/pep_ch. Es un ajuste cosmético/de consistencia que facilita merging aguas abajo entre paneles.
+
+4) Estrategia de RT (anclaje y ventanas)
+
+El péptido no modificado es el ancla. Primero intentamos corregir su RT con check_ref.
+
+Si get_histone0 detecta el unmod, calibramos todas las entradas de rt_ref sumando el desplazamiento observado (drift global).
+
+Para Y41pr/Y41ph usamos ventanas cortas relativas al unmod:
+
+Y41pr: [unmod + 0.1, unmod + 25]
+
+Y41ph: [unmod + 0.1, unmod + 15]
+
+En modo DA, la recolocación usa get_rts2, que requiere nhmass y explota diagnósticos MS2. Esto reduce falsos positivos con co-elución o bajo S/N.
+
+Consejo: si tu LC es muy rápida, eleva el delta inicial de 0.1 → 0.2–0.3 para evitar capturar la cola del ancla.
+
+5) Tolerancia de masa e isótopos
+
+ptol se reenvía a get_rts/get_rts2/get_histone*. Rangos sugeridos:
+
+Orbitrap/FT-MS centroidado: 5–10 ppm.
+
+TOF/Q-TOF centroidado: 10–20 ppm.
+
+unitdiff = 1.0032 (separación de ^13C) se usa en el seguimiento monoisotópico; mantenlo salvo que tu extractor use otra convención.
+
+6) Modo DA vs solo MS1 (semántica histórica)
+
+Recolocación:
+
+nDAmode == 2 → recolocación DA (relocate2 + get_rts2).
+
+En caso contrario → solo MS1 (relocate + get_rts).
+
+Exportación de PSM:
+
+nDAmode == 1 → exportar PSMs tras cuantificar.
+
+Sí, es asimétrico; refleja forks históricos de EpiProfile. Si prefieres un único conmutador (p. ej., nDAmode == 1 = “usar MS2 y exportar PSMs”), armoniza ambos if en tu base local.
+
+7) Resolución de problemas y casos límite
+
+No aparece el unmod (cur_rts(1) == 0):
+
+Se siguen intentando ventanas para Y41pr/Y41ph respecto a la semilla.
+
+Revisa ptol, confirma raw_path para check_ref, y valora recolocación DA (nDAmode == 2).
+
+Confusión Y41pr vs Y41ph:
+
+Aumenta la dependencia de MS2 (nDAmode == 2 para recolocación) si los fragmentos diagnósticos son fiables.
+
+Ajusta ptol y examina trazas por carga (1+ vs 2+ vs 3+).
+
+Dominancia de 1+:
+
+Este péptido puede ser fuerte en 1+; no lo filtres.
+
+Si las figuras se ven extrañas, confirma que la reordenación del main_ch no esté ocultando otras cargas.
+
+Gradientes muy rápidos / picos estrechos:
+
+Eleva el delta inicial 0.1 → 0.2–0.3.
+
+Reduce el ancho de ventanas (p. ej., +25 → +15 min) si tu método es corto.
+
+Derivatización mixta:
+
+Asegura que mod_type codifica tu química real. Si no, recalibra masas con calculate_pepmz.
+
+8) Ejecución mínima reproducible (pseudocódigo)
+cur_outpath = 'results/AT/H3/';
+special = struct();
+special.ndebug  = 0;
+special.nDAmode = 2;    % usar recolocación asistida por MS2
+special.nhmass  = 0;    % pista de masa (neutral-loss/precursor) de tu método
+special.raw_path = '/data/run1.raw';  % ruta del raw para check_ref
+
+ptol = 10;  % ppm
+
+H3_05_41_49(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+% Salidas:
+%   results/AT/H3/H3_05_41_49.mat
+%   figuras en results/AT/H3/ (según draw_layout)
+
+9) Estructura del .mat de salida
+
+pep_rts (3 × 3): filas → {unmod, Y41pr, Y41ph}; columnas → {2+, otras} reordenadas para que la primera sea 2+ (nuestra convención), seguidas del resto.
+
+pep_intens (3 × 3): intensidades integradas alineadas con pep_rts.
+
+mono_isointens (nMS1 × 3): XIC monoisotópicas por PTM (las usa draw_layout).
+
+10) Lista de verificación de QC
+
+¿El unmod cuadra cerca de ~31.2 min (semilla) tras la corrección de deriva?
+
+¿Y41ph aparece dentro de [unmod+0.1, unmod+15] y es consistente entre cargas?
+
+Si el modo DA está activo, ¿los PSM concuerdan con el pico XIC dominante?
+
+¿Alguna detección solo 1+ sospechosa? Revisa saturación del detector y centroidado.
+
+11) Extensiones del panel
+
+Añade PTMs ampliando mod_short/mod_type y las semillas rt_ref.
+
+Si incorporas sulfuración o nitración en Y41, recuerda:
+
+Mantener coherencia en calculate_pepmz(His) (depende de mod_type).
+
+Definir ventanas sensatas en relocate/relocate2.
+
+Valorar modo DA si los fragmentos MS2 son distintivos.
+
+12) Integración típica en EpiProfile_PLANTS
+
+Mantén carpetas por especie (AT/, MP/, CR/) y guarda salidas por especie.
+
+Conserva un .mat de “good-run” (o .xls auxiliar si lo estandarizas) para arranque de la recolocación cuando la calidad varíe.
+
+Usa una reordenación de cargas consistente en todos los paneles para simplificar el merge posterior.
+
+13) Versionado y procedencia
+
+Nombra los paneles con identificadores estables (H3_05_41_49) y lleva un CHANGELOG con:
+
+Ajustes de ventanas de RT,
+
+Cambios en rejilla de cargas,
+
+Correcciones en mod_type,
+
+Armonización de semántica DA.
+
+Incluye fragmentos del método instrumental (gradiente, columna, caudal) en un METHODS.md para reproducibilidad.
+
+14) Notas finales (seguridad e interpretación)
+
+La interpretación de las modificaciones en Y41 debe considerar la química de preparación (derivatización altera el comportamiento cromatográfico) y la clase de instrumento (Orbitrap vs TOF).
+
+Las comparaciones cuantitativas entre corridas deben aplicar normalización consistente (p. ej., qsmooth/ComBat a nivel de proyecto; fuera del alcance de este panel).
+
+En caso de duda, inspecciona las XIC brutas y los espectros PSM de los picos principales para no confiar en exceso en un único valor de intensidad.

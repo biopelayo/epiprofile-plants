@@ -1,0 +1,132 @@
+README — H4_06_79_92 (documentación exhaustiva, estilo EpiProfile_PLANTS)
+1) Qué cuantifica este panel
+
+Péptido de H4 (aa 79–92, canónico): KTVTAMDVVYALKR
+Mapeo posición en péptido → residuo H4:
+
+1→K79, 6→M84 (Met), 10→Y88 (Tyr), 13→K91.
+Estados modelados:
+
+unmod → estado “basal” tras derivatización: N-terminal del péptido propionilado (0,pr), Lys-1 (1,pr) y Lys-13 (13,pr).
+
+M84ox → como “unmod” + oxidación de Met (pept. pos. 6; +15.9949 Da).
+
+Y88pr → como “unmod” + propionilación lateral en Tyr (pept. pos. 10; +56.0262 Da).
+
+M84oxY88pr → combinación de ambas.
+
+[Reality Filter] La oxidación de Met puede ser artefacto (muestras/gradientes/almacenamiento). La propionilación en Tyr no es el objetivo de la estrategia (que busca bloquear aminas), pero puede aparecer según pH/exceso de anhídrido/tiempo. Este panel separa explícitamente estas especies para cuantificar si existen y evitar contaminación de “unmod”.
+
+2) Entradas y salidas
+
+Entradas
+
+MS1_index (n×2): índice de scans y RT (min) en la columna 2.
+
+MS1_peaks: picos centroidados MS1 (estructura propia del proyecto).
+
+MS2_index, MS2_peaks: análogo para MS2 (para anclaje DA y PSM).
+
+ptol: tolerancia de masa en ppm (precursor).
+
+cur_outpath: ruta de salida (escribe .mat y figuras).
+
+special (struct):
+
+ndebug (0/1): 1 usa ruta diagnóstica relocateD.
+
+nDAmode: 0=solo MS1; 2=realineación asistida por MS2; 1=además exporta PSM.
+
+nhmass: masa neutra auxiliar (si tu get_rts2 la usa).
+
+raw_path: bruto/MGF para check_ref.
+
+Salidas en disco
+
+H4_06_79_92.mat con: His (definición del panel), pep_rts (RT por carga), pep_intens (área/altura por carga), mono_isointens (traza monoisotópica vs RT).
+
+Figuras de layout/XIC (draw_layout).
+
+Si nDAmode==1: exportación de PSM (GetPSM).
+
+3) Codificación de modificaciones (convención EpiProfile)
+
+Índices relativos al péptido (1…L), y 0 para el N-terminal.
+
+pr = propionilo; ox = oxidación (+15.9949).
+
+Este panel usa:
+
+0,pr;1,pr;13,pr (unmod)
+
+...;6,ox;... (M84ox)
+
+...;10,pr;... (Y88pr)
+
+...;6,ox;10,pr;... (doble).
+
+Cargas: se consideran 1+, 2+, 3+, 4+ (matriz pep_ch), y se reordenan internamente para que la carga principal (2+) quede en la primera columna.
+
+4) Semillas de RT y expectativas cromatográficas
+
+His.rt_ref = [48.5; 46.8; 49.7; 47.7] → (unmod, M84ox, Y88pr, M84oxY88pr).
+Heurística esperada:
+
+Met ox → más hidrofílico → RT menor (observado: 46.8 < 48.5).
+
+Tyr propionilada → más hidrofóbica → RT mayor (49.7 > 48.5).
+
+Doble mod → posición intermedia (47.7) por suma de efectos contrapuestos.
+
+Las semillas se refinan automáticamente:
+
+MS1-only: check_ref + extracción con get_histone0.
+
+DA (nDAmode==2): check_ref y barrido local (±5 min) con get_rts2 (usa MS2 para anclar).
+
+5) Flujo del algoritmo (resumen operativo)
+
+Ancla “unmod” con check_ref.
+
+Extrae “unmod” (get_histone0) → calcula deriva de RT (delta) y corrige el resto de semillas (rt_ref).
+
+Relocaliza ventanas de búsqueda para M84ox, Y88pr y doble:
+
+MS1-only → relocate con get_rts.
+
+DA → relocate2 con get_rts2.
+
+Extrae cada estado con get_histone1 (por carga) y escribe matrices/salidas.
+
+Pinta XIC/diagnóstico y opcionalmente PSM.
+
+6) QC y problemas típicos
+
+M84ox alto en todos los runs → sospecha oxidación artefactual (almacenamiento, inyección tardía, carry-over). Revisa blank, tiempos y antioxidantes (p. ej., Met libre).
+
+Y88pr detectable → revisa exceso de anhídrido propiónico, pH y tiempos. Puede ser útil para monitorizar la química.
+
+Interferencias: Y88pr puede confundirse con Tyr nitrada (NO₂) (+44.9851) o sulfatada (+79.9568) o fosforilada (+79.9663). El modo DA ayuda a discriminar por fragmentación.
+
+Coelución: estrecha ventanas (reduce [t1,t2]), sube especificidad de iones en get_rts2.
+
+7) Recomendaciones instrumentales
+
+ptol (ppm): 5–10 en Orbitrap HR; 10–20 en Q-TOF.
+
+unitdiff=1.0032: espaciamiento de ^13C para seguimiento monoisotópico.
+
+MS2: prioriza precursores 2+ y 3+; documenta fragmentos que discriminen Met ox (pérdida de CH₄SO/patrones b/y con delta +16) y Tyr-pr (shifts específicos en fragmentos que incluyen Y).
+
+8) Ejemplo de ejecución
+special = struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/data/run1.raw');
+ptol = 10;  % ppm
+H4_06_79_92(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,'results/AT/H4',special);
+
+9) Archivos de salida
+
+H4_06_79_92.mat: His, pep_rts, pep_intens, mono_isointens.
+
+Figuras XIC por carga (validación visual rápida).
+
+PSM (si nDAmode==1).

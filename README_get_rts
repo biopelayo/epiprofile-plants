@@ -1,0 +1,220 @@
+README ampliado — get_rts.m
+¿Qué hace?
+
+Dado un péptido hno (solo primera carga de His), y una ventana RT [t1, t2] en minutos, la función:
+
+Convierte [t1, t2] a índices de escaneo MS1.
+
+Extrae trazas isotópicas [M−1, M, M+1, M+2] con GetProfiles.
+
+Usa la traza monoisotópica (M) para detectar picos:
+
+si nsplit == 1 ➜ GetTopBottom
+
+si no ➜ GetTopBottom11
+
+Devuelve los RTs candidatos (rts), el RT elegido (top1_rt) y los scores de área (inten_sum, top1_inten_sum).
+
+Si el apex cae < 4 min, devuelve vacíos (probable frente de disolvente / artefacto).
+
+[Inferencia] Este umbral filtra el void-volume; ajustable según método LC.
+
+Entradas
+
+MS1_index [nScans×2] (columna 2 = RT en min).
+
+MS1_peaks (estructura usada por GetProfiles).
+
+ptol: tolerancia de masa; si es 100, internamente se usa 10.
+
+unitdiff: espaciado isotópico por carga (≈ 1.00335 / z).
+
+His: pep_mz, pep_ch, rt_ref (aunque aquí no se usa rt_ref).
+
+hno: índice de péptido (fila).
+
+nsplit: selector del detector de picos (1 → GetTopBottom, otro → GetTopBottom11).
+
+t1, t2: límites RT (min).
+
+Salidas
+
+rts: vector de RTs candidatos (min).
+
+top1_rt: RT del candidato seleccionado (min).
+
+inten_sum: vector con “áreas proxy” por candidato.
+
+top1_inten_sum: “área proxy” del candidato elegido.
+
+Flujo y porqués (resumen)
+
+Ventana RT arbitraria [t1, t2]: útil en búsquedas por rango (no depende de His.rt_ref).
+
+Isótopos [M−1,M,M+1,M+2]: se usa M para detectar picos; otros ayudan a extracción más estable.
+
+ptol==100→10 y nC13 (ptol alto y z≥3): mismas reglas que el resto del pipeline.
+
+Detector según nsplit: dos heurísticas disponibles según el patrón de picos esperado.
+
+Filtro <4 min: evita cuantificaciones en zona de solvente.
+
+Riesgos / edge cases (del original)
+
+Si no hay ningún scan con RT≥t1 o RT≤t2, p(1) o pp(end) fallan (índice inexistente).
+
+Si t1/t2 no encierran señal real (o son inversos), el detector puede devolver candidatos no útiles.
+
+top1_rt<4 fuerza retorno vacío; si tu método LC tiene picos válidos cerca de 3–4 min, deberías bajar o desactivar ese umbral.
+
+Adaptación a EpiProfile_PLANTS
+
+Útil para barridos por rango en ontogenia/estreses cuando no confías en rt_ref.
+
+Mantén unitdiff adecuado y valida ptol según resolución del instrumento (FT/TOF vs ITMS).
+
+Si trabajas con picos muy estrechos, piensa en llamar a get_histone12 (ventanas centradas) o añade una ventana RT adaptativa aquí.
+
+Para evitar caídas en lotes grandes, puedes portar las guardas/fallback que ya añadiste en get_histone12 (si p/pp vacíos, salir o ampliar ventana).
+
+
+
+error tipico 
+
+20250506-05-2025017-1
+H3_01_3_8..H3_02_9_17..H3_03_18_26..H3_04_27_40..Array indices must be positive integers or logical values.
+
+Error in get_rts (line 53)
+rt_i2 = pp(end);
+
+Error in H3_04v3_27_40>relocate (line 373)
+    [rts1,top1_rt1] = get_rts(MS1_index,MS1_peaks,ptol,unitdiff,His,hno,nsplit,t1,t2);
+
+Error in H3_04v3_27_40>calculate_layout (line 227)
+        His = relocate(MS1_index,MS1_peaks,ptol,unitdiff,His);
+
+Error in H3_04v3_27_40 (line 59)
+[pep_rts,pep_intens,mono_isointens] = calculate_layout( ...
+
+Error in DrawISOProfile1 (line 152)
+            H3_04v3_27_40(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+Error in EpiProfile (line 168)
+DrawISOProfile1(raw_path,raw_names,ptol,special);
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conversión completa a Python (equivalente funcional)
+
+Mantengo la misma lógica del original (sin guardas extra en p(1)/pp(end) para ser fiel). Puedes añadir las protecciones comentadas si lo deseas. Requiere “helpers” análogos: get_profiles, get_top_bottom, get_top_bottom11.
+
+import numpy as np
+from typing import Tuple, Sequence, Callable
+
+def get_rts_py(
+    MS1_index: np.ndarray,
+    MS1_peaks,
+    ptol: float,
+    unitdiff: float,
+    His: dict,
+    hno: int,
+    nsplit: int,
+    t1: float,
+    t2: float,
+    *,
+    get_profiles: Callable,      # (MS1_index, MS1_peaks, ref_isomzs, charge, ptol, nC13, scan_idx) -> (isorts, ref_isointens)
+    get_top_bottom: Callable,    # (mono_iso: np.ndarray) -> (nt, nb, top1_idx, inten_sum)
+    get_top_bottom11: Callable   # idem
+) -> Tuple[np.ndarray, float, np.ndarray, float]:
+    """
+    Python port of get_rts (faithful to MATLAB original).
+
+    Returns
+    -------
+    rts : np.ndarray
+        Candidate apex RTs (minutes).
+    top1_rt : float
+        Selected apex RT (minutes).
+    inten_sum : np.ndarray
+        Area-like scores per candidate.
+    top1_inten_sum : float
+        Area-like score for the selected apex.
+    """
+    # Basic checks for window feasibility (same spirit as MATLAB guard)
+    num_MS1 = MS1_index.shape[0]
+    last_rt = float(MS1_index[num_MS1 - 1, 1])
+    if (t1 > last_rt) or (t2 < 0) or (t2 < t1):
+        return np.array([]), np.array([]), np.array([]), np.array([])
+
+    # Pick peptide m/z and charge (FIRST charge column)
+    c_mz = float(His['pep_mz'][hno, 0])
+    c_ch = int(His['pep_ch'][hno, 0])
+
+    # Map [t1, t2] to scan indices (no guard: faithful to original)
+    rt_vec = MS1_index[:, 1]
+    p  = np.where(rt_vec >= t1)[0]
+    rt_i1 = int(p[0])                 # may raise IndexError if empty (same as MATLAB behavior)
+    pp = np.where(rt_vec <= t2)[0]
+    rt_i2 = int(pp[-1])               # may raise IndexError if empty
+
+    # Build isotopologue anchors
+    step = unitdiff / c_ch
+    ref_isomzs = np.array([c_mz - step, c_mz, c_mz + step, c_mz + 2*step], dtype=float)
+
+    # Legacy tolerance mapping
+    if ptol == 100:
+        ptol = 10
+
+    # Coarse tol + high charge heuristic
+    nC13 = 1 if (ptol > 100 and c_ch >= 3) else 0
+
+    # Slice of scan indices inclusive [rt_i1 : rt_i2]
+    scan_idx = np.arange(rt_i1, rt_i2 + 1, dtype=int)
+
+    # Extract profiles
+    c_isorts, c_ref_isointens = get_profiles(
+        MS1_index, MS1_peaks, ref_isomzs, c_ch, ptol, nC13, scan_idx
+    )
+    mono = c_ref_isointens[:, 1]  # monoisotopic trace (M)
+
+    # Peak detection branch
+    if nsplit == 1:
+        nt, nb, top1_idx, inten_sum = get_top_bottom(mono)
+    else:
+        nt, nb, top1_idx, inten_sum = get_top_bottom11(mono)
+
+    # Candidate RTs (map indices to RT time grid)
+    rts = c_isorts[nt]
+    top1_rt = float(c_isorts[int(nt[int(top1_idx)])])
+    top1_inten_sum = float(inten_sum[int(top1_idx)])
+
+    # Early-elution guard (<4 min) → return empties (faithful to MATLAB)
+    if top1_rt < 4.0:
+        return np.array([]), np.array([]), np.array([]), np.array([])
+
+    return rts, top1_rt, inten_sum, top1_inten_sum
+
+Notas Python
+
+Índices: MATLAB 1-based vs Python 0-based (ajustado).
+
+Rebanada de scans es inclusiva (rt_i2 + 1).
+
+Sin guardas en p[0]/pp[-1] para ser fieles al original (puedes añadirlas si quieres el comportamiento “robusto”).
+
+El filtro <4 min devuelve vacíos igual que MATLAB.

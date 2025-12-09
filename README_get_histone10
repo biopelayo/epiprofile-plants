@@ -1,0 +1,90 @@
+README — get_histone10 (ES)
+¿Qué hace?
+
+Cuantifica un péptido de histona (índice hno en His) en todos sus estados de carga dentro de una ventana de ±2 minutos alrededor de su RT de referencia. Para cada carga:
+
+Construye XICs en cuatro líneas isotópicas {M−1, M, M+1, M+2} (espaciadas unitdiff / z).
+
+Encuentra candidatos de ápice en la traza monoisotópica (columna 2) con GetTopBottom11.
+
+Filtra los candidatos a los que están a ±0,5 min de His.rt_ref(hno) y elige el más cercano en RT (no el más intenso).
+
+Integra el área con get_area (que corrige solapamientos si corresponde).
+
+Devuelve RT e intensidad integrada por carga, y la XIC monoisotópica completa para la primera carga.
+
+Diferencia clave respecto a get_histone1: aquí se prioriza el candidato más cercano al RT de referencia; en get_histone1 se elige el más intenso dentro de la misma ventana ±0,5 min.
+
+Entradas
+
+MS1_index (matriz): índice de escaneos; (:,2) = RT (min), (:,3) = fila inicial en MS1_peaks.
+
+MS1_peaks (Nx2): todos los picos MS1 [m/z, intensidad] concatenados.
+
+ptol (ppm): si == 100, se fuerza a 10 (convención histórica). Si >100 y z≥3, se usa nC13=1 en GetProfiles.
+
+unitdiff (Da): diferencia isotópica (~1.003355).
+
+His (struct): pep_mz, pep_ch, rt_ref.
+
+hno (int): índice del péptido.
+
+Salidas
+
+cur_rts (1 × nCharge): RT del ápice por carga; si no hay candidato válido, rt_ref(hno).
+
+cur_intens (1 × nCharge): área integrada por carga (0 si no hay candidato).
+
+cur_mono_isointens (vector): traza monoisotópica completa para la primera carga.
+
+Detalles del algoritmo
+
+Ventana de búsqueda: índices rt_i1:rt_i2 que cubren rt_ref(hno) ± 2 min.
+
+Seeds isotópicos: {M−1, M, M+1, M+2} con paso unitdiff/z.
+
+Extracción con GetProfiles: devuelve c_isorts (RT por scan) y c_ref_isointens (matriz de XICs).
+
+Por convención, columna 2 = monoisotópica (c_mono_isointens).
+
+Detección de ápices (GetTopBottom11): entrega nt (índices candidatos), nb (fronteras de segmentos) e inten_sum.
+
+Selección del candidato:
+
+Filtrado por ±0,5 min respecto a rt_ref(hno).
+
+Regla de get_histone10: seleccionar el mínimo |RT − rt_ref| (no el máximo inten_sum).
+
+Si hay ≥2 candidatos aceptados ⇒ ajusta nb para abarcarlos ([nb(x(1)), nb(x(end)+1)]).
+
+Integración (get_area): integra con posible corrección de solapamientos (p. ej., ptol < 100 activa lógica de overlap).
+
+Ventanas, umbrales y convenciones
+
+Búsqueda: ±2.0 min alrededor de rt_ref(hno).
+
+Aceptación: ±0.5 min para candidatos válidos.
+
+Mono XIC: columna 2 de c_ref_isointens.
+
+Regla especial de ptol: ptol==100 ⇒ 10 ppm.
+
+Opción nC13=1 si ptol>100 y z≥3 (comportamiento específico de GetProfiles).
+
+Dependencias
+
+GetProfiles(MS1_index,MS1_peaks,isomzs,z,ptol,nC13,scan_range) — construye las XICs.
+
+GetTopBottom11(xic) — detecta candidatos y fronteras de segmentos (nb).
+
+get_area(...) — integra el área y maneja solapamientos.
+
+Consejos prácticos
+
+Alinea correctamente MS1_index(:,2) (RT) con la corrida; un desajuste afectará la ventana ±2 y el filtro ±0,5.
+
+El criterio “más cercano al RT de referencia” es útil si el RT esperado es fiable y puede haber picos espurios con alta intensidad cerca.
+
+Si prefieres el más intenso dentro de la ventana, utiliza/replica la lógica de get_histone1.
+
+Guarda cur_mono_isointens para inspección visual del ajuste y depuración de picking.

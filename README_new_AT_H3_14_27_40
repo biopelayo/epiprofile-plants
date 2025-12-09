@@ -1,0 +1,107 @@
+README (en castellano, para no bioinformáticos)
+¿Qué hace este script?
+
+Realiza una cuantificación dirigida de tres péptidos H3 en datos de espectrometría de masas (MS):
+
+Localiza un tiempo de retención (RT) representativo por péptido y carga.
+
+Integra la intensidad (cuánta señal MS1 tiene cada objetivo).
+
+Extrae una traza monoisotópica (evolución del pico monoisotópico a lo largo del gradiente).
+
+Guarda los resultados en <cur_outpath>/H3_14_27_40.mat y dibuja figuras diagnósticas.
+
+Opcional: si special.nDAmode==1, obtiene PSMs (evidencia MS2).
+
+Relación con EpiProfile_PLANTS: este fichero es un bloque modular del pipeline. Cambiando el panel en init_histone (secuencias, derivatizaciones y cargas) puedes apuntar a otras especies o a otros péptidos, manteniendo el mismo flujo de cuantificación.
+
+Entradas (y por qué importan)
+
+MS1_index / MS1_peaks: el índice y los picos de MS1. La 2ª columna de MS1_index suele ser el RT (min).
+
+MS2_index / MS2_peaks: índice y picos de MS2. Se usan para apoyo visual/PSM y para recalibraciones cuando procede.
+
+ptol: tolerancia de masa (ppm típico en alta resolución). Un valor más bajo restringe las coincidencias m/z.
+
+cur_outpath: carpeta donde escribir el .mat y las figuras.
+
+special (estructura):
+
+ndebug: si es 1, no recalibra RTs (modo rápido/depuración).
+
+nDAmode: si es 2, hace recalibración flexible de RT (si el ancla no cambia, busca por todo el gradiente; si cambia, busca ±5 min y refina con get_rts2). Si es 1, además saca PSMs.
+
+nhmass: masa auxiliar para get_rts2 (si tu flujo la usa).
+
+raw_path: ruta a los “raw”, usada por check_ref.
+
+[No verificado] En estos scripts, pr en mod_type suele significar propionilación (derivatización estándar de N-terminales/Lisinas en EpiProfile para histonas). Ajusta a tu protocolo real si difiere.
+
+¿Qué hace cada bloque?
+
+check: si H3_14_27_40.mat ya existe, no recalcula (ejecución idempotente).
+
+init_histone:
+
+Define tres péptidos: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR.
+
+Aplica derivatizaciones por posición (p. ej., 0,pr;1,pr;10,pr;11,pr;).
+
+Considera cargas 2, 3 y 4 (pep_ch = [2 3 4]).
+
+Calcula m/z teóricos por carga (calculate_pepmz).
+
+Fija RTs de referencia y activa display.
+
+Nota: aquí se define main_ch = His.pep_ch(1,1) y la condición if main_ch~=His.pep_ch(1,1) es
+un no-op (siempre falsa); no reordena columnas (comportamiento coherente con “z=2 primero”).
+
+calculate_layout:
+
+Reserva matrices de salida (pep_rts, pep_intens, mono_isointens).
+
+Recalibra RTs (si ndebug~=1) usando check_ref:
+
+Si nDAmode==2:
+
+Si el ancla no cambia, busca en todo el gradiente (0 → RT final).
+
+Si el ancla cambia, busca en ±5 min y refina con get_rts2.
+
+Al terminar, bloquea anclas (ndebug=1).
+
+Para cada péptido, get_histone0 devuelve RTs/intensidades/traza monoisotópica; se guardan si el RT es válido.
+
+output/draw: guarda el .mat y crea figuras QC.
+
+PSM (opcional): con nDAmode==1, GetPSM2 extrae evidencia MS2.
+
+Ejemplo de uso
+H3_14_27_40(MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+            10, 'results/H3_panel', ...
+            struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/ruta/a/raw'));
+
+
+ptol=10 (ppm) típico en instrumentos HRAM.
+
+nDAmode=2 → recalibra RTs de forma flexible; después fija ndebug=1.
+
+nDAmode=1 → además extrae PSMs.
+
+raw_path → requerido por check_ref.
+
+Consejos y errores frecuentes
+
+No aparece RT: revisa rt_ref, ptol y confirma presencia real del péptido; amplía ventana (±5 min) si procede.
+
+Figuras vacías: verifica permisos de escritura y que draw_layout esté en el path de MATLAB.
+
+Sin PSMs: asegúrate de tener MS2 útil y parámetros adecuados; confirma que el péptido está presente/fragmenta bien.
+
+Adaptación a otras plantas/paneles: edita init_histone (secuencias/derivatizaciones/cargas) según tu librería.
+
+Nota “Reality Filter”
+
+La interpretación de pr como propionilación es la práctica común en EpiProfile para histonas, pero verifícala contra tu protocolo.
+
+La semántica exacta de special puede variar entre ramas/versiones; arriba se describe el uso típico en EpiProfile_PLANTS.

@@ -1,0 +1,80 @@
+README — init_histone0.m (catálogo de péptidos de histonas para EpiProfile_PLANTS)
+Propósito
+
+Este archivo construye un catálogo de péptidos de histonas (principalmente H3 y H4, con un bloque mínimo de H2A) pensado para análisis dirigidos con derivatización por propionilación. Cada entrada define: secuencia, modificaciones fijas por posición, carga objetivo y el m/z teórico. El enfoque refleja variantes relevantes en Arabidopsis thaliana (p. ej., la región 27–40 de H3 con motivos “AT” y “TT”), junto con anclas internas estables para normalización/validación.
+
+Estructura del struct His
+
+Cada péptido ocupa una fila no y se describen campos paralelos:
+
+out_filename{no,1}: etiqueta humana y prefijo de salida (p. ej., H3_14_27_40). Suele codificar histona, índice lógico y rango de residuos.
+
+pep_seq{no,1}: secuencia peptídica.
+
+mod_type{no,1}: modificaciones fijas por posición con la gramática "pos,tipo;".
+
+Convención de índice: 0 = N-terminal del péptido; 1..N = residuos (base 1).
+
+Tipos usados aquí: pr (propionilación), ph (fosforilación), ac (acetilación).
+
+pep_ch(no,1): carga objetivo para el cálculo de m/z (1, 2 o 3).
+
+pep_mz(no,1): m/z monoisotópico calculado a partir de secuencia + mods + carga.
+
+seq_godel(no,1): huella numérica (hash ligera) basada en seq+mods para ordenación/identificabilidad interna. Si no se usa en el resto del código, puede eliminarse.
+
+Cálculo de m/z (calculate_pepmz0)
+
+Recupera tablas de masas de AA (Getaamass o GetaamassH, según special).
+
+Suma masas monoisotópicas de residuos + Δm por modificaciones (GetMods + get_mod_mass).
+
+Añade masa de H₂O (cerrado peptídico).
+
+Aplica carga pep_ch con masa del protón.
+
+Devuelve (Mr + z * mH) / z.
+
+Nota: La rama GetaamassH() solo se activa si special.nsource == 4 y special.nsubtype ∈ {1,3}. Si nunca la usas, puedes simplificar a Getaamass() y eliminar esa condición.
+
+Convenciones y diseño biológico
+
+Propionilación fija en N-terminal (0,pr;) y lisinas específicas (k,pr;) para reflejar la química de derivatización del protocolo.
+
+H3 27–40: incluye variantes H3.1 (“AT”) y H3.3 (“TT”), relevantes en Arabidopsis.
+
+Ventanas internas (p. ej., 53–63, 73–83, 117–128) funcionan como anclas de RT/QC.
+
+Sondas PTM opcionales (p. ej., S10ph, K9ac) se codifican como variantes del mismo péptido para facilitar comprobaciones dirigidas.
+
+Precaución con out_filename
+
+Hay grupos con múltiples secuencias bajo el mismo out_filename (p. ej., H3_09u_64_135, H3_11_3_8, H3_14_27_40). Si el downstream crea carpetas/archivos con este prefijo, puede haber sobrescritura. Recomendación: añadir sufijos (_H3.1_AT, _H3.3_TT, _var1, etc.) o garantizar unicidad en la capa de salida.
+
+Qué puedes podar (si no lo usas)
+
+Duplicados exactos (mismo péptido ya definido) — elimina uno para evitar redundancias.
+
+Variantes raras — conserva solo si están en tu FASTA de A. thaliana o si aparecen en tus datos.
+
+Bloque H2A — si no cuantificas H2A, puedes retirarlo temporalmente.
+
+seq_godel — si no hay referencias en el repo, elimínalo.
+
+Rama GetaamassH() — si nunca activas ese modo, simplifica.
+
+Checklist rápido antes de borrar
+
+FASTA AT: ¿existe la secuencia? Si no, elimina.
+
+Detección real: ¿lo has visto en tus MS? Si no, desactiva o elimina.
+
+Búsqueda en el repo: grep -R "seq_godel", grep -R "GetaamassH" etc. Si no hay usos, elimina.
+
+Dependencias esperadas
+
+GetMods, get_mod_mass: tabla y lógica de masas de modificaciones.
+
+Getaamass, GetaamassH: tablas monoisotópicas de AA.
+
+Estructura special con nsource y nsubtype para seleccionar tabla de masas alternativa si procede.

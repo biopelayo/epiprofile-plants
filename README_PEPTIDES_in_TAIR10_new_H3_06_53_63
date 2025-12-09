@@ -1,0 +1,49 @@
+yo en mi EpiProfile tengo esto 
+
+KYQKSTELLIR
+
+esto es lo que sale en el fasta TAIR si te fijas  siempre esta esa R al inicio pro yo no la pongo porque? tendra que ver con que es un sitio que seguro que se corta y deja el KYQ***? o porque 
+yo en mi EpiProfile tengo esto 
+
+KYQKSTELLIR
+
+esto es lo que sale en el fasta TAIR si te fijas  siempre esta esa R al inicio pro yo no la pongo porque? tendra que ver con que es un sitio que seguro que se corta y deja el KYQ***? o porque 
+
+
+Search "KYQKSTELLIR" (12 hits in 1 file of 1 searched)
+  C:\Users\geope\Downloads\TAIR10_pep_20101214.fas (12 hits)
+	Line   5889: MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRFRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line  27328: MARTKQTARKSHGGKAPRTLLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDYK
+	Line 109271: MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRFRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 164979: MARTKQTARKSTGGKAPRKQLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 165465: MARTKQTARKSTGGKAPRKQLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 173650: MARTKQTARKSTGGKAPRKQLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 174600: RKYQKSTELLIRKLPFQRLVREIAQDFKTDLRFQSHAVLALQEAAEAYLVGLFEDTNLCAIHAKRVTIMPKDIQLARRIR
+	Line 174603: MARTKQTARKSTGGKAPRKQLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 192880: MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRFRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 193435: MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRFRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 209349: MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRFRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+	Line 214048: MARTKQTARKSTGGKAPRKQLATKAARKSAPTTGGVKKPHRYRPGTVALREIRKYQKSTELLIRKLPFQRLVREIAQDFK
+
+
+
+Sí: ese R inicial que ves en TAIR pertenece a la posición de corte anterior. En tu workflow (histonas con propionilación), la digestión es ArgC-like: la tripsina corta después de R pero no en K porque las lisinas están bloqueadas (propioniladas). Por eso, en la región canónica de H3:
+... REIRKYQKSTELLIRKLPF ...
+          ^           ^ 
+        corte       corte
+
+Los cortes tras R generan exactamente el péptido KYQKSTELLIR (empieza en K y termina en R). El R que aparece antes en la FASTA es el C-terminal del péptido previo (“…EIR”) y no se incluye en tu péptido porque se escinde ahí.
+Detalles útiles y cómo encaja con tu código:
+
+
+En tu función H3_06_53_63, el péptido objetivo es KYQKSTELLIR (aa 53–63 de H3).
+— El K en posición 4 del péptido es H3K56, la marca que cuantificas (me1/me2/me3/ac).
+
+
+Tus mod_type “0,pr;1,pr;4,pr;” reflejan el bloqueo por propionilo del N-terminal (0) y de las lisinas internas (posiciones 1 y 4 del péptido), lo que impide cortes en K y deja a la tripsina actuar solo en R → péptidos ArgC-like limpios.
+
+
+Si alguna vez observases RKYQKSTELLIR en espectros, eso sería un missed cleavage en R (no deseado). Tu librería no lo incluye porque EpiProfile asume el péptido completamente cortado (KYQKSTELLIR). Si quisieras monitorizar ese caso, habría que añadirlo explícitamente a la lista.
+
+
+Conclusión: no “quitas” la R; esa R nunca forma parte del péptido objetivo en la digestión que usas. Es el residuo de corte previo. Por eso tu biblioteca usa KYQKSTELLIR y no RKYQKSTELLIR.

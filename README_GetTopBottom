@@ -1,0 +1,89 @@
+README (ESPAÑOL)
+¿Qué hace GetTopBottom?
+
+Divide una traza 1D de intensidades (por ejemplo, la XIC monoisotópica) en ventanas de pico y, para cada ventana, calcula:
+
+nt(i): índice del “ápice” del pico. Aquí no se usa el máximo puntual, sino el centroide ponderado por intensidad, más robusto con picos anchos o mesetas.
+
+inten_sum(i): área (suma de intensidades) dentro de la ventana.
+
+nb: límites de cada ventana; el pico i ocupa nb(i) : nb(i+1).
+
+top1_idx: índice del pico de mayor área.
+
+Entradas y salidas
+
+Entrada: w — vector 1D de intensidades (típicamente por escaneo/tiempo).
+
+Salidas:
+
+nt (nPicos×1) — centroides (índices) por ventana.
+
+nb ((nPicos+1)×1) — límites inclusivos; ventana i es nb(i):nb(i+1).
+
+top1_idx — índice del pico con mayor inten_sum.
+
+inten_sum (nPicos×1) — áreas (suma de w) por ventana.
+
+Cómo funciona (paso a paso)
+
+Puerta de ruido (noise gate)
+Se ponen a cero todos los puntos con w < 0.015 * max(w) (menos del 1,5% del máximo global).
+Esto hace que los ceros actúen como separadores de posibles picos.
+
+Ventanas iniciales
+Se buscan tramos contiguos no nulos y se generan límites nb para cada tramo.
+
+División por valles
+Dentro de cada tramo, se calcula JudgeLocalmaxmin(w(IX)) (función auxiliar) para localizar mínimos locales candidatos a separar picos solapados.
+Se acepta una división en el punto nmid si:
+
+Profundidad del valle: w(nmid) < 0.2 * c_max (≤20% del máximo local).
+
+Balance de áreas: min(areaIzq, areaDer) > 0.05 * max(areaIzq, areaDer) (la parte menor ≥5% de la mayor).
+Se hace una pasada de división y luego otra para capturar un valle adicional si aparece tras introducir límites.
+
+Ajuste de bordes
+Si hay ceros pegados a los extremos de una ventana, se mueven ligeramente los límites para que abarquen el pico real.
+
+Cálculo del ápice y el área
+
+Ápice nt(i): centroide ponderado floor( (∑ idx·w) / (∑ w) ) dentro de la ventana.
+
+Área inten_sum(i): suma de w en la ventana.
+
+Selección del pico principal
+top1_idx = argmax(inten_sum).
+
+Umbrales clave y por qué
+
+1,5% del máximo global para limpiar ruido: evita falsos picos de base.
+
+20% del máximo local para profundidad del valle: si el valle es poco profundo, es probable que sea hombro/noise.
+
+5% de balance de áreas: impide crear picos residuales minúsculos por fluctuaciones.
+
+Estos valores funcionan bien en XICs típicas. Puedes afinarlos si tu instrumento/gradiente genera picos más anchos o más ruidosos.
+
+Dependencia externa
+
+JudgeLocalmaxmin: esta función auxiliar debe devolver, para un vector, las posiciones de máximos/mínimos locales (aquí solo se usan los índices b que incluyen bordes y extremos). Si tu implementación difiere, revisa los umbrales y la lógica de selección de nmid.
+
+Consejos y trampas
+
+Si todo queda a cero tras el filtro del 1,5%, la función devuelve vacío (no hay picos).
+
+El ápice como centroide evita saltos por mesetas; si prefieres el máximo puntual, puedes sustituir la línea por nt(i) = IX( argmax(w(IX)) );.
+
+Las dos pasadas de división ayudan con picos superpuestos; si aún detectas sub-picos no separados, podrías repetir el bloque de división una tercera vez.
+
+Validación rápida
+% Ejemplo mínimo:
+w = [0 1 3 7 5 2 0 0 0 1 2 6 9 8 3 0];
+[nt, nb, top1_idx, inten_sum] = GetTopBottom(w);
+
+% Inspección:
+nb        % límites de ventanas
+nt        % índices de ápices (centroides)
+inten_sum % áreas por ventana
+top1_idx  % qué ventana es la dominante

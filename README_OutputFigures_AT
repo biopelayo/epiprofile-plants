@@ -1,0 +1,183 @@
+README (extensísimo, en español, para no bioinfos / no proteómicos)
+Resumen en una frase
+
+Esta función recorre resultados intermedios (archivos .mat) de cada muestra, arma una matriz común con tiempo de retención (RT), intensidad (Area) y razones (Ratio), construye nombres legibles de péptidos y genera PDFs de control de calidad (barras, boxplots, PCA) y mapas de calor por H3 y H4, además de un fichero de leyendas.
+
+Entrada que necesita
+
+layout_path: carpeta base de trabajo.
+
+raw_names: lista de nombres de muestra (cada uno debe tener su carpeta NN_nombre/detail con .mat).
+
+Estructura esperada por muestra:
+
+<layout_path>/
+  01_muestraA/
+    detail/
+      H3_01_... .mat
+      H3_02_... .mat
+      H4_01_... .mat
+      ...
+  02_muestraB/
+    detail/
+      ...
+
+
+Dentro de cada .mat:
+
+His.pep_mz (N×1): cuenta y orden de péptidos de esa ventana.
+
+auc (N×3): columnas [RT, Area, Ratio] en ese mismo orden de péptidos.
+
+His.mod_short (opcional): etiquetado corto de la modificación para generar nombres legibles.
+
+Reality Filter: si falta alguna de estas variables, el script fallará en esa parte.
+
+Qué hace paso a paso
+1) Descubre el total de péptidos (solo en la primera muestra)
+
+Suma cuántas filas (His.pep_mz) aporta cada fichero .mat de 01_<muestra>/detail.
+Resultado: npeps = número de filas que se usarán en todas las matrices y figuras.
+
+Motivo: fijar un orden canónico de péptidos para todas las muestras.
+
+2) Cuenta por clases H3 y H4
+
+Vuelve a recorrer los .mat de la primera muestra y suma los péptidos según el prefijo del fichero:
+
+Si empieza por H3, suma a la clase H3.
+
+Si empieza por H4, suma a la clase H4.
+
+Guarda los totales en c_npeps = [#H3; #H4]. Esto define los rangos de filas para los mapas de calor por clase.
+
+Diferencia con la versión anterior “9 buckets”: aquí solo H3 y H4. No H1, H2A/H2B ni subgrupos.
+
+3) Construye etiquetas legibles de péptidos
+
+A partir del nombre del fichero .mat (que codifica la región de histona) y de His.mod_short, se arma una etiqueta humana por péptido (p. ej., H3_... K9me3K14ac).
+Hay casos especiales con sufijos de “versión/variant” (v) que el código contempla para dejar una etiqueta estable.
+
+Esto no cambia datos; solo crea nombres para filas de heatmaps y reportes.
+
+4) Forma la “gran” matriz info
+
+Para cada muestra, se concatenan todas las ventanas en el mismo orden de la primera muestra, y se copian sus columnas:
+
+RT, Area, Ratio (en ese orden).
+Luego se reordenan las columnas de info por bloques:
+
+[ RT de todas las muestras | Area de todas | Ratio de todas ]
+
+5) Extrae matrices de interés y transforma
+
+info_auc = bloque de Area (intensidad).
+
+info_ratio = bloque de Ratio (relaciones relativas).
+
+Transformaciones:
+
+Boxplots: se usa log10(info_auc).
+
+Ratios: log2((ratio + 1e-10) * 2^5) para estabilizar y visualizar (evita log de cero y ajusta escala).
+
+PCA y clustering: se usa zscore por fila (cada péptido), para centrado/escala comparables entre muestras.
+
+6) Prepara nombres de muestras y carpeta de figuras
+
+Etiquetas tipo "1,muestra_A" y se cambia _ por - para que queden más limpias en las figuras.
+
+Crea (si no existe) heatmap_clustering/.
+
+7) Figura 01 — Barras: péptidos identificados por muestra
+
+Cuenta cuántos péptidos tienen Area > 0 en cada muestra.
+Es un indicador rápido de “cuánto ha captado” cada inyección.
+
+8) Figura 02 — Boxplots: intensidades
+
+Boxplots de log10(Area) por muestra para ver mediana y dispersión comparable entre muestras.
+
+9) Figura 03 — PCA
+
+PCA sobre la matriz de ratios z-score.
+Permite ver si réplicas agrupan juntas y si condiciones separan en PC1/PC2.
+
+10) Figura 10 — Heatmaps de PTMs (si hay archivo auxiliar)
+
+Si existe histone_ratios_single_PTMs.mat en el padre de la carpeta de figuras, se crean dos heatmaps:
+
+“Ratio” en log2 (como info_ratio).
+
+“z-score” por PTM (resalta patrones sobre magnitudes absolutas).
+
+11) Figura 11 — Heatmaps por clase (H3 y H4)
+
+Usa los rangos de filas de c_npeps para extraer solo H3 y solo H4 y dibuja sus heatmaps:
+
+11_heatmap_ratio_H3.pdf
+
+11_heatmap_ratio_H4.pdf
+
+Esto está activo en esta variante (a diferencia de la otra, que tenía una versión comentada con 9 grupos).
+
+12) Leyendas (texto)
+
+Escribe Figure Legends.txt con explicaciones en inglés para 01–03 y 10.
+
+Interpretación práctica (qué mirar y por qué)
+
+Barras (Fig. 01)
+Muestras muy por debajo en #péptidos pueden indicar baja inyección o problemas de sensibilidad/preparación.
+
+Boxplots (Fig. 02)
+Medianas/anchos deben ser comparables. Si una muestra es muy baja/estrecha, puede sesgar análisis posteriores.
+
+PCA (Fig. 03)
+Réplicas deben agruparse; condiciones deben separarse. Si no ocurre, revisar QC o lotes.
+
+Heatmaps (Fig. 10 y 11)
+
+“Ratio/log2” muestra niveles relativos.
+
+“z-score” muestra patrones (subidas/bajadas coordinadas) independientemente de la escala.
+
+H3/H4 por separado (Fig. 11) te permite comparar clases mayores sin mezclar.
+
+Requisitos y dependencias
+
+Bioinformatics Toolbox para HeatMap/clustergram.
+
+Estructura de carpetas consistente y mismo conjunto/orden de .mat por muestra.
+
+Cada .mat con His.pep_mz y auc (3 columnas). mod_short recomendado para etiquetas.
+
+Errores frecuentes (y cómo evitarlos)
+
+Ventanas distintas entre muestras
+Si una muestra tiene menos/más .mat o en otro orden, las filas “se descuadran”.
+
+Faltan variables
+Si en un .mat no hay His.pep_mz o auc, fallará al sumar/pegar matrices.
+
+Toolbox ausente
+Sin Bioinformatics Toolbox, usa alternativas (imagesc + colorbar) o comenta esa parte.
+
+Rangos de ejes fijos
+Si tienes muchas más muestras o muy pocas, quizá quieras ajustar xlim, ylim.
+
+Diferencias clave de esta variante H3/H4 (respecto a la previa “9 buckets”)
+
+c_npeps ahora es de tamaño 2×1 (solo H3 y H4).
+
+Se activan y generan dos PDFs de heatmap de ratios: H3 y H4.
+
+No hay H1, H2A/H2B ni subdivisiones por “ventana” para H3/H2A.
+
+Consejos para informes / repos
+
+Exporta también un TSV con: nº péptidos identificados por muestra, mediana log10(Area), % ceros en Area y varianza explicada por PC1/PC2.
+
+Incluye en docs/qc/ un README corto que apunte a este README “largo” y a las figuras.
+
+Si trabajas con varias especies, duplica esta rutina por especie o parametriza las clases.

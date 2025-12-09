@@ -1,0 +1,75 @@
+README — find_triple (ES)
+¿Qué hace?
+
+Construye una rejilla 3×3 de tiempos de retención (xt) combinando tres listas de candidatos (rts1, rts2, rts3) y sus intensidades. La fila 1 usa rts1 (ancla con top1_rt1), la fila 2 usa rts2 y la fila 3 usa rts3. Las columnas representan posiciones temporales (izquierda/centro/derecha) derivadas por ventanas y reglas de intensidad.
+
+Entradas
+
+rts1, rts2, rts3 (vectores): RTs candidatos para cada lista.
+
+top1_rt1 (escalar): RT “top” del lista 1 (ancla primaria). Si está vacío ⇒ xt = zeros(3,3).
+
+inten_sum1, inten_sum2, inten_sum3 (vectores): intensidades alineadas índice a índice con sus rts?.
+
+Salida
+
+xt (matriz 3×3):
+
+Fila 1: selecciones de rts1.
+
+Fila 2: selecciones de rts2.
+
+Fila 3: selecciones de rts3.
+Los ceros indican ausencia de candidato válido.
+
+Lógica por columnas
+
+Columna 1
+
+xt(1,1) = top1_rt1.
+
+xt(2,1): máximo de inten_sum2 en ventana [top1_rt1 − 1.2, top1_rt1 + 0.7].
+
+(No se rellena xt(3,1) en esta fase.)
+
+Columna 2
+
+xt(1,2): busca en rts1 a la derecha de top1_rt1 (≥ top1_rt1 + 0.7).
+Si existen dos picos fuertes (segundo ≥ 1/10 del primero), se prefiere el más temprano de ambos solo si rts2 tiene un vecino a ±0.7; si no, se queda con el más intenso.
+
+xt(2,2): dentro de [top1_rt1 + 0.7, xt(1,2) + 1.2] (o hasta top1_rt1 + 1.9 si no hay xt(1,2)).
+Si hay dos picos fuertes y cercanos (segundo ≥ 1/10 y separados < 1.3), el temprano va a xt(2,2) y el tardío define xt(1,3); en otro caso, xt(2,2) es el más intenso y xt(1,3) = xt(2,2) + 0.02.
+
+xt(3,2): análogo en rts3 (máximo en ventana simétrica).
+
+Alineación opcional: si es posible, xt(1,2) se ajusta al RT de rts1 más cercano al punto medio de xt(2,2) y xt(3,2) (tolerancia < 0.7).
+
+Salida temprana: si xt(1,2)=0 y |xt(2,2)-xt(3,2)|>0.7, o falta xt(2,2) o xt(3,2), la función termina (no continúa a col. 3).
+
+Columna 3
+
+xt(2,3): máximo de inten_sum2 a la derecha de xt(1,3)+1.
+
+xt(3,3): busca en [xt(1,3)+1, xt(2,3)+1.2]; si hay picos dentro de ±0.5 de xt(2,3), toma el más intenso; si no, fuerza xt(3,3) = xt(2,3).
+
+Ventanas y umbrales clave
+
+Ventanas relativas en torno a top1_rt1:
+
+Para rts2 (col 1): [−1.2, +0.7].
+
+Para col 2 en rts2/rts3: [+0.7, +1.2] respecto a top1_rt1 (o hasta +1.9 si no hay xt(1,2)).
+
+Criterios de “doblete” fuerte en rts2 (col 2): segundo ≥ 1/10 del primero y separación < 1.3.
+
+Ajuste de xt(1,2) al punto medio de xt(2,2) y xt(3,2) con tolerancia < 0.7.
+
+En col 3, preferencia por rts3 a ±0.5 de xt(2,3).
+
+Consejos y consideraciones
+
+Asegúrate de que rts? e inten_sum? estén perfectamente alineados.
+
+Si aparecen muchos ceros en la segunda/tercera columna, revisa si las ventanas (anchos y desplazamientos) se ajustan a tu cromatografía.
+
+El bloque comentado al inicio ofrece una heurística alternativa para redefinir top1_rt1 cuando hay un segundo pico fuerte cercano; el código operativo actual no la usa, pero se conserva para trazabilidad.

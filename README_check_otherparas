@@ -1,0 +1,63 @@
+README — check_otherparas (ES)
+¿Qué hace?
+
+Inicializa parámetros por defecto para el análisis y extrae la lista de ficheros *.RAW en un directorio dado. Devuelve:
+
+tolerancia en ppm (def_ptol),
+
+un código de salida de dos dígitos como cadena (soutput),
+
+flags de figuras (nfigure) y depuración/referencia (ndebug),
+
+y los nombres base de los RAW encontrados (raw_names, sin extensión).
+
+Entrada
+
+raw_path (string): ruta a la carpeta que contiene los ficheros con extensión mayúscula .RAW.
+
+⚠️ En sistemas case-sensitive, .raw en minúsculas no coincidirá y el listado saldrá vacío.
+
+Salidas
+
+def_ptol (double): tolerancia por defecto en ppm. Comentario indica “FT: 10 ppm; otros < 100 ppm”.
+
+soutput (char): código de dos caracteres:
+
+Primer dígito (H3/H4):
+1 = básico H3/H4; 2 = básico + H3S10ph; 3 = todo H3/H4.
+
+Segundo dígito (H1/H2AB):
+1 = incluir H1/H2AB; 0 = no incluir H1/H2AB.
+
+Ejemplo: '30' → H3/H4 “todo”; H1/H2AB “no”.
+
+nfigure (0/1): 1 = generar figuras; 0 = no generar.
+
+ndebug (0/1/2): 0 = normal + referencia; 1 = depuración; 2 = normal sin referencia.
+
+raw_names (cell N×1): nombres sin la extensión .RAW. Si no hay ficheros, devuelve {} y escribe no raws.
+
+Flujo resumido
+
+Fija los valores por defecto (def_ptol=10, soutput='30', nfigure=0, ndebug=0).
+
+Busca *.RAW en raw_path.
+
+Si no hay coincidencias → raw_names = {} y mensaje “no raws”.
+
+Si hay coincidencias → rellena raw_names quitando la extensión.
+
+Dependencias
+
+Solo funciones integradas de MATLAB: dir, fullfile, repmat, fprintf.
+No invoca funciones propias del proyecto.
+
+Consideraciones/prácticas recomendadas
+
+Extensión: asegúrate de que los ficheros terminan en .RAW (mayúsculas) si tu FS es sensible a mayúsculas/minúsculas.
+
+Carpeta: si raw_path no existe o está vacío, obtendrás no raws y raw_names={}.
+
+Consumo de soutput: es una cadena (no entero). Las funciones posteriores deben interpretar sus dígitos.
+
+Trazabilidad: si cambias los valores por defecto, documenta en un changelog del pipeline (fecha, motivo).

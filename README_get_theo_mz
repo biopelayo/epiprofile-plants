@@ -1,0 +1,123 @@
+README (ESPAÑOL)
+¿Qué hace get_theo_mz?
+
+Calcula los m/z teóricos de los iones de fragmentación de referencia de un péptido (con sus modificaciones) para las dos familias clásicas:
+
+CID/HCD → series b (extremo N) y y (extremo C).
+
+ETD/ECD → series c (extremo N) y z (extremo C).
+
+Para cada ion de la serie elegida, genera sus m/z en los estados de carga z = 1..chg y devuelve, junto al vector de m/z, un vector de códigos de tipo (theo_tp) que etiquetan qué ion es cada m/z (serie, ordinal y carga).
+
+Entradas
+
+c_sequence (char): Secuencia del péptido en código 1-letra (A..Z), en mayúsculas.
+
+c_modification (tipo propio del proyecto): Descripción de modificaciones (fijas/variables) por residuo; la interpreta get_mod_mass.
+
+chg (int): Carga máxima de fragmento a considerar (genera z = 1..chg).
+
+Mods (struct): Catálogo de modificaciones usado por get_mod_mass.
+
+ActiveType (char): 'CID' para b/y; 'ETD' para c/z.
+
+Supuesto: Getaamass() devuelve masas de residuo (convenientes para b/y, c/z).
+
+Salidas
+
+theo_mz (1×K double): Todos los m/z teóricos calculados (series × cargas).
+
+theo_tp (1×K double): Código entero para cada theo_mz que permite decodificar serie, ordinal y carga.
+
+Convención de theo_tp
+
+Para CID (b/y):
+
+base b_i = 1000 + 10*i
+
+base y_i = 2000 + 10*i
+
+Para ETD (c/z):
+
+base c_i = 1000 + 10*i
+
+base z_i = 2000 + 10*i
+
+Después se suma la carga z (1..chg): TP_final = base + z.
+
+Cómo decodificar:
+
+Serie: floor(TP/1000) → 1 = serie N (b o c), 2 = serie C (y o z).
+
+Ordinal: mod(floor(TP/10),100) → índice i del ion (1,2,3…).
+
+Carga: mod(TP,10) → z.
+
+Ejemplos:
+
+TP=1032 → 1*** ⇒ serie N; (1032//10)%100=3 ⇒ i=3; 1032%10=2 ⇒ z=2 ⇒ b3(2+) en CID o c3(2+) en ETD (según ActiveType).
+
+TP=2071 → serie C; i=7; z=1 ⇒ y7(1+) (CID) o z7(1+) (ETD).
+
+Detalles del cálculo
+
+Masas de residuos: Getaamass() mapea A..Z a masas monoisotópicas de residuo (no aminoácido libre).
+
+Modificaciones: get_mod_mass devuelve un vector Δm por posición (misma longitud que la secuencia); se suma a cada residuo.
+
+Series:
+
+CID:
+
+b_i = sum(residuos 1..i)
+
+y_i = sum(residuos L-i+1..L) + H2O
+
+ETD:
+
+c_i = sum(residuos 1..i) + NH3
+
+z_i = sum(residuos L-i+1..L) + HO − NH2 + H
+
+m/z para carga z: m/z = (M_neutral + z·m_protón) / z, con m_protón = 1.007276.
+
+Deduplicación: se eliminan duplicados por unique para evitar entradas redundantes (por ejemplo, secuencias muy cortas).
+
+Nota: no se consideran pérdidas neutrales (−H2O, −NH3), iones “a”, immonium, ni fragmentos internos; sólo las series backbone.
+
+Ejemplo de uso
+seq  = 'AKSTGGKAPR';         % ejemplo de péptido
+mods = [];                   % según tu esquema (p.ej., struct/array por posición)
+chg  = 3;                    % calcula z = 1, 2, 3
+type = 'CID';                % b/y
+
+% 'Mods' es tu catálogo de modificaciones (p.ej., con masas de acetilación, me1/2/3, etc.)
+[theo_mz, theo_tp] = get_theo_mz(seq, mods, chg, Mods, type);
+
+% Ejemplo de decodificación rápida para el primer 5 fragmentos:
+for k = 1:min(5, numel(theo_tp))
+    series  = floor(theo_tp(k)/1000);          % 1=N-series (b/c), 2=C-series (y/z)
+    ordinal = mod(floor(theo_tp(k)/10),100);   % i
+    charge  = mod(theo_tp(k),10);              % z
+    fprintf('m/z=%.4f | series=%d | i=%d | z=%d\n', theo_mz(k), series, ordinal, charge);
+end
+
+Buenas prácticas y “gotchas”
+
+Consistencia de masas: asegúrate de que Getaamass() y get_mod_mass() usan el mismo marco (monoisotópicas, masas de residuo).
+
+Codificación TP: es compacta y práctica, pero no estándar; documenta la convención (arriba) si exportas a otros programas.
+
+Cargas máximas: elegir chg demasiado alto puede generar muchos iones poco realistas; típicamente 1–3 (o 1–4) es razonable.
+
+Modificaciones: si una mod afecta sólo a un extremo (p. ej., acetilación N-terminal), confirma que get_mod_mass la aplica en la posición correcta y que su efecto concuerda con las fórmulas de serie.
+
+Validación rápida
+
+Prueba con un péptido corto (≥3 aa) sin mods; verifica que:
+
+Hay L-1 iones en cada serie (b1..b(L−1); y1..y(L−1)), multiplicados por chg cargas.
+
+Activa una modificación conocida (p. ej., +42.010565 en K):
+
+Observa que todos los fragmentos que incluyen ese residuo se desplazan +42.010565 (en masa neutra; el desplazamiento en m/z se reparte por la carga).

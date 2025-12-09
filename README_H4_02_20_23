@@ -1,0 +1,257 @@
+README — H4_02_20_23 (documentación extensa, en castellano)
+1) Alcance y motivación
+
+Panel: cuantificación dirigida del tetrámero peptídico N-terminal de H4 KVLR (residuos 20–23 de histona H4) y sus variantes PTM más comunes:
+
+unmod (peptídico derivatizado por propionilación; “pr” de EpiProfile),
+
+K20me1 / K20me2 / K20me3 (mono/di/tri-metilación en Lys20),
+
+K20ac (acetilación en Lys20).
+
+Este panel se centra en un motivo extremadamente corto (4 aa), clave en epigenética (H4K20*). Peptídidos tan cortos pueden exhibir:
+
+alto solapamiento isotópico,
+
+cargas 1+ y 2+ como dominantes,
+
+comportamiento cromatográfico muy compacto (picos estrechos) y susceptibilidad a co-elución.
+
+El objetivo es anclar RT con el derivatizado “unmod”, relocalizar ventanas para las PTMs y extraer XICs de forma consistente, con opción de apoyo MS2 (DA mode) si se desea.
+
+[Reality Filter] Las RT semilla y la relación de elución entre me1/me2/me3/ac son heurísticas basadas en métodos típicos (gradiente, columna, derivatización). Deben validarse en cada instrumento/método; este panel no garantiza un orden de elución universal.
+
+2) Entradas, salidas y flujo
+Entradas
+
+MS1_index (n×2): índice de escaneo y tiempo de retención (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno de tu “core” EpiProfile-like).
+
+MS2_index, MS2_peaks: MS2 centroidado (solo necesario si usas DA mode para relocalización/PSM).
+
+ptol: tolerancia de masa (ppm u otra unidad que consuma el core).
+
+cur_outpath: carpeta de salida.
+
+special (struct):
+
+ndebug: 1 → relocalización diagnóstica mínima (relocateD).
+
+nDAmode: semántica histórica:
+
+2 → relocalización asistida por MS2 (relocate2/get_rts2).
+
+≠2 → relocalización solo MS1 (relocate/get_rts).
+
+1 → tras cuantificar, exporta PSM con GetPSM(...).
+
+nhmass: pista de pérdida neutra/precursor para get_rts2 (si aplica).
+
+raw_path: ruta de fichero crudo para check_ref (ancla RT del unmod).
+
+Salidas (a disco)
+
+H4_02_20_23.mat con:
+
+His: definición de panel (secuencia, PTMs, cargas, m/z, RT semilla, flags).
+
+pep_rts (5×2): RT por fila PTM × carga (0 si no encontrado).
+
+pep_intens (5×2): intensidad/área integrada por fila PTM × carga.
+
+mono_isointens (nMS1×5): trazas monoisotópicas por PTM (para plots).
+
+Figuras (draw_layout(...)) con resumen XIC/RT.
+
+PSM (opcional) si special.nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init: construir His (KVLR; filas unmod, K20me1/2/3, K20ac; cargas 1+/2+; m/z teórico; RT semilla).
+
+Anclaje unmod: refinar His.rt_ref(1) con check_ref; si DA mode, afinar con get_rts2.
+
+Extracción unmod: get_histone0; si hay hallazgo, corregir deriva global (desplazar RT semilla del resto).
+
+Relocalización:
+
+MS1-only → relocate (ventanas dependientes del ancla).
+
+DA mode → relocate2 (usa diagnósticos MS2).
+
+Extracción modificados: bucle get_histone1 para me1/me2/me3/ac.
+
+Guardar y dibujar; PSM opcional si nDAmode==1.
+
+3) Estructura His (detallada)
+
+pep_seq = 'KVLR'.
+
+mod_short = {'unmod','K20me1','K20me2','K20me3','K20ac'}.
+
+mod_type (codificación compacta de PTM relativa al péptido):
+
+unmod: '0,pr;1,pr;'
+
+K20me1: '0,pr;1,me1;'
+
+K20me2: '0,pr;1,me2;'
+
+K20me3: '0,pr;1,me3;'
+
+K20ac : '0,pr;1,ac;'
+
+Donde:
+
+0 = N-terminal peptídico (pr de derivatización),
+
+1 = Lys20 dentro del péptido KVLR (posición local).
+
+pep_ch = [1 2] replicado en todas las filas (aceptamos 1+ y 2+).
+
+pep_mz = calculate_pepmz(His) (portabilidad del panel, sin hard-code).
+
+rt_ref semilla (min): [29.52, 32.57, 19.21, 19.03, 28.32].
+
+display = ones(5,1).
+
+Reordenado de columnas de carga: se asegura que 2+ va primero para las filas 3–4 (detalle histórico del core).
+
+4) Estrategia de RT (anclaje y ventanas)
+
+Ancla: el derivatizado unmod (fila 1). Se refina con check_ref y, si DA mode, se inspecciona con get_rts2 ±5 min.
+
+Corrección de deriva: si get_histone0 encuentra unmod, se ajusta rt_ref(1) y se desplazan todas las semillas restantes por el delta observado.
+
+Ventanas de relocalización (MS1-only; DA mode hace lo mismo pero con get_rts2):
+
+K20me1: [unmod + 0.1, unmod + 16] (más tardío que unmod en este método semilla).
+
+K20me2: [6, unmod − 3] (más temprano).
+
+K20me3: [6, unmod − 3] (más temprano; se resuelve en pareja con me2 vía find_pair usando sumas de intensidad).
+
+K20ac: [(unmod + me2)/2, unmod − 0.1] (en medio de me2 y unmod).
+
+[Reality Filter] La relación relativa me2/me3 ≺ unmod ≺ me1 ≲ ac depende del gradiente/columna/derivatización. Tomar estos rangos como semillas; comprobar visualmente con XIC/PSM.
+
+5) Tolerancias y cargas
+
+ptol se reenvía directamente a los extractores (sugerencias):
+
+Orbitrap/FT centroidado: 5–10 ppm.
+
+TOF/Q-TOF centroidado: 10–20 ppm.
+
+Cargas: péptido de 4 aa; 1+ es frecuente; 2+ también. Mantener ambos.
+
+6) DA mode vs MS1-only (semántica histórica)
+
+Relocalización:
+
+nDAmode == 2 → usa MS2 (relocate2/get_rts2).
+
+En otro caso → MS1 (relocate/get_rts).
+
+Exportar PSM:
+
+nDAmode == 1 → exporta PSM tras cuantificar.
+
+Si prefieres un único interruptor (“usar MS2 y exportar PSM”), homogeneiza los if en tu fork. Aquí se respeta la semántica histórica.
+
+7) Resolución de ancla con fallback (caso especial)
+
+Si check_ref devuelve special.ndebug == 2, el panel:
+
+busca unmod y K20me1 en todo el gradiente,
+
+si encuentra me1 pero no unmod, posiciona el unmod ~3 min antes de me1,
+
+si encuentra ambos, alinea unmod justo antes de me1, usando el máximo de intensidad dentro de una ventana previa (−18 a 0 min).
+
+Esto evita perder el ancla cuando el unmod es débil o co-eluye.
+
+8) Casuística y solución de problemas
+
+unmod no aparece: revisa raw_path, relaja/ajusta ptol, activa DA mode (nDAmode=2) para relocalizar con MS2; usa el fallback descrito.
+
+me2/me3 confusos: confía en find_pair (usa intensidades). Si persiste, apoya con frags MS2 diagnósticos y reduce ptol.
+
+K20ac débil: estrecha ventana ([(unmod+me2)/2, unmod−0.2]) y prueba MS2 si hay fragmentación informativa.
+
+1+ solamente: no filtres por carga; este péptido es muy corto.
+
+gradientes muy rápidos: aumenta delta inicial (0.1 → 0.2–0.3 min).
+
+9) Ejecución mínima reproducible
+cur_outpath = 'results/AT/H4/';
+special = struct();
+special.ndebug   = 0;
+special.nDAmode  = 2;              % usar relocalización asistida por MS2
+special.nhmass   = 0;              % si no aplica, 0
+special.raw_path = '/data/run1.raw';
+
+ptol = 10; % ppm típico
+
+H4_02_20_23(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+% Resultados:
+%   results/AT/H4/H4_02_20_23.mat + figuras de draw_layout(...)
+
+10) Estructura del .mat
+
+pep_rts (5×2): filas {unmod, me1, me2, me3, ac}; columnas {2+, 1+} si tu core reordena así; donde no haya hallazgo, 0.
+
+pep_intens (5×2): intensidades integradas, alineadas con pep_rts.
+
+mono_isointens (nMS1×5): trazas por fila (para plot y diagnóstico).
+
+11) Checklist de QC
+
+¿Unmod cercano a ~29.5 min tras corregir deriva?
+
+¿me2/me3 presentes antes que unmod (ventanas 6 → unmod−3)?
+
+¿me1 después de unmod (hasta +16 min)?
+
+¿K20ac entre me2 y unmod?
+
+¿Coherencia 1+ vs 2+? Si hay solo 1+, confirmar centroidado y saturación.
+
+12) Notas biológicas y de interpretación
+
+H4K20 (me1/me2/me3) es un eje epigenético mayor (replicación, cromatina constitutiva, reparación del ADN). H4K20ac es menos prevalente y más lábil.
+
+La cuantificación relativa entre estados requiere normalización consistente a nivel de proyecto (p.ej., qsmooth/ComBat; fuera del alcance de este panel).
+
+Siempre inspeccionar XIC y, cuando sea posible, espectros MS2 de los picos dominantes.
+
+13) Versionado y reproducibilidad
+
+Mantén un CHANGELOG.md con:
+
+ajustes de ventanas RT,
+
+cambios de cuadrícula de cargas,
+
+correcciones de mod_type,
+
+armonización de semántica DA.
+
+Incluye en METHODS.md gradiente, columna, flujo, proveedor, versión SW.
+
+14) Resumen ejecutivo
+
+Panel compacto, específico para H4K20.
+
+Anclaje robusto del unmod con fallback.
+
+Relocalización dependiente del ancla; opción MS2 (DA).
+
+Extracción clara de me1/me2/me3/ac con ventanas razonables.
+
+Preparado para campañas de alto rendimiento con informes y PSM opcionales.
+
+15) Descargo [Reality Filter]
+
+Este README describe heurísticas probadas pero no universales. No puedo verificar tu método exacto (columna, gradiente, software, centroidado). Trata las RT semillas como puntos de partida y valida siempre con tus datos/PSM. Si algo no cuadra, indica: “No verificado” en tus notas y ajusta ventanas.

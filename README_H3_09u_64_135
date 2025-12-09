@@ -1,0 +1,181 @@
+README — H3_09u_64_135 (Panel utilitario multi-péptido: documentación técnica extensa)
+1) Alcance y propósito
+
+Este panel “u” (de utility) cuantifica tres péptidos cortos de H3 en un único bloque, usados como anclas de RT, control de digestión y marcadores de estabilidad cromatográfica:
+
+64–69 KLPFQR — péptido básico, útil como ancla de media elución (~40 min semilla).
+
+129–134 RIRGER — péptido muy temprano, informativo sobre colas tempranas y calidad de gradiente.
+
+130–135 IRGERA — cercano al anterior, permite evaluar resolución y co-elución en la zona final de la proteína.
+
+A diferencia de otros paneles centrados en variantes PTM de un mismo péptido, aquí tratamos tres secuencias distintas como “filas” del panel. Este patrón es útil para:
+
+Ajustar derivas globales de RT entre corridas.
+
+Verificar estado de digestión (péptidos cortos, terminaciones R/K).
+
+Detectar artefactos de centroidado y posibles saturaciones por alta basicidad.
+
+[Reality Filter] La codificación compacta de PTMs en mod_type (p. ej. 0,pr;1,pr;) depende del núcleo de tu EpiProfile. Este panel no redefine ese mapeo; asume tu indexado canónico. Si tu core usa índices distintos para extremos/modificaciones, ajusta mod_type para conservar masas y cargos consistentes.
+
+2) Entradas, salidas y flujo
+
+Entradas
+
+MS1_index ([n × 2]): índice de escaneo y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno).
+
+MS2_index, MS2_peaks: picos MS2 centroidados (solo para refinamiento DA de semillas).
+
+ptol: tolerancia de masa (ppm u otra; se propaga a las funciones núcleo).
+
+cur_outpath: carpeta de salida para .mat y figuras.
+
+special (struct):
+
+ndebug — 1: usa relocateD (diagnóstico; sin recolocación normal).
+
+nDAmode — semántica heredada:
+
+Recolocación/refinado: == 2 → se usa get_rts2 (MS2-asistido) para refinar las semillas de RT. En otro caso, MS1-solo (check_ref).
+
+Exportación PSM: aquí se usa GetPSM2 cuando nDAmode == 1.
+
+nhmass — pista de masa (pérdida neutra/precursor) para get_rts2.
+
+raw_path — ruta al bruto (para check_ref).
+
+Salidas (disco)
+
+H3_09u_64_135.mat con:
+
+pep_rts (3 × 3): RT por péptido × carga (0 si no detectado).
+
+pep_intens (3 × 3): áreas/intensidades por péptido × carga.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica por péptido.
+
+Figuras (draw_layout).
+
+Opcional: PSMs vía GetPSM2 si nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init: se construye His (aquí pep_seq actúa como sentinela, y las tres secuencias reales van en mod_short).
+
+Refinado de semillas (check_ref): para cada fila (tres péptidos), corrige rt_ref(hno).
+
+Si nDAmode == 2, tras check_ref se realiza un barrido con get_rts2 en torno a la semilla (±5 min o 0–fin si no cambió).
+
+Extracción directa con get_histone0 para cada péptido (no hay relocate/relocate2 aquí).
+
+Guardar y dibujar; exportar PSM con GetPSM2 si procede.
+
+3) Estructura His (particularidades de este panel)
+
+pep_seq = 'unmod' — usado como sentinela (no es la secuencia real).
+
+Las secuencias reales están en mod_short:
+
+{'KLPFQR','RIRGER','IRGERA'}.
+
+mod_type:
+
+Para KLPFQR: '0,pr;1,pr;' (convención de extremos derivatizados).
+
+Para RIRGER e IRGERA: '0,pr;'.
+
+pep_ch: réplicas de [1 2 3] por fila (admitimos 1+, 2+, 3+).
+
+pep_mz: computado por calculate_pepmz(His) (portabilidad).
+
+rt_ref (min): [39.63, 17.36, 22.00].
+
+display = zeros(...): oculto en plots por defecto (panel utilitario).
+
+Reordenación de cargas: se reorganizan columnas para que 2+ sea la primera, por coherencia entre paneles.
+
+4) Estrategia de RT y ventanas
+
+No hay ventanas explícitas por péptido en este archivo: get_histone0 usa internamente las semillas rt_ref.
+
+En DA (nDAmode == 2), se refina cada semilla con get_rts2 (ventanas amplias definidas en el propio calculate_layout):
+
+Si la semilla no se movió con check_ref: barrido [0, RT_final].
+
+Si sí se movió: barrido RT ± 5 min.
+
+Consejo: si trabajas con gradientes muy rápidos, conviene estrechar el ±5 y/o homogeneizar semillas por método/columna en un good-run.
+
+5) Tolerancia de masa y cargas
+
+ptol recomendado:
+
+Orbitrap/FT-MS: 5–10 ppm.
+
+TOF/Q-TOF: 10–20 ppm.
+
+Cargas: estos péptidos cortos pueden favorecer 2+; no descartes 1+ cuando S/N sea alto.
+
+6) Modo DA vs MS1-solo (semántica heredada)
+
+Refinado de semillas:
+
+nDAmode == 2 → get_rts2 (MS2-asistido).
+
+En otro caso → check_ref MS1-solo.
+
+Extracción: siempre con get_histone0 (MS1).
+Si necesitas confirmación secuencia-específica más estricta, considera otro panel con get_histone1/ventanas dedicadas (fuera del alcance de este archivo).
+
+PSM: nDAmode == 1 → exporta con GetPSM2.
+
+7) Casos límite y resolución de problemas
+
+Co-elución de 129–134 y 130–135: son vecinos; comprueba cargas y perfiles XIC para separar picos.
+
+KLPFQR saturado: la basicidad puede saturar detectores en métodos largos; revisa centroidado y mira 3+.
+
+Deriva global: si los tres péptidos se desplazan en bloque, actualiza semillas para tu método y guarda un .mat/.xls “good-run”.
+
+MS2 escaso: en nDAmode == 2, si get_rts2 no mejora, aumenta ventana (±8–10) solo para refinar semillas y vuelve a MS1-solo para cuantificar.
+
+8) Ejecución mínima reproducible
+cur_outpath = 'results/AT/H3/';
+special = struct();
+special.ndebug   = 0;
+special.nDAmode  = 2;              % refino de semillas con MS2
+special.nhmass   = 0;              % pista de pérdida neutra si aplica
+special.raw_path = '/data/run1.raw';
+
+ptol = 10; % ppm
+
+H3_09u_64_135(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+9) Estructura del .mat
+
+pep_rts (3 × 3): filas {KLPFQR, RIRGER, IRGERA}; columnas {2+, 1+, 3+} tras reordenación.
+
+pep_intens (3 × 3): intensidades/áreas integradas alineadas con pep_rts.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica para draw_layout.
+
+10) QC rápido
+
+¿Aparece RIRGER antes de 22 min y IRGERA alrededor de ~22 min con separación suficiente?
+
+¿KLPFQR se mantiene estable cerca de 39–40 min?
+
+¿Las cargas dominantes son razonables (2+ visible, 1+ opcional, 3+ discreto)?
+
+Si nDAmode == 1, ¿coherencia PSM↔picos XIC?
+
+11) Integración con EpiProfile_PLANTS
+
+Mantén convención de 2+ como primera columna entre paneles.
+
+Versiona en CHANGELOG: cambios de semillas, semántica DA, y cualquier ajuste de mod_type.
+
+Si usas este panel como “triple ancla”, documenta gradiente/columna/flujo en METHODS.md para traslado a otras especies (AT/MP/CR).

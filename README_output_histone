@@ -1,0 +1,159 @@
+README — output_histone.m (exportar cuantificación y RT de péptidos de histonas)
+1) ¿Qué hace esta función?
+
+output_histone genera dos salidas sincronizadas a partir de resultados ya calculados para un conjunto de péptidos/modificaciones de histonas (definidos en la estructura His):
+
+Un fichero tabulado con extensión .xls (en realidad TSV legible por Excel/LibreOffice) que contiene:
+
+Un bloque [area] con áreas por estado de carga y fracciones normalizadas (por péptido y globales).
+
+Un bloque [rt] con los tiempos de retención (RT) por estado de carga.
+
+Un fichero .mat con:
+
+auc → matriz n×3 para los péptidos marcados como visibles (His.display==1):
+
+Columna 1: RT (tomado del primer estado de carga).
+
+Columna 2: Área total (suma de cargas).
+
+Columna 3: Proporción del área total respecto a la suma de áreas de todos los péptidos visibles.
+
+His → estructura posiblemente reducida (solo péptidos visibles) mediante reduce_His.
+
+[Reality Filter] No verifico aquí la procedencia de pep_intens/pep_rts: asumo que provienen de funciones previas (p.ej., get_histone0/1/2) y están en la misma ordenación que His.mod_short, His.mod_type, His.pep_mz, His.pep_ch, His.rt_ref.
+
+2) Entradas y supuestos
+
+cur_outpath (char): carpeta de salida.
+
+out_filename (char): prefijo base del nombre de fichero.
+
+His (struct) con campos coherentes entre sí:
+
+pep_seq (char): secuencia del péptido/base (“peptide header”).
+
+mod_short (cellstr, n×1): etiquetas cortas (“unmod”, “K20me1”, …).
+
+mod_type (cellstr, n×1): especificación completa de mods y posiciones.
+
+pep_mz (double, n×c): m/z por estado de carga.
+
+pep_ch (double/int, n×c): valores de carga por columna (+1, +2, +3…).
+
+rt_ref (double, n×1): RTs de referencia.
+
+display (double/logical, n×1): 1 si el péptido se exporta al .mat (para el .xls se escriben todos).
+
+pep_intens (double, n×c): intensidad/área por mod (n) y carga (c).
+
+pep_rts (double, n×c): RT por mod y carga.
+
+Supuestos clave
+
+Tamaños consistentes: size(pep_intens) == size(pep_rts) == size(His.pep_mz) == [npep, ncharge].
+
+Las cargas por columna son las mismas para todas las filas (His.pep_ch(1,:) se usa para etiquetar columnas).
+
+Las intensidades son no negativas. Si una fila suma 0, la fracción por fila se protege con eps.
+
+3) Estructura del .xls (TSV)
+
+Se crea out_file1 = fullfile(cur_outpath,[out_filename,'.xls']) como texto tabulado:
+
+3.1 Cabecera de secuencia
+
+Primera línea: la secuencia His.pep_seq.
+
+3.2 Bloque [area]
+
+Línea de etiqueta: [area]
+
+Cabecera de columnas:
+
+peptide    (+z1)        (+z2)        ...    total
+
+
+Para cada carga (+) hay dos columnas:
+(área absoluta) y (fracción por péptido).
+
+Cuerpo: una fila por mod_short:
+
+<mod>    <area_z1> <frac_en_fila_z1>    <area_z2> <frac_en_fila_z2>   ...   <area_total_fila> <frac_global_fila>
+
+
+area_total_fila = sum(pep_intens(ino,:))
+
+frac_en_fila_zj = area_zj / (eps + area_total_fila)
+
+frac_global_fila = area_total_fila / (eps + total_intens_global)
+
+total_intens_global = sum(area_total_fila) sobre todas las filas (npep).
+
+Formato:
+
+Áreas: %e (notación científica).
+
+Fracciones: %f (decimal por defecto).
+
+3.3 Bloque [rt]
+
+Línea de etiqueta: [rt]
+
+Cabecera: peptide (+z1) (+z2) ...
+
+Cuerpo: una fila por mod_short con RT por carga (formato %.2f).
+
+4) Estructura del .mat
+
+Se crea out_file2 = fullfile(cur_outpath,[out_filename,'.mat']).
+
+Se seleccionan índices visibles ix = find(His.display==1).
+
+Si no hay visibles (isempty(ix)), no se guarda .mat y la función retorna (el .xls ya se habrá escrito).
+
+Se construye auc (npep2 × 3):
+
+auc(:,1) = pep_rts(ix,1) → RT del primer estado de carga.
+
+auc(:,2) = sum(pep_intens(ix,:), 2) → área total (todas las cargas).
+
+auc(:,3) = auc(:,2) / (eps + sum(auc(:,2))) → fracción global visible.
+
+Si npep2 < npep, se llama a reduce_His(His,ix) para subconjuntar todos los campos relevantes de His (manteniendo coherencia).
+
+Se hace save(out_file2,'auc','His').
+
+Nota metodológica: en auc(:,1) solo se usa la primera columna de RT. Si deseas consolidar RT por carga (media ponderada, carga dominante, etc.), habría que ampliar la lógica aguas arriba.
+
+5) Consideraciones de calidad / edge cases
+
+Permisos de escritura: si no se puede abrir el .xls, se muestra can not open: ... y se retorna sin .mat.
+
+Filas con todo cero: las fracciones resultan 0 gracias al uso de eps.
+
+Cargas incoherentes por fila: el etiquetado de cabecera usa His.pep_ch(1,:). Si hay filas con cargas diferentes, la cabecera no reflejará esas diferencias; hay que asegurar la armonización de pep_ch.
+
+RT por fila/carga: si no se calculó un RT (p. ej., 0 o NaN), aparecerá tal cual en [rt]. Conviene filtrar o imputar antes si el flujo lo requiere.
+
+Extensión .xls: es tabulado plano (TSV). Excel lo abre sin problema, pero no es un binario XLS; para compatibilidad estricta se recomienda .tsv o .csv.
+
+6) Uso mínimo de ejemplo
+% Supón que ya has poblado His, pep_intens, pep_rts con npep×ncharge
+cur_outpath  = 'results/H4';
+out_filename = 'H4_02_20_23';  % por ejemplo
+
+output_histone(cur_outpath, out_filename, His, pep_intens, pep_rts);
+
+% → results/H4/H4_02_20_23.xls  (TSV con [area] y [rt])
+% → results/H4/H4_02_20_23.mat  (auc y His reducido a visibles)
+
+7) Buenas prácticas recomendadas
+
+Validar que size(pep_intens) == size(pep_rts) == size(His.pep_mz).
+
+Revisar His.display antes de exportar: define qué péptidos consideras “informativos”.
+
+Mantener número y orden de modificados entre His.* y las matrices de resultados.
+
+Para series multi-método o multi-corrida, estandarizar unidades de RT (minutos) y formato decimal.

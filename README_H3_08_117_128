@@ -1,0 +1,178 @@
+README — H3_08_117_128 (Documentación técnica extensa)
+1) Alcance y propósito
+
+Este panel cuantifica el péptido de H3 VTIMPKDIQLAR (residuos 117–128) y dos variantes post-traduccionales frecuentes:
+
+unmod — péptido de referencia derivatizado (convención EpiProfile: pr marca propionilación en los extremos del péptido tras la preparación de muestra).
+
+M120ox — oxidación de metionina (artefacto común de muestra; puede tener valor de control de calidad).
+
+K122ac — acetilación de lisina 122 (marca regulatoria potencialmente relevante).
+
+Motivación. Este tramo es estable y con buen comportamiento cromatográfico. La oxidación de M (M120ox) suele eluír antes que el péptido no modificado, y K122ac tiende a eluir ligeramente antes del no modificado (pero posterior a M120ox). Esto permite ventanas de RT simples, ancladas al unmodified, y cuantificación robusta con MS1; cuando hay co-elución o baja S/N, la recolocación DA (MS2-asistida) mejora la especificidad.
+
+[Reality Filter] La codificación compacta de PTMs (mod_type como '0,pr;6,ac;') depende del núcleo (core) de tu EpiProfile. Este panel no redefine ese mapeo: asume tu indexado canónico. Si en tu core el índice de residuo difiere, ajusta mod_type para conservar masas y cargos consistentes.
+
+2) Entradas, salidas y flujo
+
+Entradas
+
+MS1_index ([n × 2]): índice de escaneo y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno).
+
+MS2_index, MS2_peaks: picos MS2 centroidados (para modo DA).
+
+ptol: tolerancia de masa (ppm u otra; se propaga a las funciones núcleo).
+
+cur_outpath: carpeta de salida para .mat y figuras.
+
+special (struct):
+
+ndebug — si 1, utiliza relocateD (diagnóstico; sin recolocación normal).
+
+nDAmode — semántica heredada:
+
+Recolocación: == 2 → DA (relocate2 + get_rts2); en otro caso MS1-solo (relocate + get_rts).
+
+Exportación PSM: == 1 → genera PSM tras cuantificar.
+
+nhmass — pista de masa (pérdida neutra/precursor) para get_rts2.
+
+raw_path — ruta del fichero bruto (para check_ref del ancla).
+
+Salidas (disco)
+
+H3_08_117_128.mat con:
+
+pep_rts (3 × 4): RT por PTM × carga (0 si no detectado).
+
+pep_intens (3 × 4): intensidades/áreas por PTM × carga.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica por PTM.
+
+Figuras (draw_layout): resumen de XIC y layout.
+
+Opcional: tablas de PSM si nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init: construye His (secuencia, PTMs, grid de cargas, m/z, semillas de RT).
+
+Anclaje unmod: afina His.rt_ref(1) con check_ref; en DA puede sondear con get_rts2 alrededor del ancla.
+
+Extracción unmod (get_histone0) y calibración de deriva global (desplaza semillas según el RT observado).
+
+Recolocación:
+
+MS1-solo → relocate (ventanas ancladas).
+
+DA → relocate2 (usa diagnósticos MS2).
+
+Extracción de modificados (get_histone1 para M120ox y K122ac).
+
+Guardar / dibujar; exportar PSM si procede.
+
+3) Estructura His (detalle)
+
+pep_seq = 'VTIMPKDIQLAR'.
+
+mod_short = {'unmod','M120ox','K122ac'}.
+
+mod_type (core-dependiente):
+
+unmod: '0,pr;6,pr;'
+
+M120ox: '0,pr;4,ox;6,pr;'
+
+K122ac: '0,pr;6,ac;'
+
+pep_ch: replica [1 2 3 4] por fila (admite 1+–4+).
+
+pep_mz: calculate_pepmz(His) (portátil; evita masas “hard-coded”).
+
+rt_ref semillas (min): [48.69, 46.37, 47.68].
+
+display = ones(...) y oculta M120ox en plots por defecto (display(2)=0), aunque se cuantifica.
+
+Reordenación de cargas. Se fuerza que 2+ sea la primera columna (convención global), reordenando pep_mz/pep_ch para homogeneidad entre paneles.
+
+4) Ventanas de RT (recolocación)
+
+M120ox: ventana [unmod − 10, unmod − 0.1] min → forma más temprana que unmod.
+
+K122ac: ventana [max(unmod − 8, M120ox + 0.1), unmod − 0.1] → entre M120ox y unmod, evitando solapamiento extremo con M120ox.
+
+Calibración por deriva global. Si el RT de unmod observado difiere de la semilla, se aplica un desplazamiento a todas las semillas para robustez frente a drift LC.
+
+5) Tolerancia de masa e isótopos
+
+ptol sugerido:
+
+Orbitrap/FT-MS: 5–10 ppm.
+
+TOF/Q-TOF: 10–20 ppm.
+
+unitdiff = 1.0032 (^13C) para seguimiento monoisotópico.
+
+6) DA (MS2 asistido) vs MS1-solo
+
+Recolocación:
+
+nDAmode == 2 → relocate2 + get_rts2 (usa evidencia MS2).
+
+En otro caso → relocate + get_rts (solo MS1).
+
+Exportación PSM:
+
+nDAmode == 1 → genera PSM tras cuantificar (semántica heredada, asimétrica respecto a recolocación).
+
+Uso práctico: en mezclas complejas o con oxidación extendida, activa DA para reducir falsos positivos (diagnósticos MS2).
+
+7) Casos límite y resolución de problemas
+
+Oxidación extendida: M120ox puede fragmentarse fuerte y dominar; si “ensucia” K122ac, estrecha la ventana superior de K122ac (p. ej., unmod − 0.2) y sube el delta a 0.2–0.3.
+
+K122ac débil: revisa centroidado, saturación de detector y distribución de cargas (2+ vs 3+).
+
+Semillas imprecisas: crea un .mat “good-run” por columna/gradiente para fijar semillas estables.
+
+Interpretación de Mox: artefacto frecuente; úsalo para QC (p. ej., estrés oxidativo de la preparación), no como señal biológica salvo control ortogonal.
+
+8) Ejecución mínima reproducible
+cur_outpath = 'results/AT/H3/';
+special = struct();
+special.ndebug   = 0;
+special.nDAmode  = 2;              % recolocación DA
+special.nhmass   = 0;              % pista de pérdida neutra si aplica
+special.raw_path = '/data/run1.raw';
+
+ptol = 10; % ppm
+
+H3_08_117_128(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+9) Estructura del .mat
+
+pep_rts (3 × 4): filas {unmod, M120ox, K122ac}; columnas {2+, 1+, 3+, 4+} tras reordenación.
+
+pep_intens (3 × 4): intensidades integradas por fila/columna.
+
+mono_isointens (nMS1 × 3): XIC monoisotópica para draw_layout.
+
+10) QC rápido
+
+unmod cerca de 48.69 min (semilla) tras calibración.
+
+M120ox clara antes del unmod (≈ 46.3 min).
+
+K122ac entre M120ox y unmod (≈ 47.5–48.5 min según método).
+
+En DA: ¿PSMs coherentes con máximos XIC?
+
+11) Consejos de integración (EpiProfile_PLANTS)
+
+Mantén convención de cargas (2+ primero) en todos los paneles para simplificar la fusión aguas abajo.
+
+Versiona cambios en ventanas, semillas y semántica DA (CHANGELOG por panel).
+
+Documenta gradiente/columna/flujo en METHODS.md para comparabilidad.

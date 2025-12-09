@@ -1,0 +1,169 @@
+README (extenso, español, para no bioinfo/proteómica)
+¿Qué es este módulo?
+
+Este archivo implementa un panel de cuantificación para el péptido de histona H3 53–63 (KYQKSTELLIR), centrado en las modificaciones en K56: sin modificar, me1, me2, me3 y ac. El flujo:
+
+Define la librería del panel (secuencia, PTMs, cargas, m/z, RTs).
+
+Calibra el RT usando la forma no modificada (más robusta).
+
+Ajusta las RT de las variantes PTM (reglas de elución plausibles).
+
+Extrae el cromatograma monoisotópico y cuantifica el área por carga.
+
+Guarda resultados, dibuja figuras y, si procede, recupera PSMs (evidencia MS2).
+
+Función principal: H3_06_53_63(...)
+Entradas
+
+MS1_index: tabla con los scans MS1 (columna 2 = RT en minutos).
+
+MS1_peaks: picos/intensidades MS1 (formato compatible con GetProfiles/get_area).
+
+MS2_index, MS2_peaks: datos MS2 (si se usa modo DDA).
+
+ptol: tolerancia de masa (ppm/Da según helpers de EpiProfile).
+
+cur_outpath: carpeta de salida.
+
+special: estructura de configuración (p.ej. ndebug, nDAmode, raw_path, nhmass).
+
+Salidas (por efectos secundarios)
+
+H3_06_53_63.mat con matrices de RTs y áreas (AUC).
+
+PDFs de figuras (layout, heatmaps).
+
+Figure Legends.txt con leyendas.
+
+PSMs (si special.nDAmode == 1).
+
+Lógica
+
+Idempotencia: si el .mat ya existe, no recalcula.
+
+Inicializa librería con init_histone (más abajo).
+
+Llama a calculate_layout (núcleo de cuantificación).
+
+Escribe resultados (output_histone) y dibuja (draw_layout).
+
+Si procede, extrae PSMs (GetPSM).
+
+Inicialización del panel: init_histone(...)
+
+Define:
+
+Secuencia base: KYQKSTELLIR (H3 53–63).
+
+PTMs: unmod, K56me1, K56me2, K56me3, K56ac.
+
+Codificación PTM (mod_type): pares posición,tipo; con índices 0-based sobre la secuencia del péptido (no la proteína completa). Ej.: 4,me1; aplica en la Lys de índice 4 (K56 en esta ventana).
+
+Cargas: z=1..4 para cada estado (matriz pep_ch).
+
+m/z: calculado por calculate_pepmz(His) a partir de secuencia + PTMs + z.
+
+RTs de referencia: valores de biblioteca razonables por estado; se recalibran más tarde.
+
+Canal principal: reordena columnas para que la carga 2+ sea la primera (mejor comportamiento en histonas).
+
+Nota: pr en mod_type marca propionilaciones (N-terminal y Lys) típicas del protocolo histónico.
+
+Núcleo: calculate_layout(...)
+
+Calibración con “unmod”
+
+Guarda rt_unmod_orig.
+
+Si no estamos en ndebug:
+
+Sin DDA: check_ref(...) puede ajustar la RT desde metadatos previos.
+
+Con DDA: combina check_ref y búsqueda (get_rts2) en una ventana amplia o ±5 min para fijar una RT óptima apoyada por MS2.
+
+Ejecuta get_histone0(...) para cuantificar la forma no modificada y obtener su RT medida.
+
+Si hay RT válida, alinea el panel: desplaza todas las rt_ref por el delta entre RT medida y RT original.
+
+Relocalización de RTs por estado PTM
+
+relocate (MS1) o relocate2 (MS2 asistido) aplican reglas de elución:
+
+K56me1: suele eluir después de unmod → busca entre unmod+0.1 y unmod+14.
+
+K56me2 / me3: suelen eluir antes → busca de 6 min hasta unmod-3, y selecciona un par coherente con find_pair(...).
+
+K56ac: suele caer entre me2 y unmod → busca entre el punto medio (unmod, me2) y unmod-0.1.
+
+Cuantificación de los 4 estados modificados
+
+Recorre hno = 2..5 llamando a get_histone1(...).
+
+Guarda RTs/AUC cuando hay apex válido.
+
+Salidas
+
+pep_rts (nPTM x nCharge), pep_intens (nPTM x nCharge), y mono_isointens (num_MS1 x nPTM) (traza monoisotópica por estado).
+
+Relocalización (MS1 vs MS2)
+
+relocate: usa sólo MS1, rápido, robusto si las señales son claras.
+
+relocate2: usa fragmentación MS2 con get_rts2 para confirmar candidatos cuando MS1 es ruidoso.
+
+Dependencias clave (resumen conceptual)
+
+GetMods: tabla de masas de PTMs.
+
+calculate_pepmz: calcula m/z para cada (estado, carga).
+
+check_ref: corrige/valida RT de biblioteca a partir de metadatos previos.
+
+get_rts / get_rts2: escanean RT y devuelven candidatos (y métricas) para fijar la mejor RT. get_rts2 usa MS2.
+
+get_histone0 / get_histone1: extraen EIC, eligen apex y integran área por carga.
+
+find_pair: selecciona un par consistente (me2/me3) por RT e intensidad.
+
+output_histone / draw_layout: guardan resultados y generan figuras.
+
+GetPSM: extrae PSMs (cuando se desea evidencia de fragmentación).
+
+(Estas funciones existen en tu base EpiProfile/EpiProfile_PLANTS; aquí sólo se documenta cómo se usan.)
+
+Parámetros y recomendaciones
+
+ptol: tolerancia de masa. Muy baja → riesgo de perder el pico; muy alta → más ruido. Mantén coherente con la calibración del instrumento.
+
+Ventanas de búsqueda (p. ej., +14 min, -3 min, ±5 min): son heurísticas razonables para gradientes estándar; ajusta si tu LC es distinto.
+
+Carga principal 2+: en histonas suele ser la más informativa; si tu instrumento/gradiente prefieren otra, adapta el bloque de “main ch”.
+
+Errores comunes y QC
+
+Archivo ya existe: el flujo se salta (comportamiento intencionado).
+
+RTs imposibles (0): esa variante se marcará como no detectada; revisa rango/ruido.
+
+MS2 ausente en DA-mode: relocate2 caerá en casos vacíos; usa relocate o desactiva DDA si no hay fragmentación útil.
+
+Revisión manual: grafica las EIC y confirma algunos apex; valida que las reglas de elución se cumplen con tus datos.
+
+Extensión a otras especies
+
+Este archivo está acoplado al panel H3 K56 (secuencia, posiciones PTM, RTs). Para portar a otra especie o a otro péptido:
+
+Cambia secuencia (pep_seq) y posiciones PTM (mod_type).
+
+Valida/actualiza RTs de referencia (por lote/gradiente).
+
+Recalcula m/z con calculate_pepmz.
+
+Revisa las reglas de relocalización (ventanas de búsqueda), ya que pueden variar ligeramente con la matriz/gradiente.
+
+“Reality Filter”
+
+[No verificado] Los rangos de RT (p.ej., +14, -3, ±5 min) se documentan aquí tal como están en tu código; ajusta empíricamente a tu gradiente.
+
+[No verificado] La semántica exacta de ptol depende de tu implementación de GetProfiles/get_rts; documentada según el patrón EpiProfile.

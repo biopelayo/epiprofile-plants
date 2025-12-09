@@ -1,0 +1,108 @@
+Qué cambia exactamente
+
+Cálculo de ventana RT (escaneos a extraer)
+
+Original:
+
+p  = find(RT >= rt_ref - 0.2);  rt_i1 = p(1);
+pp = find(RT <= rt_ref + 0.2);  rt_i2 = pp(end);
+
+
+➜ Si p o pp están vacíos, peta (índice inexistente).
+
+Robusta: calcula lo_idx y hi_idx, imprime DEBUG, y si alguno está vacío hace fallback:
+
+si lo_idx vacío → rt_i1 = 1
+
+si hi_idx vacío → rt_i2 = nScans
+
+si rt_i1 > rt_i2 → intercambia y avisa
+➜ Nunca se cae por falta de scans en ±0.2.
+
+Trazabilidad
+
+Original: silenciosa.
+
+Robusta: fprintf/disp de rt_ref, lo_idx, hi_idx y del rango elegido (útil para depurar deriva de RT).
+
+Comportamiento si no hay scans en ±0.2
+
+Original: error inmediato.
+
+Robusta: extrae del rango completo y luego aplica el filtro de candidatos ±0.5 alrededor de rt_ref.
+➜ Si hay señal cerca de rt_ref (aunque no hubiera scans en ±0.2), la encuentra; si no, devuelve 0 (sin caer).
+
+Detector de picos
+
+Ambas usan GetTopBottom (tu par “original” ya no llama a GetTopBottom11), así que aquí no hay diferencia.
+
+Resto de la lógica
+
+ptol==100 → 10, nC13 para ptol>100 & z≥3, selección de apex por máxima área entre candidatos ±0.5, integración con get_area: idénticos.
+
+Cómo y por qué afecta a los resultados
+
+Caso normal (hay scans dentro de ±0.2):
+Ambas versiones usarán exactamente el mismo rango (rt_i1:rt_i2) y el mismo filtro ±0.5 → mismo apex y misma área (salvo micro-efectos numéricos).
+
+Caso con hueco de RT (no hay scans en ±0.2, pero sí entre ±0.2 y ±0.5):
+
+Original: crash por p(1)/pp(end).
+
+Robusta: usa fallback (rango grande), GetTopBottom ve picos en toda la región, y el filtro ±0.5 alrededor de rt_ref se asegura de que solo compitan candidatos cercanos.
+➜ Cuantifica donde antes fallabas.
+
+Caso sin señal real cerca de rt_ref:
+
+Ambas (si la original llegase a ejecutar): devolverán 0 tras el filtro ±0.5 (no hay candidatos válidos).
+
+Diferencia: la original no llega a ese punto si faltan scans; la robusta sí.
+
+Posible diferencia leve de área bajo fallback:
+El rango de extracción más amplio puede crear una malla temporal algo distinta, y GetTopBottom puede segmentar de modo ligeramente diferente. Aun así, al integrarse solo alrededor del candidato ±0.5, las discrepancias suelen ser pequeñas.
+
+Riesgos nuevos (y cómo mitigarlos)
+
+Fallback “oculta” desalineación de RT
+
+Riesgo: como ya no cae, puedes no darte cuenta de que tu rt_ref está desfasado.
+
+Mitiga: registra una bandera (used_fallback) y monitoriza su tasa por lote/especie; si sube, realinea RT o aumenta delta (p. ej., 0.3–0.5) o usa ventana adaptativa (±0.2→±0.35→±0.5).
+
+nb(x(end)+1) puede salirse si GetTopBottom no garantiza el último límite
+
+Igual que antes (no lo has blindado).
+
+Mitiga: limita el índice derecho a length(nb); así evitas “index out of range”.
+
+Coste y ruido si el fallback se activa mucho
+
+Rango largo = más picos candidatos; aunque el filtro ±0.5 limpia, consume más CPU.
+
+Mitiga: ventana adaptativa antes de ir a “full”.
+
+DEBUG verboso
+
+En producción, puede ralentizar y llenar logs.
+
+Mitiga: átalo a ndebug o añade un verbose flag.
+
+Cuándo verás números diferentes (resumen ultra conciso)
+
+Idénticos: cuando hay scans en ±0.2 y no hay picos múltiples raros.
+
+Mejores (robusta): cuando faltan scans en ±0.2 pero sí hay alrededor de ±0.5 (antes: crash; ahora: cuantificación estable).
+
+Ligeramente distintos: bajo fallback por segmentación distinta de GetTopBottom o límites nb.
+
+Ceros “de más”: si realmente no hay señal alrededor de rt_ref (antes te caías, ahora lo verás como 0, que es lo correcto).
+
+Recomendación para EpiProfile_PLANTS
+
+Deja la versión robusta (mejor para lotes AT/MP/CR).
+
+Añade ventana adaptativa antes de ir a “full” y marca cuándo hubo fallback.
+
+Protege el índice derecho en nb y silencia DEBUG si no estás depurando.
+
+Si quieres, te paso un mini-patch con: (1) adaptativa ±0.2→±0.35→±0.5, (2) guardas para nb, y (3) flag used_fallback en la salida para auditar.

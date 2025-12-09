@@ -1,0 +1,139 @@
+README (en castellano, para no bioinformáticos)
+¿Qué hace este script?
+
+Este archivo MATLAB ejecuta un mini-análisis dirigido para tres péptidos de histona H3 definidos internamente (ver init_histone). A partir de datos de espectrometría de masas (MS1 y MS2), el código:
+
+Comprueba si ya hay resultados para no repetir trabajo.
+
+Define el panel de péptidos H3 (sus secuencias cortas, derivatizaciones “pr” = propionilación, estados de carga, m/z y tiempos de retención de referencia).
+
+Calcula para cada péptido:
+
+Un tiempo de retención representativo (RT).
+
+Una intensidad integrada (cuánto “señal” hay).
+
+Un perfil monoisotópico a lo largo del gradiente (cómo evoluciona la señal con el tiempo).
+
+Guarda los resultados en un .mat.
+
+Dibuja gráficos de diagnóstico.
+
+(Opcional) Extrae evidencia PSM (emparejamientos espectro-peptídicos) si está activado el modo “data-assisted” (special.nDAmode==1).
+
+Relación con EpiProfile_PLANTS: este fichero representa un “bloque” clásico del flujo EpiProfile adaptado. El panel de péptidos/RTs/derivatización y la búsqueda acorde a tolerancias e isótopos es coherente con la cuantificación dirigida de hPTMs en plantas. Cambiando init_histone se puede apuntar a otros péptidos/especies.
+
+Parámetros de entrada (en palabras simples)
+
+MS1_index: tabla con los escaneos MS1 y sus tiempos (la 2ª columna suele ser el RT en minutos).
+
+MS1_peaks: los picos MS1 propiamente dichos (formato que usan las funciones internas).
+
+MS2_index / MS2_peaks: análogos para MS2; se usan en validaciones y/o en modo asistido.
+
+ptol: tolerancia de masa (p. ej., en ppm). Cuanto menor, más estricta la coincidencia m/z.
+
+cur_outpath: carpeta donde se guardan los resultados (H3_11_3_8.mat) y las figuras.
+
+special: estructura con “banderas” y parámetros, típicamente:
+
+special.ndebug: si es 1, no recalibra los RT de referencia (modo rápido/depuración).
+
+special.nDAmode: si es 1, activa extracción PSM; si es 2, usa lógica de recalibración DA.
+
+special.nhmass: masa auxiliar usada en get_rts2 en modo DA.
+
+special.raw_path: ruta del raw (para check_ref).
+
+Nota [No verificado]: los campos exactos de special dependen de tu entorno. Aquí describimos los más frecuentes en EpiProfile/EpiProfile_PLANTS.
+
+¿Qué significan las partes clave?
+
+unitdiff = 1.0032: es la diferencia de masa entre isótopos (C-13 vs C-12), útil para localizar los picos monoisotópicos y patrones isotópicos.
+
+init_histone(): fija el panel.
+
+mod_short: etiquetas cortas de tus péptidos objetivo (aquí TKQTAR, TKQSAR, SNQTAR).
+
+mod_type: la derivatización; pr suele ser propionilación (EpiProfile usa propionilación de N-terminales y lisinas para estabilizar cargas y simplificar el espectro).
+
+pep_ch: estados de carga que se buscan (aquí 1 y 2).
+
+calculate_pepmz(His): calcula m/z teóricos en cada carga.
+
+rt_ref: tiempos de retención semilla (minutos) para iniciar la búsqueda.
+
+display: 1 = mostrar en la salida/figuras.
+
+calculate_layout(...): hace el trabajo gordo.
+
+Reserva memoria para las salidas.
+
+Recalibra RT si no estás en “debug”: llama a check_ref(...) para validar/ajustar anclas de RT.
+
+Si special.nDAmode==2, el ajuste es más flexible: si no encuentra un RT claro, rastrea todo el gradiente; si sí, busca en una ventana ±5 min y refina con get_rts2(...).
+
+Para cada péptido, llama a get_histone0(...) que devuelve:
+
+cur_rts: RT por carga.
+
+cur_intens: intensidades integradas por carga.
+
+cur_mono_isointens: traza monoisotópica a lo largo del RT.
+
+Copia a las matrices finales si hay RT válido.
+
+Salida: output_histone(...) guarda .mat con His, pep_intens, pep_rts.
+
+Figuras: draw_layout(...) usa mono_isointens, pep_rts/intens y los índices para graficar.
+
+PSMs: si special.nDAmode==1, GetPSM2(...) añade evidencia de MS2.
+
+Línea a línea (qué y por qué, muy resumido)
+
+Comprobación de existencia de archivo: evita recalcular si ya tienes H3_11_3_8.mat.
+
+Inicialización del panel: define qué péptidos buscas y en qué cargas; calcula m/z.
+
+Cálculo: con unitdiff fija el espaciado isotópico; calculate_layout localiza RTs e integra intensidades.
+
+Salida y dibujo: guarda resultados y crea figuras diagnósticas (útiles para QC).
+
+Modo asistido (opcional): extrae PSMs para dar soporte MS2 a lo observado en MS1.
+
+¿Cómo lo ejecuto?
+% Ejemplo (ajusta a tus variables reales):
+H3_11_3_8(MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+          10, 'results/H3_panel', struct('ndebug',0,'nDAmode',0,'raw_path','/path/to/raw'));
+
+
+ptol=10 (ejemplo) → tolerancia estricta típica (ppm).
+
+special.ndebug=0 → permite recalibrar RT.
+
+special.nDAmode=0 → modo estándar (sin PSM).
+
+special.raw_path → para check_ref.
+
+Errores frecuentes y consejos
+
+No encuentra RT: revisa rt_ref (semillas), la tolerancia ptol y si el péptido realmente está presente.
+
+Sin figuras: confirma permisos de escritura en cur_outpath y que draw_layout esté en el path.
+
+PSM vacío: si nDAmode==1, asegúrate de tener MS2_index/peaks y parámetros adecuados.
+
+Cambiar péptidos/especie: edita init_histone (secuencias/mods) o apunta a otra librería en tu versión EpiProfile_PLANTS.
+
+Dependencias que se llaman desde aquí
+
+calculate_pepmz, check_ref, get_rts2, get_histone0, output_histone, draw_layout, GetPSM2.
+Deben estar en tu MATLAB path (o en la misma carpeta). En EpiProfile_PLANTS suelen vivir en lib/ o scripts/.
+
+Nota de “Realidad” (Reality Filter)
+
+La interpretación de mod_type como propionilación es la práctica estándar en EpiProfile para histonas, pero ajústalo a tu preparación real si difiere.
+
+Los significados exactos de todos los campos de special pueden variar según tu rama de código; aquí se describe lo más usado.
+
+Si quieres, en la siguiente iteración documento también get_histone0 y check_ref/get_rts2 con el mismo estilo para cerrar el círculo del panel H3 dentro de EpiProfile_PLANTS.

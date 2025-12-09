@@ -1,0 +1,78 @@
+README — H4_03_24_35 (documentación clara para no-bioinfos)
+1) Qué mide este panel
+
+Péptido H4 (aa 24–35): DNIQGITKPAIR
+Estados cubiertos:
+
+unmod (derivatizado estándar: N-terminal y Lys internas propioniladas)
+
+T30pr (O-propionilación en Thr30; marcador útil de derivatización “sobre-acilada”)
+
+[Reality Filter] La señal T30pr depende del protocolo (p. ej., si no se eliminan O-propionilos con hidroxilamina). Es un indicador de química de derivatización, no una PTM biológica estable. Valida siempre en tu preparación.
+
+2) Entradas / Salidas
+
+Entradas:
+
+MS1_index (n×2: id de escaneo, RT en min) y MS1_peaks centroidado.
+
+MS2_index, MS2_peaks para anclaje fino / PSM (si se usa DA).
+
+ptol (ppm) típico: 5–10 (Orbitrap), 10–20 (Q-TOF).
+
+cur_outpath (carpeta de resultados).
+
+special: ndebug, nDAmode (2=usa MS2; 1=exporta PSM tras cuantificar; otro=MS1-only), nhmass, raw_path.
+
+Salidas:
+
+H4_03_24_35.mat con His, pep_rts, pep_intens, mono_isointens.
+
+Gráficas XIC/“layout” con draw_layout.
+
+PSM (si nDAmode==1).
+
+3) Cómo codifica el panel las modificaciones
+
+pep_seq = 'DNIQGITKPAIR'.
+
+mod_type usa índices relativos al péptido:
+
+0,pr = propionilo N-terminal del péptido (derivatización).
+
+8,pr = propionilo en K (posición 8 del péptido) — presente en unmod y T30pr.
+
+T30pr añade 7,pr (Thr a nivel péptido).
+
+Cargas consideradas: 1+/2+/3+/4+ (se reordenan para que el “main” sea 2+).
+
+4) Estrategia de RT
+
+Anclaje unmod con check_ref. Si nDAmode==2, se refina en ±5 min (o todo el gradiente si no cambia).
+
+Corrección de deriva global: se desplaza el resto de RT semilla por delta.
+
+Relocalización (MS1: relocate; DA: relocate2):
+
+T30pr: ventana [unmod+0.1, unmod+30] min (misma en DA).
+
+5) Flujo
+
+Extraer unmod con get_histone0 → fijar delta.
+
+Relocalizar ventana de T30pr → get_histone1.
+
+Guardar, dibujar, y opcionalmente exportar PSM.
+
+6) QC rápido
+
+Orden típico: unmod → T30pr (si existe).
+
+Si T30pr es muy alto, revisa condiciones de derivatización y etapa de des-O-acilación.
+
+Usa nDAmode==2 si hay interferencias/isóbaros.
+
+7) Ejemplo mínimo
+special = struct('ndebug',0,'nDAmode',2,'nhmass',0,'raw_path','/data/run.raw');
+ptol = 10;  % ppm
+H4_03_24_35(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,'results/AT/H4',special);

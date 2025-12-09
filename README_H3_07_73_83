@@ -1,0 +1,215 @@
+README — H3_07_73_83 (Documentación técnica extensa)
+1) Alcance y propósito
+
+Este panel cuantifica el péptido de H3 EIAQDFKTDLR (residuos 73–83) y sus variantes en K79:
+
+unmod — péptido derivatizado de referencia (convención EpiProfile: pr en extremos de péptido tras propionilación en la preparación).
+
+K79me1, K79me2, K79me3 — mono/di/trimetilación en K79.
+
+K79ac — acetilación en K79.
+
+Motivación. K79 es un “orphan mark” en plantas y animales con interés biológico (regulación transcripcional, envejecimiento, etc.). Este tramo cromatográficamente suele separar me2/me3 (más tempranas), K79ac (entre me2 y unmod), y me1 (ligeramente posterior a unmod), lo que permite cuantificar con reglas de ventana simples más un emparejado me2 vs me3 basado en evidencia de intensidad.
+
+[Reality Filter] La codificación compacta de PTMs (mod_type, índices como 7,me2) depende del núcleo de tu EpiProfile. Este panel no redefine ese mapeo: asume el indexado canónico de tu build. Si tu core numera distinto, ajusta mod_type para mantener coherencia de masas.
+
+2) Entradas, salidas y flujo
+
+Entradas
+
+MS1_index ([n × 2]): índice de escaneo y RT (min).
+
+MS1_peaks: picos MS1 centroidados (formato interno).
+
+MS2_index, MS2_peaks: picos MS2 (para recolocación DA).
+
+ptol: tolerancia de masa (ppm u otra; se propaga).
+
+cur_outpath: carpeta de salida.
+
+special:
+
+ndebug — si 1, usa relocateD (diagnóstico).
+
+nDAmode — semántica histórica:
+
+Recolocación: == 2 → DA (relocate2 + get_rts2); en otro caso MS1-solo (relocate + get_rts).
+
+Exportación PSM: == 1 → GetPSM tras cuantificar.
+
+nhmass — pista de masa (pérdida neutra/precursor) para get_rts2.
+
+raw_path — usado por check_ref para afinar el ancla.
+
+Salidas (disco)
+
+H3_07_73_83.mat con:
+
+pep_rts (5 × 4): RT por PTM × carga (0 si no se encuentra).
+
+pep_intens (5 × 4): intensidades/áreas por PTM × carga.
+
+mono_isointens (nMS1 × 5): XIC monoisotópicas por PTM.
+
+Figuras (layout/XIC) según draw_layout.
+
+Opcional: PSMs si nDAmode == 1.
+
+Flujo (alto nivel)
+
+Init His (secuencia, PTMs, cargas [1 2 3 4], pep_mz, rt_ref, display).
+
+Ancla unmod: afina His.rt_ref(1) con check_ref; en DA puede sondear con get_rts22 (ver Nota en §6).
+
+Extrae unmod (get_histone0) y calibra deriva global (desplaza semillas).
+
+Recoloca:
+
+MS1-solo → relocate (ventanas por PTM).
+
+DA → relocate2 (usa MS2 diagnóstica).
+
+Extrae modificados (get_histone1 filas 2–5).
+
+Guarda/Dibuja y exporta PSM si procede.
+
+3) Estructura His (detalle)
+
+pep_seq = 'EIAQDFKTDLR'.
+
+mod_short = {'unmod','K79me1','K79me2','K79me3','K79ac'}.
+
+mod_type (core-dependiente):
+
+unmod: '0,pr;7,pr;'
+
+me1: '0,pr;7,me1;'
+
+me2: '0,pr;7,me2;'
+
+me3: '0,pr;7,me3;'
+
+ac: '0,pr;7,ac;'
+
+pep_ch: replica [1 2 3 4] por fila (admite 1+–4+).
+
+pep_mz: calculate_pepmz(His).
+
+rt_ref semillas (min): [40.37, 41.20, 33.92, 33.72, 39.17].
+
+me2/me3 antes del ancla, ac entre me2 y unmod, me1 después del ancla.
+
+display = ones(...): todos visibles por defecto.
+
+Reordenación de cargas: se fuerza 2+ como primera columna para homogeneidad entre paneles.
+
+4) Estrategia de RT y ventanas (recolocación)
+
+K79me1: ventana [unmod + 0.1, unmod + 14] min → forma tardía.
+
+K79me2 y K79me3: ambas en [6, unmod − 3] min (región temprana).
+Se resuelven como par con find_pair(...), que asigna me2/me3 a partir de listas de candidatos, intensidades integradas y los picos top.
+
+K79ac: ventana [(unmod + me2)/2, unmod − 0.1] → intermedia entre me2 y ancla.
+
+La calibración de deriva desplaza todas las semillas según el unmod observado para robustez ante drift LC.
+
+5) Tolerancia de masa e isótopos
+
+ptol recomendado:
+
+Orbitrap/FT-MS: 5–10 ppm.
+
+TOF/Q-TOF: 10–20 ppm.
+
+unitdiff = 1.0032 (^13C) para seguimiento monoisotópico.
+
+6) Modo DA (MS2 asistido) vs MS1-solo
+
+Recolocación:
+
+nDAmode == 2 → relocate2 con get_rts2 (MS2 diagnóstica).
+
+Otro caso → relocate con get_rts (solo MS1).
+
+Ancla DA: este código llama a get_rts22 en el sondeo del unmod (dos doses).
+
+Nota: En muchos cores la función se llama get_rts2. [Reality Filter] Si tu core no define get_rts22, cambia esa llamada por get_rts2. Aquí no alteramos la lógica original.
+
+Exportación PSM:
+
+nDAmode == 1 → exporta PSM tras cuantificar (semántica heredada asimétrica).
+
+7) Comprobaciones y casos límite
+
+me2 vs me3 invertidos: si find_pair asigna de forma inestable, revisa las intensidades integradas y la calidad MS2; en DA la asignación suele ser más robusta.
+
+K79ac difuso: si el intervalo entre me2 y unmod es corto (gradiente rápido), acorta ventana superior (p. ej., unmod − 0.2) y eleva el delta inicial a 0.2–0.3.
+
+me1 débil tras el unmod: verifica centroidado, saturación y el equilibrio de cargas (2+ vs 3+).
+
+Seeds extremas: si rt_ref iniciales no encajan con tu método, prepara un .mat “good-run” para bootstrap de semillas.
+
+8) Ejecución mínima reproducible
+cur_outpath = 'results/AT/H3/';
+special = struct();
+special.ndebug  = 0;
+special.nDAmode = 2;           % usar recolocación DA
+special.nhmass  = 0;           % pista neutral-loss si aplica
+special.raw_path = '/data/run1.raw';
+
+ptol = 10;  % ppm típico en TOF/Q-TOF
+
+H3_07_73_83(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+9) Estructura del .mat
+
+pep_rts (5 × 4): filas {unmod, me1, me2, me3, ac}; columnas {2+, 1+, 3+, 4+} tras reordenación.
+
+pep_intens (5 × 4): intensidades integradas alineadas con pep_rts.
+
+mono_isointens (nMS1 × 5): XIC monoisotópica por PTM para draw_layout.
+
+10) QC rápido (lista)
+
+¿El unmod queda ~40.37 min (semilla) tras corregir deriva?
+
+me2/me3: ¿aparecen en la región temprana (≈ 34 min) y find_pair los separa coherentemente?
+
+K79ac: ¿cae entre me2 y unmod (≈ 37–40 min)?
+
+me1: ¿ligeramente posterior al unmod (~41.2 min)?
+
+En DA: ¿PSMs consistentes con los máximos XIC?
+
+11) Parámetros prácticos
+
+ptol: 5–10 ppm (Orbitrap), 10–20 ppm (TOF).
+
+Ventanas: si el gradiente es corto, reduce anchos (p. ej., me1: +0.2→+10–12 min; me2/me3: 6→8, unmod−3→unmod−2).
+
+Aumenta delta inicial a 0.2–0.3 para evitar “cola” del ancla.
+
+12) Versionado y procedencia
+
+Identificador estable: H3_07_73_83.
+
+Registrar cambios en:
+
+Ventanas (me1, me2/me3, ac).
+
+Regla y criterios de find_pair.
+
+Semántica DA (y corrección de get_rts22 → get_rts2 si aplica).
+
+rt_ref semillas por instrumento/método.
+
+13) Notas biológicas (resumen)
+
+[Reality Filter] El interés de K79me1/2/3/ac es alto en regulación y cromatina, pero la evidencia exacta depende del contexto experimental (tejido, especie, protocolo). Usa controles y validaciones ortogonales cuando interpretes cambios.
+
+14) Integración en EpiProfile_PLANTS
+
+Salidas por especie (AT/, MP/, CR/), misma convención de cargas (2+ primero) en todos los paneles.
+
+Mantén un “good-run” por instrumento/columna/gradiente para bootstrapar semillas estables.

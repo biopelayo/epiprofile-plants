@@ -1,0 +1,211 @@
+README — Explicación extensiva (no bioinfo, no proteómica)
+Qué hace esta función, en pocas palabras
+
+OutputFigures recorre las salidas intermedias de EpiProfile (archivos .mat ya calculados por pasos anteriores) y genera gráficas PDF y un archivo de texto con las leyendas. Sirve para control de calidad (QC) y resumen visual de tus muestras:
+
+Figura 01 (bar chart): cuántos péptidos de histonas se han identificado en cada muestra.
+
+Figura 02 (boxplot): cómo se distribuyen las intensidades (áreas) de esos péptidos por muestra.
+
+Figura 03 (PCA): qué muestras se parecen entre sí (agrupación) y cuáles se diferencian.
+
+Figuras 10 (heatmaps): mapas de calor con abundancias relativas de marcas (PTMs) si existe un archivo de apoyo.
+
+Además, crea un fichero Figure Legends.txt con una explicación en texto llano de las figuras.
+
+Importante: La lista de péptidos y su orden se toma de la primera muestra. Se asume que el mismo conjunto aparece en el resto (mismo pipeline).
+
+Qué necesita para funcionar
+
+Carpeta base: layout_path.
+
+Para cada muestra (entrada raw_names), debe existir una carpeta:
+
+<layout_path>/<01_rawname>/detail/
+<layout_path>/<02_rawname>/detail/
+...
+
+
+Dentro de cada detail/ hay varios .mat, uno por ventana/fragmento de histona (p.ej., H3_01_3_8.mat, etc.).
+Cada .mat debe contener como mínimo:
+
+His con el campo pep_mz (una fila por péptido de esa ventana).
+
+auc como matriz con 3 columnas: [RT, Area, Ratio] para cada péptido.
+
+(Opcional) mod_short: etiquetas cortas de la modificación para construir nombres legibles.
+
+Para mapas de calor “Figuras 10” (opcionales):
+Debe existir histone_ratios_single_PTMs.mat en la carpeta layout_path (madre de heatmap_clustering). Este archivo tiene:
+
+targets: etiquetas de filas (las marcas/“PTMs”).
+
+sratios: matriz (PTMs × muestras) con valores de razón (ratio) en escala lineal.
+
+Paso a paso (qué hace cada bloque)
+1) Descubre cuántos péptidos hay (primera muestra)
+
+Selecciona la primera muestra raw_names{1}.
+
+Entra en <layout_path>/01_<raw>/detail y suma el número de péptidos de cada .mat (cada .mat define el número de filas en His.pep_mz).
+
+Resultado: npeps = total de péptidos “teóricos” que se esperan en todas las muestras.
+
+Por qué solo la primera: es una práctica común fijar el orden y número de péptidos con una referencia. Así la matriz final tiene dimensiones fijas y comparables entre muestras.
+
+2) Cuenta por subclases de histona (c_npeps)
+
+Vuelve a enumerar los .mat de la primera muestra.
+
+Clasifica cada archivo por tipo de histona (H3, H4, H1, H2A, H2B) y sub-grupo (para H3 y H2A) según el número de ventana (01, 02, 04, etc.) contenido en el nombre del .mat.
+
+Suma los péptidos de cada grupo para fines descriptivos/legenda (c_npeps).
+
+3) Construye etiquetas legibles de péptidos (peptides)
+
+Para cada .mat de la primera muestra:
+
+Deriva una etiqueta de posición histone_pos a partir del nombre del archivo (tokens separados por _).
+
+Ajusta casos especiales (p.ej., nombres que llevan v de “variant”).
+
+Combina esa posición con mod_short (si existe) para que cada fila (péptido) tenga una etiqueta humana útil (guardada en peptides).
+
+Esto no cambia datos; es cosmética para facilitar la lectura de matrices/figuras.
+
+4) Construye la gran matriz de datos (info)
+
+Inicializa una matriz info de tamaño npeps × (3 × nº_muestras).
+
+Para cada muestra:
+
+Carga cada .mat de su detail/, en el mismo orden que en la primera muestra.
+
+Copia las 3 columnas de auc (RT, Area, Ratio) a la zona correspondiente de info.
+
+Reordena columnas de info para que queden por bloques:
+[todas las RT | todas las Areas | todas las Ratios].
+
+5) Extrae y transforma matrices para análisis/gráficas
+
+info_auc = bloque de Área (intensidad).
+
+info_ratio = bloque de Ratio (relativos).
+
+Transformaciones:
+
+log10(info_auc) para los boxplots.
+
+Para info_ratio, se aplica log2((ratio+1e-10)*2^5) para estabilizar/escala.
+
+zscore por fila (cada péptido) para comparar patrones entre muestras.
+
+Estas transformaciones hacen que las figuras sean comparables, evitando que valores extremos “aplasten” el resto.
+
+6) Formatea nombres de muestras y crea carpeta de figuras
+
+Prepara raw_names en “<índice>,<nombre>” y sustituye _ por - para que se lean mejor en las gráficas.
+
+Crea (si no existe) la carpeta <layout_path>/heatmap_clustering.
+
+7) Figura 01 — Barras de péptidos identificados
+
+Cuenta en cada muestra cuántos péptidos tienen Area > 0 (identificados).
+
+Crea un gráfico de barras (01_bar_peptide_number.pdf).
+
+Escribe una anotación con el total teórico npeps y la lista de muestras a la derecha.
+
+8) Figura 02 — Boxplots de intensidades
+
+Dibuja caja y bigotes con log10(Area) por muestra (02_boxplot_peptide_intensity.pdf).
+
+Añade texto explicativo dentro de la figura (qué es mediana, percentiles, etc.).
+
+9) Figura 03 — PCA de muestras
+
+Calcula PCA sobre la matriz de ratios z-score (filas=pept., columnas=muestras; se transpone).
+
+Dibuja PC1 vs PC2 (03_pca.pdf), añade identificadores de muestra y una leyenda textual a la derecha.
+
+10) Figuras 10 — Heatmaps (si hay archivo de apoyo)
+
+Si existe histone_ratios_single_PTMs.mat:
+
+Crea un heatmap de ratios (log2-escalados) por PTM y muestra.
+
+Crea un heatmap de z-scores por PTM (resalta patrones, no magnitud absoluta).
+
+Guarda 10_heatmap_ratio_single_PTMs.pdf y 10_heatmap_zscore_single_PTMs.pdf.
+
+El bloque comentado de “11_heatmap_ratio_H*” está tal cual en tu código (no se ejecuta). Si decides activarlo, genera heatmaps por subclases de histonas usando los índices de c_npeps.
+
+11) (Opcional, desactivado) Clustering no supervisado
+
+La función clustering_histone aplica K-means a los perfiles de cada péptido y produce:
+
+12_clustering_peptides.pdf con las series por clúster y los centroides.
+
+13_cluster_k.pdf con un heatmap por cada clúster.
+
+12) Leyendas de figuras en texto
+
+write_txt genera Figure Legends.txt con explicaciones en inglés para Figuras 01–03 y 10.
+
+Interpretación de los resultados (qué mirar)
+
+Figura 01: si una muestra tiene muchos menos péptidos identificados, puede haber problemas de inyección/carga o de sensibilidad.
+
+Figura 02: las medianas y anchos deberían ser comparables entre muestras. Si una caja es muy baja y estrecha, esa muestra rinde peor.
+
+Figura 03 (PCA): réplicas deben agruparse; condiciones distintas deben separarse. Si no, revisar calidad/consistencia.
+
+Heatmaps: la versión “ratio” muestra niveles relativos; la “z-score” muestra patrones (subidas/bajadas coordinadas) independientemente de la escala.
+
+Errores comunes y cómo evitarlos
+
+Faltan variables en los .mat
+Cada .mat tiene que contener His.pep_mz y auc (3 columnas). Si falta mod_short, se crean etiquetas sin esa parte (el código ya lo contempla).
+
+Orden de ventanas distinto entre muestras
+Es crítico mantener el mismo conjunto y orden de archivos .mat por muestra. Si cambia, las filas se “desalinean”.
+
+histone_ratios_single_PTMs.mat no existe
+No pasa nada; simplemente no se dibujan las Figuras 10.
+
+Toolbox
+HeatMap y clustergram pertenecen a la Bioinformatics Toolbox. Si no está instalada, esas partes fallarán. (El bloque de clustering está comentado.)
+
+Rangos de ejes fijos
+Los límites (xlim, ylim) están elegidos para que “quepa todo” de manera estable. Si tu número de muestras/peptídicos es muy distinto, puedes ajustarlos (pero yo he mantenido tu original sin tocar nada).
+
+Dónde se guardan las salidas
+
+En la carpeta:
+
+<layout_path>/heatmap_clustering/
+
+
+Allí encontrarás:
+
+01_bar_peptide_number.pdf
+
+02_boxplot_peptide_intensity.pdf
+
+03_pca.pdf
+
+(Si aplica) 10_heatmap_ratio_single_PTMs.pdf, 10_heatmap_zscore_single_PTMs.pdf
+
+Figure Legends.txt
+
+Checklist rápido antes de ejecutar
+
+ Tu primer sample (raw_names{1}) tiene todos los .mat esperados.
+
+ Todos los samples tienen el mismo set de .mat en el mismo orden de listados.
+
+ Cada .mat define His.pep_mz y auc (tres columnas).
+
+ (Opcional) Existe histone_ratios_single_PTMs.mat si quieres los heatmaps de Fig. 10.
+
+ Tienes la Bioinformatics Toolbox si piensas usar heatmaps/clustergram.

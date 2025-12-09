@@ -1,0 +1,139 @@
+README (ESPAÑOL)
+¿Qué hace GetPSM?
+
+Construye una lista de PSMs (MATLAB .mat) y un fichero .plabel (para pLabel/pFind) a partir de:
+
+Evidencia MS1: la traza monoisotópica de cada péptido (mono_isointens) para definir una ventana de RT (inicio–fin) alrededor de su máximo local.
+
+Evidencia MS2: busca espectros MS2 dentro de esa ventana de RT y se queda solo con los que cumplen:
+
+Carga de precursor = carga teórica.
+
+m/z del precursor a ±ptol ppm de la m/z teórica del péptido (permitiendo M/M+1/M+2 con unitdiff/z).
+
+Exporta:
+
+./psm/<out_filename>.mat con el struct psm.
+
+./psm/<out_filename>.plabel con rutas, catálogo de modificaciones y lista de espectros.
+
+Entradas clave
+
+His: descriptor del péptido/proteína. Campos usados:
+
+pep_seq (string único).
+
+pep_mz (npep×nchg) y pep_ch (npep×nchg) (m/z y carga teóricas por estado de carga).
+
+mod_short{npep} (mods abreviadas para etiquetar).
+
+mod_type{npep} (mods largas: "pos,mod;pos,mod;...").
+
+pep_rts (npep×1): RT (min) por péptido (se requiere >4 min).
+
+pep_intens (npep×1): intensidad resumen (si >0 se calcula ventana; si no, se hace degenerada).
+
+isorts (nMS1×1): RT por scan MS1.
+
+mono_isointens (nMS1×npep): XIC monoisotópica por péptido.
+
+MS1_index, MS1_peaks: salidas de GetMS1ScanNo.
+
+MS2_index: salida de GetMS2ScanNo.
+
+ptol: tolerancia en ppm (si pones 100, internamente usa 10 ppm por compatibilidad).
+
+unitdiff: separación isotópica de 13C (~1.0032 Da).
+
+Salidas
+1) psm (MATLAB .mat)
+
+pep{npep}: etiquetas <seq>_<mods>.
+
+nms2(npep×1): nº de MS2 aceptados por péptido.
+
+Listas planas (una entrada por espectro MS2 aceptado):
+
+fname: <RAW>.<scan>.<scan>.<z> (string pLabel-like).
+
+prot: identificador de proteína/histona (derivado de out_filename).
+
+seq: secuencia (sin mods inline).
+
+mod0: mods abreviadas.
+
+mod1: mods largas (texto tipo "pos,mod;...").
+
+mod2: mods numéricas en formato pLabel "pos,ID;..." (mapeadas con GetMods).
+
+emz0: m/z medida original en MS2.
+
+emz: m/z posiblemente corregida a pico MS1 más intenso en ventana ppm (si cayó fuera).
+
+tmz: m/z teórica usada para matching.
+
+chg: carga.
+
+rt: RT del péptido.
+
+2) .plabel
+
+[FilePath]: ruta a .../MS2/<RAW>.ms2.
+
+[Modification]:
+
+1=pr[PEP_N] reservado (propionilación N-terminal).
+
+Resto: recorre GetMods() y emite líneas ID=nombre[residuo].
+
+[Total]: nº total de espectros reportados.
+
+Bloques [SpectrumN] con:
+
+name=<FNAME> (mayúsculas).
+
+pep1=0 <SECUENCIA> 1 <MODS_NUMÉRICAS>
+
+mod2 se calcula en change_modtype: toma mod1 y lo traduce a IDs pLabel (1 = pr[PEP_N], y luego recorre el catálogo por nombre × set de residuos).
+
+Flujo interno (paso a paso)
+
+Ventana de RT (por péptido):
+
+Encuentra el scan de MS1 más cercano a su pep_rt.
+
+Si pep_intens>0, segmenta la traza con GetTopBottom y refina con GetLocal para quedarte con un rango de scans [inicio, fin] que abarque el pico local. Si no, usa un rango degenerado [scan, scan].
+
+Selección MS2:
+
+Toma los MS2 con rt dentro de [rt1, rt2].
+
+Para cada MS2, comprueba carga y m/z vs. His.pep_mz (permite M/M+1/M+2 con unitdiff/z). Debe estar a ±ptol ppm.
+
+Corrección de m/z (opcional):
+
+Si la m/z medida está fuera de ppm respecto a la teórica, reemplaza por la m/z del pico MS1 más intenso dentro de la ventana ppm en el MS1 vinculado (su scan más cercano).
+
+Exporta psm y .plabel.
+
+Consejos y trampas comunes
+
+RT < 4 min: se ignoran esos péptidos (ix filtra). Ajusta si tu gradiente es corto.
+
+Rutas: el .plabel asume MS2 en ../MS2/<RAW>.ms2 relativo a cur_outpath. Si tu layout difiere, cambia ms2_path.
+
+Mods:
+
+1=pr[PEP_N] se reserva para N-terminal (posición 0,1 en mod2).
+
+Para mods en residuos, el ID se obtiene recorriendo todas las combinaciones nombre × residuo de GetMods() (orden fijo). Si añades mods al catálogo, el mapeo cambia.
+
+ptol=100 → 10 ppm: herencia histórica del script. Si quieres 100 ppm reales, pásalo como 100.0 y elimina el if ptol==100 o adapta la condición.
+
+Validación rápida
+GetPSM(outdir, 'H3K9ac_sample', His, pep_rts, pep_intens, isorts, mono_isointens, ...
+       MS1_index, MS1_peaks, MS2_index, 10, 1.0032);
+
+% Deberías ver ./psm/H3K9ac_sample.mat y ./psm/H3K9ac_sample.plabel
+load(fullfile(outdir,'psm','H3K9ac_sample.mat'));  % struct psm
+summary = table(psm.fname, psm.seq, psm.mod0, psm.tmz, psm.emz, psm.chg, psm.rt);

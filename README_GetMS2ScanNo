@@ -1,0 +1,118 @@
+README (ESPAÑOL)
+¿Qué hace GetMS2ScanNo?
+
+Convierte un TXT de MS2 centroidado en dos ficheros MAT:
+
+*_MS2scans.mat → MS2_index (metadatos por espectro + puntero a picos).
+
+*_MS2peaks.mat → MS2_peaks (todas las parejas m/z, intensidad concatenadas).
+
+Además, enlaza cada MS2 con su MS1 más próximo usando *_MS1scans.mat (debe existir, generado antes con GetMS1ScanNo).
+
+Si los MAT ya existen, no re-procesa.
+
+Formato de entrada esperado
+
+Encabezados con TAB:
+
+H\tDataType → 'C' (centroid) o 'P' (profile). Si es 'P', se aborta (centroida antes).
+
+S → inicio de espectro MS2; la línea contiene números (incluye el nº de scan MS2 y un m/z de precursor).
+
+I\tRetTime → RT (s, se convierte a min si detecta >1000).
+
+I\tActivationType → CID|ETD|HCD.
+
+I\tInstrumentType → ITMS|FTMS.
+
+I\tPrecursorScan → scan MS1 asociado (si falta, se aproxima al previo más cercano).
+
+I\tActivationCenter → m/z centro de aislamiento/activación (sirve para refinar el precursor).
+
+Z → carga y MH+ (se usa solo el primer Z).
+
+Luego, pares <m/z>\t<intensidad>.
+
+I\tMonoiosotopicMz está en el fichero, pero no se usa aquí.
+
+Salidas
+MS2_index (nScans × 8)
+
+MS1_scan (enlazado o aproximado).
+
+ms2_rt (min).
+
+MS2_scan.
+
+prec_mz (precursor m/z refinado): se “ajusta” por offset isotópico para coincidir con ActivationCenter ±20 ppm.
+
+charge (z).
+
+Fragtype ∈ {1..6}:
+1=CID-IT, 2=CID-FT, 3=ETD-IT, 4=ETD-FT, 5=HCD-IT, 6=HCD-FT.
+
+ptr → puntero de inicio en MS2_peaks (ver abajo).
+
+baseline → umbral por espectro (0 si no se aplicó).
+
+Cómo recuperar los picos del espectro i:
+
+start = MS2_index(i,7);
+stop  = (i<size(MS2_index,1)) * (MS2_index(i+1,7)-1) + ...
+        (i==size(MS2_index,1)) * size(MS2_peaks,1);
+scan_peaks = MS2_peaks(start:stop,:);   % [mz, inten]
+
+MS2_peaks (nPeaks × 2)
+
+Columna 1: m/z, Columna 2: intensidad (tras filtrar bajo el baseline cuando procede).
+
+Detalles del algoritmo
+
+Centroidado obligatorio: si DataType='P', se para y se avisa.
+
+Refino de precursor: con ActivationCenter y la separación ¹³C (~1.0032/z), se genera una rejilla cur_mz ± k*(1.0032/z) (k=-1..8) y se escoge la que cae dentro de ±20 ppm del centro.
+
+Enlace a MS1: si PrecursorScan no está, se toma el último MS1 cuyo scan_no ≤ MS2_scan, y se usa su RT para ms2_rt.
+
+Baseline: si el espectro tiene >100 puntos, se calcula el modo del histograma de log10(intensidad) (bins 0.08) y se filtra < baseline.
+
+Duplicados: si el nº de MS2 se repite inmediatamente, el segundo se omite.
+
+Supuestos de carpeta
+
+El script espera encontrar el MS1 en:
+../MS1/<dataname>_MS1scans.mat (carpeta hermana MS1).
+
+Si tu estructura es distinta, ajusta la línea:
+
+MS1_scanfile = fullfile(fileparts(datapath),'MS1',[dataname,'_MS1scans.mat']);
+
+Validación rápida
+ok = GetMS2ScanNo('/ruta/mi_export_MS2.txt');
+load('/ruta/mi_export_MS2_MS2scans.mat');  % MS2_index
+load('/ruta/mi_export_MS2_MS2peaks.mat');  % MS2_peaks
+size(MS2_index), size(MS2_peaks)
+
+% Reconstruir el espectro 100:
+s = 100;
+st = MS2_index(s,7);
+en = (s<size(MS2_index,1))*(MS2_index(s+1,7)-1) + (s==size(MS2_index,1))*size(MS2_peaks,1);
+spec = MS2_peaks(st:en,:);
+
+Errores comunes y cómo actuar
+
+“MS2 is profile mode” → el TXT no está centroidado. Pásalo por el centroidador (vendor/ProteoWizard).
+
+No encuentra MS1 → revisa la ruta a *_MS1scans.mat (estructura de carpetas).
+
+RTs en segundos → se convierten a minutos si el último RT > 1000 (heurística).
+
+Espectros vacíos o muy estrechos (m/z rango < 10) → se descartan.
+
+Varias líneas Z → solo se usa la primera (descarta cargas adicionales).
+
+Rendimiento y memoria
+
+Preasignaciones: 1.5e5 espectros y 4e7 picos totales (ajusta si te quedas corto o si quieres ahorrar RAM).
+
+Complejidad lineal con el nº de líneas; impresión de progreso en STDOUT.

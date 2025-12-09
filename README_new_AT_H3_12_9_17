@@ -1,0 +1,110 @@
+README (en castellano, para no bioinformáticos)
+¿Qué hace esta función?
+
+Ejecuta una búsqueda dirigida de cuatro péptidos H3 (ver init_histone.mod_short) en tus ficheros de espectrometría de masas:
+
+Localiza su tiempo de retención (RT) en el cromatograma (MS1).
+
+Integra su intensidad (cuánta señal hay).
+
+Construye una traza monoisotópica (señal del pico monoisotópico a lo largo del RT).
+
+Guarda los resultados (.mat) y dibuja figuras de diagnóstico.
+
+Opcional: si special.nDAmode==1, extrae PSMs (evidencia MS2).
+
+Relación con EpiProfile_PLANTS: es un bloque típico del pipeline. Cambiando el panel en init_histone puedes apuntar a otros péptidos/especies y mantener el mismo flujo de cuantificación.
+
+Parámetros de entrada
+
+MS1_index / MS1_peaks: índices y picos de MS1 (la 2ª columna de MS1_index suele ser el RT en minutos).
+
+MS2_index / MS2_peaks: índices y picos de MS2 (para verificación/PSMs).
+
+ptol: tolerancia de masa (p. ej., ppm).
+
+cur_outpath: carpeta de salida (se crea el .mat y figuras).
+
+special: estructura de banderas y rutas:
+
+ndebug: si es 1, no recalibra RTs (modo rápido/depuración).
+
+nDAmode: si es 2, usa recalibración flexible de RTs; si es 1, además saca PSMs.
+
+nhmass: masa auxiliar para get_rts2 en modo DA.
+
+raw_path: ruta de los ficheros raw para check_ref.
+
+Nota [No verificado]: en tu entorno, pr en mod_type suele significar propionilación de N-terminales/Lisinas, típico de EpiProfile para histonas.
+
+¿Qué hace cada parte?
+
+Comprobación de existencia: si H3_12_9_17.mat ya existe, no recalcula (idempotente).
+
+init_histone:
+
+Define los cuatro péptidos: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR.
+
+Aplica derivatizaciones en posiciones concretas (0,pr;1,pr;6,pr; etc.).
+
+Considera tres cargas ([1 2 3]).
+
+Calcula m/z teóricos por carga (calculate_pepmz).
+
+Define RTs de referencia y activa su visualización.
+
+Fija z=2 como carga principal y reordena columnas para que z=2 quede a la izquierda (estándar de lectura).
+
+calculate_layout:
+
+Reserva estructuras de salida.
+
+Recalibra RTs si no estás en ndebug: con check_ref confirma/ajusta anclas.
+
+Si nDAmode==2, primero intenta confirmar ancla; si no cambia, busca en todo el gradiente; si cambia, busca en ±5 min y refina con get_rts2.
+
+Finalmente bloquea las anclas (pone ndebug=1).
+
+Para cada péptido, llama a get_histone0 y guarda RTs, intensidades y trazas monoisotópicas.
+
+Salida y figuras: guarda .mat y dibuja con draw_layout.
+
+PSMs: si nDAmode==1, GetPSM2 extrae evidencia MS2.
+
+¿Cómo lo ejecuto?
+H3_12_9_17(MS1_index, MS1_peaks, MS2_index, MS2_peaks, ...
+           10, 'results/H3_panel', struct('ndebug',0,'nDAmode',2, ...
+                                          'nhmass',0, 'raw_path','/path/to/raw'));
+
+
+ptol=10 (ppm) típico para alta resolución.
+
+nDAmode=2: recalibra RTs de forma flexible (y luego fija ndebug=1).
+
+nDAmode=1: además genera PSMs.
+
+raw_path: necesario para check_ref.
+
+Problemas típicos y pistas
+
+No aparece RT: revisa rt_ref y ptol, y confirma que el péptido existe en la muestra.
+
+Figuras vacías: verifica permisos y que draw_layout esté en el path de MATLAB.
+
+PSMs sin resultados: necesitas MS2_index/peaks y parámetros adecuados.
+
+Cambiar de especie/panel: edita init_histone (secuencias/mods/cargas).
+
+Diferencias rápidas vs. H3_11_3_8
+
+4 péptidos (aquí) en lugar de 3.
+
+Tres cargas (1,2,3) en vez de 1–2; y se prioriza z=2 (reordenación de columnas).
+
+RTs de referencia para 4 entradas (dos con 22 min).
+
+Nota “Reality Filter”
+
+La interpretación de pr como propionilación es la práctica común en EpiProfile para histonas, pero ajústalo a tu protocolo si difiere.
+
+Los detalles exactos de special dependen de tu rama; aquí se describen los más habituales en EpiProfile_PLANTS.

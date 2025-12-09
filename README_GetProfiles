@@ -1,0 +1,89 @@
+README (ESPAÑOL)
+¿Qué hace GetProfiles?
+
+Extrae, para un precursor concreto (m/z y carga conocidos), los perfiles cromatográficos MS1 (XICs) en las posiciones isotópicas esperadas (p. ej., M−1, M, M+1, M+2). Devuelve una matriz c_ref_isointens con la intensidad por scan en cada canal isotópico y el vector isorts con el RT por scan.
+
+Entradas y salidas
+
+Entradas
+
+MS1_index (nScans×4): [scan_no, rt, ptr, baseline] (salida de GetMS1ScanNo).
+
+MS1_peaks (nPeaks×2): todas las parejas [m/z, intensidad] concatenadas.
+
+c_ref_isomzs (1×nmz): m/z de referencia por canal (orden fijo; típico: [M−1, M, M+1, M+2]).
+
+cur_ch: carga del precursor (z).
+
+ptol: tolerancia en ppm (se convierte a Th y se capa a 0.3 Th).
+
+nC13: modo de trabajo
+
+1 = simple (sin verificación de patrón isotópico).
+
+≠1 = con patrón (usa la tabla IPV).
+
+PosRange: índices de scans MS1 a procesar (p. ej., rt_i1:rt_i2).
+
+Salidas
+
+isorts (nScans×1): tiempos de retención (minutos).
+
+c_ref_isointens (nScans×nmz): intensidades por canal y scan (0 si no hay candidato aceptado).
+
+Modos de trabajo
+1) Modo simple (nC13 == 1)
+
+Para cada scan y canal isotópico, se toma el máximo dentro de la ventana m/z ± tol. Es rápido y tolerante a ruido/solapamientos, pero no garantiza coherencia isotópica (M, M+1…).
+
+2) Modo con patrón (nC13 ~= 1)
+
+Calcula la masa neutra aproximada M ≈ m/z_M * z − z*H⁺ (usa c_ref_isomzs(2) como M).
+
+Selecciona la fila IPV(floor(M), 1:5) → [1, t1, t2, t3, t4] con intensidades relativas esperadas (I(M)=1).
+
+Dentro de cada scan:
+
+Marca las señales que caen en cada ventana isotópica.
+
+Elige la pareja (M, M+1) cuyo cociente I(M+1)/I(M) está más cerca de t1.
+
+Acepta si M−1 no domina (o no existe) y la desviación del cociente está dentro de un umbral thr=5 (en log-espacio).
+
+Opcionalmente añade M+2 si I(M+2)/I(M+1) también cuadra (o si nC13==2, se fuerza).
+
+Resultado: intensidades coherentes con un patrón isotópico plausible, mitigando confusiones por solapamientos.
+
+Sobre IPV: es una tabla de vectores de patrón isotópico con 5 columnas (I(M), I(M+1), …, I(M+4)), normalizada a I(M)=1, y miles de filas (una por masa entera aproximada). En este código sólo se usa t1 = IPV(M,2).
+
+Detalles clave
+
+Ventana m/z: tol = min(ptol * m/z * 1e−6, 0.3) Th. El “cap” de 0.3 Th evita ventanas enormes en m/z altos/tolerancias grandes.
+
+Punteros a picos: los picos del scan i están en MS1_peaks(index(i):index(i+1)-1,:), con index = [1; MS1_index(:,3)].
+
+Orden de canales: debe ser compatible con el resto del pipeline (p. ej., canal 2 = M, canal 3 = M+1).
+
+Cuándo usar cada modo
+
+Simple (nC13=1): exploración rápida, señales aisladas, instrumentación estable y poca interferencia.
+
+Con patrón (nC13≠1): LC complejas, co-eluciones frecuentes, necesidad de consistencia isotópica para minimizar falsos positivos.
+
+Casos límite y consejos
+
+Si c_ref_isointens queda con muchos ceros en modo con patrón, puede que el ptol sea estrecho o que el patrón no cuadre (ruido, bajo SNR).
+→ prueba ampliar ptol, o usar nC13=1 para ver la señal bruta.
+
+Si IPV no cubre el rango de masas (p. ej., floor(M) fuera), habrá error: revisa la masa o amplía la tabla.
+
+Con altas cargas y gradientes largos, el “cap” de 0.3 Th protege frente a ventanas demasiado anchas.
+
+Ejemplo mínimo de uso
+% Supón que ya definiste:
+%   c_ref_isomzs = [M-1, M, M+1, M+2]; cur_ch = z; ptol = 20; nC13 = 0;
+%   PosRange = rt_i1:rt_i2;  % p. ej., ventana de RT donde vive el precursor
+
+[isorts, XICs] = GetProfiles(MS1_index, MS1_peaks, c_ref_isomzs, cur_ch, 20, 0, PosRange);
+
+% XICs(:,2) = traza monoisotópica; XICs(:,3) = M+1; etc.

@@ -1,0 +1,136 @@
+README (en castellano, extenso)
+¿Qué hace ReadInput?
+
+Lee un fichero de texto plano con parámetros en formato clave=valor y devuelve:
+
+raw_path – ruta a los datos (normalmente donde están los .RAW).
+
+norganism – código numérico: 1=Humano, 2=Ratón.
+
+nsource – código del tipo de origen/diseño:
+
+1=histone_normal
+
+2=histone_SILAC (marcado isotópico ligero/pesado)
+
+3=histone_C13 (13C)
+
+4=histone_N15 (15N)
+
+nsubtype – solo para nsource=4 (N15):
+
+0: N14 light Mods
+
+1: N15 light Mods
+
+2: N14 heavy Mods
+
+3: N15 heavy Mods
+
+4: 0+1 (combina subtipos 0 y 1)
+
+5: 0+3 (combina subtipos 0 y 3)
+
+Devuelve además bOK indicando si existía el fichero y se pudo abrir y procesar (ver limitaciones).
+
+Formato esperado del fichero de parámetros
+
+Texto plano, codificación simple (ASCII/UTF-8).
+
+Una clave por línea, patrón clave=valor.
+
+Orden recomendado y asumido por el código (muy importante):
+
+raw_path=... (esta línea debe empezar exactamente por raw_path)
+
+norganism=...
+
+nsource=...
+
+nsubtype=...
+
+Ejemplo (Windows)
+raw_path=C:\proyectos\epiprofile\runs\ontogenia_01
+norganism=1
+nsource=1
+nsubtype=0
+
+Ejemplo (Linux)
+raw_path=/datos/epiprofile/runs/ontogenia_01
+norganism=2
+nsource=4
+nsubtype=1
+
+
+Atención: el código no recorta espacios ni comillas. Evita escribir:
+raw_path="C:\datos\..." o raw_path= C:\datos\... (con espacios extra).
+Escribe directamente raw_path=C:\datos\....
+
+Entradas y salidas de la función
+
+Entrada
+
+para_txtfile — ruta al .txt con los parámetros anteriores.
+
+Salidas
+
+bOK — 1 si el fichero existe, se abre y se ejecuta el bucle de lectura; 0 si no existe o no se puede abrir.
+
+raw_path, norganism, nsource, nsubtype — valores leídos (o por defecto si no se encontraron).
+
+Cómo funciona la lectura (resumen)
+
+Comprueba que el fichero existe y que se puede abrir.
+
+Lee línea a línea:
+
+Busca una línea que empiece exactamente por raw_path y toma lo que haya tras el =.
+
+A partir de ahí, busca norganism, luego nsource, luego nsubtype (en ese orden), y extrae el número tras =.
+
+Cierra el fichero y pone bOK=1.
+
+Limitaciones importantes (derivadas del código original)
+
+Orden rígido: el escaneo no rebobina. Si norganism aparece antes de raw_path, no se leerá.
+
+raw_path al inicio: la línea debe empezar por raw_path (sin espacios previos). Para el resto de claves, pueden estar en cualquier posición de la línea.
+
+Sin “trim”: no se recortan espacios; cualquier espacio después de = formará parte del valor (y podría romper rutas).
+
+bOK optimista: vale 1 si el fichero se abrió y el bucle se ejecutó, aunque falte alguna clave y se haya salido con los valores por defecto. Si necesitas validación estricta, añade comprobaciones posteriores (p. ej., isempty(raw_path) o isnan(norganism)).
+
+Sin comentarios: no hay manejo de comentarios (#, //, etc.). Evítalos o colócalos en líneas separadas después de las cuatro claves, sabiendo que el código no los ignora explícitamente.
+
+Buenas prácticas
+
+Mantén el orden exacto de claves y evita espacios extra.
+
+Usa rutas sin comillas.
+
+Valida tras leer:
+
+[ok, raw_path, norg, nsrc, nsub] = ReadInput('params.txt');
+assert(ok==1 && ~isempty(raw_path), 'Parámetros incompletos o fichero ilegible');
+
+
+Si trabajas con diseños N15, documenta claramente qué significan tus subtipos (0..5) en tu proyecto.
+
+Ejemplo de uso integrado
+% 1) Leer parámetros
+[ok, raw_path, norg, nsrc, nsub] = ReadInput('params_ontogenia.txt');
+if ~ok || isempty(raw_path)
+    error('No se pudieron leer parámetros válidos.');
+end
+
+% 2) Listar nombres de archivo RAW (sin extensión) según tu convención
+raw_names = {'YNG_01','YNG_02','BOT_01','BOT_02'};
+
+% 3) Convertir RAW -> MS1/MS2 (si aplica en tu flujo)
+% Raw2MS(raw_path, raw_names);
+
+% 4) Continuar con el pipeline...
+
+Resumen en una frase
+
+ReadInput lee un fichero de parámetros muy simple (clave=valor) para obtener raw_path, norganism, nsource y nsubtype; requiere orden y formato estrictos, no hace “trim” de espacios y pone bOK=1 aunque falte alguna clave, por lo que conviene validar lo leído antes de seguir.

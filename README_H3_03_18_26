@@ -1,0 +1,165 @@
+H3_03_18_26 — Panel dirigido H3 KQLATKAAR (18–26)
+1) Resumen ejecutivo
+
+Panel para el péptido H3 KQLATKAAR (pos. 18–26) con PTMs en K18, T22 y K23.
+Flujo: anclaje en unmod → recalibración de RTs → reubicación (MS1 o MS2-asistida) → extracción de RT e intensidad (XIC) por estado PTM → salida de cuantificaciones y figuras (y PSMs si procede).
+
+Estados cubiertos
+unmod, K23me1, K18me1, K18me1K23me1, K18ac, K23ac, K18acK23ac, K18acT22pr, T22ac, T22pr.
+
+2) Entradas, salidas y parámetros clave
+
+Entradas
+
+MS1_index, MS1_peaks (perfil y picos MS1 centroidados).
+
+MS2_index, MS2_peaks (escans y picos MS2 centroidados).
+
+ptol (ppm de tolerancia m/z).
+
+special: struct con campos como:
+
+raw_path (para check_ref),
+
+ndebug (modo debug/desanclaje),
+
+nDAmode (activar lógica MS2-asistida y exportar PSMs),
+
+nhmass (parámetro de masas para diagnósticos/neutral-loss).
+
+Salidas
+
+H3_03_18_26.mat con matrices pep_rts y pep_intens.
+
+Figuras diagnósticas (draw_layout) con XICs/RTs y marcas MS2.
+
+PSMs (GetPSM) cuando special.nDAmode == 1.
+
+Constantes internas
+
+unitdiff = 1.0032 (Δ¹³C–¹²C).
+
+His.pep_ch = [1 2 3] (considera 1+, 2+, 3+).
+
+m/z teórico por PTM/carga vía calculate_pepmz(His).
+
+His.display([8 9 10]) = 0 para ocultar por defecto el bloque T22* en plots.
+
+3) Estrategia de RT y reglas de extracción
+3.1 Anclaje y recalibración
+
+Se intenta fijar RT de unmod con check_ref y get_rts (o get_rts2 si nDAmode==2).
+
+Si unmod no está claro, se triangula usando K23me1 y K18ac: se toma una RT intermedia razonada o el máximo local más robusto en esa ventana.
+
+Recalibración: desplazamiento Δ = RT(unmod_observado) − RT(unmod_priori) y se aplica a todas las RT de referencia.
+
+3.2 Reubicación (relocate)
+
+MS1-only: relocate usa ventanas heurísticas alrededor del ancla y propagación de desplazamientos cuando hay relaciones fuertes (p.ej., K23me1 ↔ K18me1; K18ac ↔ K23ac; T22ac ↔ K18acT22pr).
+
+MS2-asistida: relocate2 replica la lógica con confirmaciones por fragmentos diagnósticos (get_rts2) y mejora la desambiguación en co-elución.
+
+3.3 Extracción (extractores)
+
+Simple (un objetivo): get_histone1 / get_histone10 (este último si se esperan dos máximos cercanos y hace “split” limpio).
+
+Pareado (dos objetivos): get_histone2 cuando se anticipa co-elución fuerte.
+Ejemplos:
+
+K23me1 vs K18me1: si |RT(K18me1)−RT(K23me1)| ≤ 0.4 min, usar pareado; si no, extraer por separado.
+
+K18ac vs K23ac y T22ac vs K18acT22pr: suelen requerir pareado.
+
+4) Ventanas de búsqueda (resumen operativo)
+
+t = RT del ancla unmod. δ = 0.1 min.
+
+K23me1: [t+δ, t+14]; si hay 2 máximos próximos con intensidades comparables, reparte y alinea K18me1 en consecuencia.
+
+K18me1: sigue el desplazamiento de K23me1 cuando se detecta “doblete”.
+
+K18me1K23me1: desde max(t+δ, RT(K18me1)+δ) hasta ≈ t+22 (o RT(K18me1) + (RT(K18me1)−t) + 2).
+
+K18ac: [t−14, t−δ]; K23ac hereda el desplazamiento de K18ac.
+
+K18acK23ac: [t−20, min(t−δ, RT(K18ac)−δ)].
+
+T22ac: [t+δ, t+14]; K18acT22pr hereda desplazamiento de T22ac.
+
+T22pr: [max(t, RT(T22ac))+δ, t+20].
+
+5) MS2 y confirmación diagnóstica
+
+Con nDAmode == 2:
+
+get_rts2 añade filtros por fragmentos diagnósticos o transiciones MS2, reforzando la especificidad en me/ac/pr y resolviendo solapes (especialmente K18/K23 y T22).
+
+Se exportan PSMs para auditoría de identidades y validación.
+
+6) Pares/co-elución relevantes (decisión automática)
+
+K23me1 vs K18me1 → simple si ΔRT > 0.4 min; pareado si ΔRT ≤ 0.4.
+
+K18ac vs K23ac → pareado por defecto (co-eluyen con frecuencia).
+
+T22ac vs K18acT22pr → análogo (usa pareado si ΔRT estrecho).
+
+Dobles (K18me1K23me1, K18acK23ac) → tratadas como entidades propias con ventanas dedicadas.
+
+7) QA/QC y resolución de incidencias
+
+Falta de anclaje en unmod: se activa triangulación con K23me1/K18ac; si aún no aparece, revisa ptol, calibración m/z y rango RT global.
+
+Falsos dobles picos: el criterio inten_sum(2) ≥ inten_sum(1)/30 y ΔRT ≤ 2 min evita dividir ruido como “isómeros”.
+
+MS2 débil: baja a MS1-only o amplía ventanas; revisa nhmass y lista de iones diagnósticos en la librería.
+
+Figuras saturadas: usa His.display para ocultar canales (por defecto T22* desactivados).
+
+8) Reproducibilidad y extensión
+
+m/z teóricos con calculate_pepmz (evita números hard-coded).
+
+Tolerancias en ppm (ptol) y ventanas en minutos documentadas arriba.
+
+Para nuevas variantes (otras marcas o combinaciones), clonar patrón de:
+
+definición en His.mod_short/mod_type,
+
+RT prior aproximado,
+
+regla en relocate/relocate2,
+
+extractor adecuado (get_histone1/2/10).
+
+9) Diferencias respecto a paneles H3_02* y notas por especie
+
+Comparado con H3_02 (9–17), aquí el ancla está más tardía (región 18–26) y las ventanas RT se desplazan hacia el final del gradiente.
+
+La resolución K18/K23 es crítica: la lógica de pareado se usa con mayor frecuencia que en 9–17.
+
+Especies (A. thaliana / M. polymorpha / Chlamydomonas): el orden relativo (K18 vs K23; T22) suele conservarse, pero los tiempos absolutos y anchos de pico pueden variar con matriz/columna/gradiente. Recomendación:
+
+Mantener un EpiProfile separado por especie (librería, RT priors y, si conviene, display defaults).
+
+Empezar con estas reglas y reajustar RT priors tras los primeros runs de calibración (2–3 arquivos por especie bastan para fijar deltas estables).
+
+10) Ejemplo de uso (pseudocódigo)
+% Cargar índices/picos MS1/MS2 y configurar 'special'
+special = struct('raw_path', rawfile, 'ndebug', 0, 'nDAmode', 2, 'nhmass', 0);
+ptol    = 10;  % ppm
+outdir  = 'results/';
+H3_03_18_26(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,outdir,special);
+
+11) Checklist rápido
+
+ ¿unmod anclado? Si no: triangulación K23me1/K18ac.
+
+ ¿ΔRT(K18me1–K23me1) > 0.4? → simple; si no → pareado.
+
+ ¿K18ac/K23ac y T22ac/K18acT22pr co-eluyen? → pareado.
+
+ ¿Plots limpios? Ajusta His.display y ventanas si es necesario.
+
+ ¿PSMs exportados? Solo con nDAmode == 1.

@@ -1,0 +1,65 @@
+README (ESPAÑOL)
+¿Qué hace H3_02a_9_17?
+
+Cuantifica el péptido H3 KSTGGKAPR con fosforilación en S10 (S10ph) como ancla, y combina K9 (me1/2/3 o ac) y/o K14ac. Extrae RT e intensidades, dibuja los XICs y puede exportar .plabel.
+
+Entradas
+
+MS1_index/MS1_peaks, MS2_index/MS2_peaks, ptol, cur_outpath, special (nDAmode, ndebug, nhmass, raw_path).
+
+Salidas
+
+H3_02a_9_17.mat, figuras, y opcionalmente H3_02a_9_17.plabel.
+
+Diferencias clave vs. H3_02_9_17 (sin S10ph)
+
+Ancla de RT distinta
+
+H3_02_9_17: ancla = unmod.
+
+H3_02a_9_17: ancla = S10ph.
+→ Todas las ventanas RT se recalculan relativas a S10ph, no al péptido no modificado.
+
+Comportamiento MS2
+
+Con S10ph es frecuente pérdida neutra de 98 Da (H₃PO₄) en CID/HCD.
+
+En modo MS2-assisted (relocate2), esto mejora la confirmación si los iones diagnósticos contemplan dicha pérdida. Conviene usar get_rts2/get_rts22.
+
+Orden de elución y polaridad
+
+S10ph desplaza RT (más polar): típicamente más temprano que sus equivalentes no fosforilados.
+
+Los dobles/combinados (K9meX/K14ac + S10ph) quedan encajonados entre me2S10ph y el ancla, o entre sus vecinos definidos.
+
+Riesgos de co-elución
+
+Al añadir fosfo, aumentan co-eluciones con isóbaros cercanos; el emparejamiento me2 vs me3 se vuelve más sensible y la función find_pair_new es aún más útil.
+
+Reflexión multi-especie (AT / MP / CR) — para mis notas
+
+Secuencia y clivaje
+
+A. thaliana (AT) y Marchantia polymorpha (MP) suelen compartir secuencia canónica de H3 en K9–S10–K14; Chlamydomonas reinhardtii (CR) puede tener variantes/isoformas.
+
+Cualquier variante (aa, sitios vecinos) altera cargas preferentes y fragmentación; mantendré EpiProfile por especie (librerías lib/AT, lib/MP, lib/CR) y .params específicos.
+
+RT y química de matriz
+
+Diferencias en matriz/gradiente (sales, carga de fosfato, complejidad proteómica) desplazan RT entre especies.
+
+Tomaré S10ph como ancla intra-especie: recalibración por especie en cada “run”, y luego mapearé offsets AT↔MP↔CR a posteriori para comparar.
+
+Estoiquiometría y dinámica
+
+La abundancia relativa de S10ph y sus combinaciones con K9 y K14 puede cambiar drásticamente por estado fisiológico y ontogenia; no asumiré traslación directa AT→MP→CR de RT ni intensidad.
+
+Usaré MS2-assisted en datasets con fosfo para mejorar especificidad (NL98), y reservaré MS1-only para corridas de alta resolución con buena ortogonalidad cromatográfica.
+
+Diagnóstico y calidad
+
+Validaré con índices de calidad (coherencia de isótopos, reposicionamiento de apex vs. ancla, presencia de pares iónicos diagnósticos con NL).
+
+Mantendré tablas de referencia por especie (anchors_*.tsv) con RT medianas por estado PTM para estabilizar los layouts en futuros análisis.
+
+Conclusión operativa: un repo por especie bajo el paraguas EpiProfile_PLANTS, con anclas locales (S10ph en este panel), ventanas/RT ajustadas por especie, y modo MS2-assisted preferente cuando haya fosforilaciones.
