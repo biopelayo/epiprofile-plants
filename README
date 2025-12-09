@@ -1,0 +1,53 @@
+# EpiProfile_PLANTS
+
+EpiProfile_PLANTS is a MATLAB-based extension of EpiProfile 2.0 tailored for **plant histone proteomics**.  
+It provides species-specific histone peptide catalogs, layouts and utilities to quantify histone post-translational modifications (hPTMs) in organisms such as *Arabidopsis thaliana*, *Marchantia polymorpha* and *Chlamydomonas reinhardtii*.
+
+---
+
+## Overview
+
+This repository contains a plant-focused adaptation of the original EpiProfile 2.0 software for histone PTM quantification. The goal of EpiProfile_PLANTS is to:
+
+- Make EpiProfile usable on plant datasets without ad-hoc hacking.
+- Provide curated histone peptide catalogs and layouts for multiple plant species.
+- Expose a clearer architecture for:
+  - MS pre-processing (MS1/MS2),
+  - quantification of hPTMs,
+  - quality control and reporting.
+
+EpiProfile_PLANTS is used as the computational backbone in my PhD work on histone H3K79 and related marks in *Arabidopsis* and other plant systems.
+
+---
+
+## Provenance and license
+
+EpiProfile_PLANTS is a **modified and extended version** of the original EpiProfile 2.0 software, which is distributed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+- The core logic and several functions come from the original EpiProfile 2.0 distribution.
+- Additional code has been added or modified to:
+  - support plant-specific histone sequences and variants,
+  - introduce species-specific `init_histone0_*` libraries and panels,
+  - provide QC and visualization helpers tailored to plant datasets.
+
+In accordance with the original license, this repository is released under the **GNU General Public License v3.0**.  
+See the [`LICENSE`](./LICENSE) file for the full text.
+
+---
+
+## Repository structure
+
+```text
+epiprofile-plants/
+├── src/
+│   ├── core/      # core EpiProfile logic (adapted from EpiProfile 2.0)
+│   ├── plants/    # plant-specific init_histone0_* and panel definitions
+│   ├── qc/        # quality control and reporting utilities
+│   └── utils/     # shared helper functions
+├── layouts/       # tabular catalogs of histone peptides and panels
+├── examples/
+│   └── ONTOGENY_DEMO/   # minimal BOT/FLOR/SEN demo dataset (no raw WIFF)
+├── docs/          # additional documentation (architecture, usage, design notes)
+├── .github/workflows/   # optional CI workflows
+├── LICENSE
+└── README.md
