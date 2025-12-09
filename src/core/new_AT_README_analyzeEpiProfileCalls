@@ -1,0 +1,110 @@
+README — “analyzeEpiProfileCalls.m” (explicación extensa en español)
+¿Qué hace?
+
+Este utilitario lee el archivo EpiProfile.m, detecta las subfunciones definidas dentro de ese mismo fichero, ejecuta EpiProfile bajo el profiler de MATLAB y, al final, imprime una lista en consola indicando cuáles de esas subfunciones se llamaron realmente durante la ejecución (verde) y cuáles no (rojo).
+
+Piensa en ello como un “radar” para ver, en tu propia versión de EpiProfile, qué partes del código se activan cuando lo lanzas tal cual.
+
+¿Para quién es?
+
+Para ti y cualquiera que mantenga/adapte EpiProfile (p. ej., EpiProfile_PLANTS).
+
+Útil para limpieza y auditoría: ¿hay subfunciones muertas? ¿qué se ejecuta en un run típico?
+
+Útil también para documentar el flujo real: no solo lo que “existe” en el fichero, sino lo que “ocurre” en la práctica.
+
+Requisitos
+
+MATLAB con acceso al profiler (viene de serie).
+
+Carpeta con EpiProfile.m y sus dependencias mínimas para que EpiProfile arranque (aunque falle luego, el profiler ya puede haber registrado llamadas previas).
+
+Consola que soporte ANSI si quieres ver colores (verde/rojo).
+
+En algunos entornos de MATLAB (Command Window clásico), las secuencias ANSI no se renderizan; verás texto con \x1b[32m. Esto no es un error del script; es una limitación del entorno de salida.
+
+Si ejecutas MATLAB en terminal del sistema (matlab -nodesktop -nosplash) es más probable que veas colores.
+
+Reality Filter: No podemos garantizar que tu entorno muestre colores ANSI. Si no ves colores, los nombres siguen siendo correctos; solo cambia la estética.
+
+Cómo se usa
+analyzeEpiProfileCalls('/ruta/a/tu/carpeta');
+
+
+Esa carpeta debe contener EpiProfile.m.
+
+El script añade temporalmente esa carpeta al path y ejecuta EpiProfile.
+
+Salida esperada en consola:
+
+Encabezado: “Resultados de ejecución de EpiProfile:”
+
+Luego, una línea por cada subfunción declarada dentro de EpiProfile.m:
+
+Verde si el profiler vio esa función en el FunctionTable (se llamó).
+
+Rojo si no la vio (no se llamó).
+
+Qué detecta exactamente
+
+Descubrimiento estático (texto):
+Lee EpiProfile.m y busca líneas con patrón function ... name(....
+Desde la línea 2 (salta la primera a propósito), para no confundir la cabecera principal con subfunciones (criterio idéntico al código original que me pasaste).
+
+Ejecución con profiler:
+Lanza EpiProfile y registra todo lo que se llamó.
+
+Cruce de listas:
+Compara los nombres extraídos estáticamente (subfunciones) con los nombres reportados por el profiler.
+
+Limitaciones (importante)
+
+Solo inspecciona EpiProfile.m:
+Si hay subfunciones repartidas en otros ficheros, no aparecen en la lista “detectada” (aunque sí pueden aparecer como ejecutadas en el profiler, pero no se comparan).
+
+Comparación por nombre exacto:
+El profiler puede devolver nombres con calificador (p. ej. paquetes, clases). El código compara con strcmp contra nombres “pelados”. Resultado: alguna función podría salir en rojo aunque se haya ejecutado con nombre cualificado.
+Solución eventual (opcional, no altero tu lógica): normalizar con contains o un map de alias.
+
+EpiProfile sin argumentos:
+Si tu EpiProfile necesita inputs/estado, adapta dentro de EpiProfile (o modifica la llamada). Aquí mantengo la invocación simple por diseño.
+
+Diagnóstico típico que habilita
+
+Subfunciones “muertas”: aparecen siempre en rojo tras varios runs → candidatas a eliminar o documentar como “deprecated”.
+
+Cobertura parcial: si una rama de código no se ejecuta, sabrás qué falta activar en tus tests.
+
+Rendimiento: aunque este script no presenta tiempos, al abrir profile viewer puedes inspeccionar dónde se consume tiempo.
+
+Puedes abrir el visor manualmente tras ejecutar:
+
+profile viewer
+
+Preguntas frecuentes
+
+1) No veo colores, salen códigos raros.
+Tu consola no interpreta ANSI. Los nombres siguen siendo correctos. Si te interesa color en el Command Window clásico, existen alternativas como cprintf (File Exchange) o ejecutar MATLAB en terminal del sistema.
+
+2) ¿Y las funciones locales/nested dentro de otras subfunciones?
+Si están en EpiProfile.m y siguen el patrón function ... name( en líneas posteriores a la primera, se detectarán. Si son nested muy internas con definiciones en la misma línea o no coinciden con el patrón, podrían escaparse.
+
+3) ¿Por qué marca en rojo algo que sí sé que se ejecutó?
+Puede ser por nombres cualificados devueltos por el profiler. Este script compara nombre exacto (sin prefijos). La lógica se mantiene así para respetar tu versión.
+
+Buenas prácticas complementarias (opcionales)
+
+Tests dirigidos: prepara entradas mínimas para que EpiProfile active las rutas que te interesan (e.g., un set reducido de .mat).
+
+Integración CI: puedes capturar la salida y guardarla como artefacto en tu repo (p. ej., docs/qc/epiprofile_callmap.txt) para comparar entre commits.
+
+Extender análisis: añadir recuento de llamadas o tiempo por subfunción (a partir de pInfo.FunctionTable(n).NumCalls / TotalTime).
+(No lo implemento aquí para no cambiar tu lógica.)
+
+Resumen ejecutivo
+
+Qué hace: lista subfunciones declaradas en EpiProfile.m y marca cuáles se llamaron en una ejecución real.
+
+Para qué sirve: limpieza, auditoría de flujo y guía de pruebas.
+
+Qué NO hace: no resuelve dependencias externas, no reescribe EpiProfile, no analiza otros ficheros, no normaliza nombres cualificados.

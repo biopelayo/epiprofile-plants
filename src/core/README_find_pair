@@ -1,0 +1,84 @@
+README — find_pair (ES)
+¿Qué hace?
+
+Resuelve una pareja de tiempos de retención 
+‘
+𝑡
+3
+‘
+,
+‘
+𝑡
+4
+‘
+‘t3‘,‘t4‘ a partir de dos conjuntos de candidatos (grupo/canal “3” y “4”). Combina proximidad en RT con prioridad por intensidad y, si no encuentra pareja dentro de una ventana asimétrica, genera una pareja sintética desplazada ±0,5 unidades.
+
+Entradas
+
+rts3 — vector de RTs candidatos del grupo 3.
+
+top1_rt3 — RT del mejor candidato del grupo 3.
+
+inten_sum3 — intensidades alineadas con rts3.
+
+top1_inten_sum3 — intensidad del mejor candidato del grupo 3.
+
+rts4 — vector de RTs candidatos del grupo 4.
+
+top1_rt4 — RT del mejor candidato del grupo 4.
+
+inten_sum4 — intensidades alineadas con rts4.
+
+top1_inten_sum4 — intensidad del mejor candidato del grupo 4.
+
+Requisito: las longitudes de rts? e inten_sum? deben coincidir y estar alineadas índice a índice.
+
+Salidas
+
+t3, t4 — RTs emparejados. Si no se encuentra pareja en la ventana del otro grupo, se usa un desplazamiento fijo:
+
+Anclando en 3: t4 = top1_rt3 - 0.5
+
+Anclando en 4: t3 = top1_rt4 + 0.5
+Si ambas listas están vacías → t3 = 0, t4 = 0.
+
+Reglas de emparejamiento
+
+Ambos no vacíos:
+
+Si top1_rt4 cae en [top1_rt3 − 2, top1_rt3 + 0.5] → pareja directa (t3 = top1_rt3, t4 = top1_rt4).
+
+Si no:
+
+Si top1_inten_sum3 > top1_inten_sum4 → ancla en top1_rt3.
+Busca en rts4 dentro de [top1_rt3 − 2, top1_rt3 + 0.5] y elige el máximo por inten_sum4.
+Si no hay candidatos → t4 = top1_rt3 − 0.5.
+
+En caso contrario → ancla en top1_rt4.
+Busca en rts3 dentro de [top1_rt4 − 0.5, top1_rt4 + 2] y elige el máximo por inten_sum3.
+Si no hay candidatos → t3 = top1_rt4 + 0.5.
+En ambos casos, el ancla se copia al otro (t3 = top1_rt3 o t4 = top1_rt4).
+
+Solo uno no vacío:
+
+Solo grupo 3 → (t3, t4) = (top1_rt3, top1_rt3 − 0.5).
+
+Solo grupo 4 → (t3, t4) = (top1_rt4 + 0.5, top1_rt4).
+
+Ambos vacíos → (t3, t4) = (0, 0).
+
+Ventanas asimétricas
+
+Al buscar en 4 desde 3: [top1_rt3 − 2, top1_rt3 + 0.5].
+
+Al buscar en 3 desde 4: [top1_rt4 − 0.5, top1_rt4 + 2].
+
+[Inferencia] La asimetría modela un desplazamiento sistemático esperado entre canales (p. ej., etiquetado isotópico o diferencias cromatográficas), permitiendo más holgura hacia “un lado” según el ancla.
+
+Detalles prácticos
+
+Elección por intensidad: se usa el máximo dentro de la ventana. Si hay empates, max devuelve el primero.
+
+Unidades: la función no las impone; generalmente minutos en LC–MS.
+
+Robustez: si las listas están mal alineadas o las ventanas no capturan el desplazamiento real, aparecerán más parejas sintéticas (±0,5). Ajusta esas ventanas en funciones de nivel superior si fuera necesario (no aquí).

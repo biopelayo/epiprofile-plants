@@ -1,0 +1,211 @@
+README ampliado (EpiProfile.m)
+1) ¿Qué hace esta función?
+
+EpiProfile es el orquestador del pipeline. Lee un fichero de parámetros (paras.txt por defecto), valida fuentes de datos y muestras, detecta el tipo de instrumento (FT vs IT) para ajustar la tolerancia de masa (ptol) y, según el modo de etiquetado (nsource/nsubtype), despacha a las rutinas DrawISOProfile0..5 que generan perfiles isotópicos y cuantificación para histonas (normal y etiquetadas).
+
+Flujo, simplificado:
+
+Parámetros → ReadInput + check_otherparas.
+
+Validación de muestras → presencia de MS1/MS2, tipo de MS1 (MS1Type).
+
+Homogeneidad de instrumento → o todas FT (ptol = def_ptol) o todas IT (ptol = 1000).
+
+Contexto → agrupa opciones en special (organismo, fuente, subtipo, debug, etc.).
+
+Perfiles → llama DrawISOProfile0 (referencias), DrawISOProfile1 (normal) y, si aplica, la variante etiquetada (DrawISOProfile2..5).
+
+Logging → salida a histone_logs.txt, tiempo total al final.
+
+[Inferencia] El significado exacto de ptol (ppm vs mDa) y algunos formatos dependen del código original; aquí documentamos el papel funcional: definir ventanas de búsqueda más estrechas (FT) o más anchas (IT).
+
+2) ¿Por qué está diseñado así?
+
+Separación de preocupaciones: Esta función no cuantifica; coordina. La cuantificación y el dibujo de perfiles ocurren en DrawISOProfile*.
+
+Robustez: Evita mezclar corridas FT e IT, porque las tolerancias de masa y, a veces, la resolución de isótopos difieren y rompen la coherencia si se analizan juntas.
+
+Portabilidad: El bloque Raw2MS está comentado para permitir preprocesado externo (p. ej., ProteoWizard, ThermoRawFileParser, SCIEX OS), que suele ser lo más estable entre laboratorios.
+
+3) Entradas, salidas y efectos colaterales
+
+Entrada principal: paras.txt (o el que le pases).
+
+Lo parsea ReadInput y complementa check_otherparas.
+
+No inventes formato: añade sólo las claves que el propio ReadInput entienda.
+
+Ficheros requeridos por muestra:
+
+MS1/<rawname>.MS1 → se indexa con GetMS1ScanNo, que crea <rawname>_MS1scans.mat.
+
+MS2/<rawname>.ms2 → se valida con GetMS2ScanNo.
+
+Salidas:
+
+Logs: <raw_path>/histone_logs.txt.
+
+Figuras/archivos: los crean DrawISOProfile0..5 dentro de subcarpetas.
+[Inferencia] En muchos forks se usa histone_layouts/ y detail/ por muestra.
+
+4) Parámetros clave y dónde tocarlos
+
+Fuente de datos (etiquetado): nsource (1..5)
+
+Mapa en el código:
+
+histone_normal
+
+histone_SILAC
+
+histone_C13
+
+histone_N15
+
+histone_13CD3
+
+Dónde: valor se obtiene en ReadInput(para_txtfile) (tu paras.txt).
+
+Subtipo de 15N: nsubtype
+
+Controla special.nhmass para N15.
+
+Dónde: lógica en:
+
+if 4==nsource && (0~=nsubtype && 2~=nsubtype)
+    special.nhmass = 1;
+else
+    special.nhmass = 0;
+end;
+
+
+Qué cambia: activa corrección de masa “heavy” (isótopo 15N).
+[Inferencia] El detalle exacto lo implementa DrawISOProfile4.
+
+Organismo: norganism
+
+Viaja en special.norganism hacia DrawISOProfile*.
+
+Qué cambia: selección de biblioteca de histonas/peptidomas (en PLANTS, AT/MP/CR).
+
+Dónde: se establece en ReadInput.
+
+Tolerancia de masa (ptol):
+
+Se inicializa con def_ptol (de check_otherparas).
+
+Se ajusta a 1000 si MS1Type=='ITMS'.
+
+Se rechaza mezcla FT/IT en el mismo lote.
+
+Qué cambia: anchura de ventanas al extraer XICs o emparejar isótopos.
+
+Rutas y nombres:
+
+raw_path: carpeta raíz.
+
+raw_names: lista de corridas (sin extensión).
+
+Dónde: check_otherparas(raw_path).
+
+Verbosos/figuras/debug:
+
+soutput, nfigure, ndebug → se empaquetan en special para que las rutinas gráficas y de salida actúen en consecuencia.
+
+5) ¿Qué adaptaría para EpiProfile_PLANTS?
+
+Objetivo: Soportar Arabidopsis thaliana (AT), Marchantia polymorpha (MP) y Chlamydomonas reinhardtii (CR), con peptidomas de histonas vegetales (secuencias, clivajes, masas, PTMs objetivo) y modos de etiquetado relevantes.
+
+5.1. Mapeo de organismo
+
+Mantén norganism → mapéalo en DrawISOProfile* a librerías:
+
+lib/AT/plant_histone_library.tsv, anchors_AT.tsv, etc.
+
+lib/MP/..., lib/CR/...
+
+No toques esta función: ya pasa special.norganism.
+Sí toca el interior de DrawISOProfile0/1/... para seleccionar bibliotecas según special.norganism.
+
+5.2. Librerías de histonas y PTMs
+
+Asegura que DrawISOProfile0 (referencias) construya isotopólogos teóricos y anclajes con:
+
+Secuencias específicas de planta (H3, H4, H2A/B, variantes).
+
+Cortes químicos/enzimáticos reales del flujo (derivatización si aplica).
+
+Lista de PTMs objetivo (incluye huérfanas como H3K79me1/2/3/ac).
+
+Dónde: tablas TSV/JSON en lib/<ORG>/... y lógica de carga dentro de DrawISOProfile0/1.
+
+5.3. Etiquetados (SILAC/C13/15N/13CD3)
+
+Verifica qué modos de etiquetado utilizas en plantas. Si no usas SILAC humano clásico:
+
+Puedes desactivar rutas innecesarias o reutilizarlas con shifts adecuados.
+
+special.nhmass (15N): confirma que las masas isotópicas se apliquen por residuo N y a precursor/fragmentos según corresponda en DrawISOProfile4.
+
+5.4. Formatos de entrada
+
+Si ya trabajas en mzML, añade un prepaso (fuera o dentro de Raw2MS) para generar los .MS1/.ms2 que este pipeline espera o adapta GetMS1ScanNo/GetMS2ScanNo a leer directamente mzML/mzXML.
+
+Recomendación: estandariza a mzML + tablas intermedias (HDF5/parquet) y evita formatos opacos.
+
+5.5. Robustez y DX (Developer eXperience)
+
+Añade mensajes con el nombre del instrumento y tipo de archivo detectado.
+
+Si hay mezcla FT/IT, en vez de abortar, divide automáticamente raw_names en dos lotes y procesa por separado (si así lo quieres).
+
+Permite forzar ptol desde paras.txt (útil en depuración).
+
+6) Dónde cambiar cosas (guía rápida)
+
+Seleccionar modo de etiquetado: en tu paras.txt → nsource (1..5) y, si 15N, nsubtype.
+
+Elegir organismo: en paras.txt → norganism (propaga a bibliotecas en DrawISOProfile*).
+
+Lista de muestras: check_otherparas(raw_path) debe devolver raw_names; si lo prefieres, lee una lista .txt.
+
+Tolerancia de masa: def_ptol desde check_otherparas; override si MS1Type=='ITMS'.
+
+Conversión RAW→MS1/MS2: si quieres hacerlo aquí, descomenta Raw2MS(raw_path,raw_names) y aporta la implementación.
+
+7) Buenas prácticas para tu repo PLANTS
+
+FAIR: CITATION.cff, LICENSE (GPL-3.0), README_FAIR.md, manifest.tsv con SHA-256.
+
+Estructura (sugerencia):
+
+EpiProfile_PLANTS/
+├─ lib/AT|MP|CR/ (secuencias, anchors, PTMs)
+├─ ms/ (RAW, mzML, MS1/MS2)
+├─ scripts/matlab/ (EpiProfile.m, DrawISOProfile*.m, helpers)
+├─ results/<dataset>/
+├─ logs/
+└─ docs/
+
+
+Pruebas: un mini set con 2–3 corridas FT + 2–3 IT para validar el rechazo de mezcla y las rutas DrawISOProfile*.
+
+8) Errores típicos y cómo resolver
+
+“mixture of FT and IT” → separa tus raw_names por instrumento o estandariza ptol.
+
+Faltan MS1/_MS1scans.mat → ejecuta GetMS1ScanNo con paths correctos o revisa permisos.
+
+paras.txt no existe → pásalo como argumento o colócalo junto a EpiProfile.m.
+
+No hay raw_names → revisa check_otherparas(raw_path); que encuentre tus corridas.
+
+9) Próximos pasos para ti (PLANTS)
+
+Cargar bibliotecas vegetales en DrawISOProfile0/1 (AT, MP, CR).
+
+Confirmar shifts para 15N/13C/13CD3 en plantas (DrawISOProfile3/4/5).
+
+Añadir validaciones extra (p. ej., verificar que H3K79* aparecen en el layout y que se exportan métricas por estadio de ontogenia).
+
+(Opcional) Aceptar mzML directamente en GetMS1ScanNo/GetMS2ScanNo y abandonar .MS1/.ms2 propietarios.

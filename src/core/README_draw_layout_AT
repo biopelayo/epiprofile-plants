@@ -1,0 +1,136 @@
+README (ES)
+¿Qué hace esta draw_layout?
+
+Genera un PDF con un subplot por forma peptídica/modificada donde se ve:
+
+XIC MS1 (intensidad vs tiempo).
+
+Pico local y límites de integración (líneas magenta).
+
+Etiqueta con modificación, m/z, carga, RT e intensidad.
+
+Opcional: superposición MS2 (modo DIA: special.nDAmode==2) con iones b/y (CID/HCD) o c/z (ETD).
+
+El PDF se guarda como ../<out_filename>.pdf (una carpeta por encima de cur_outpath).
+
+Entradas
+
+cur_outpath (carpeta del window) y out_filename (base del PDF).
+
+His (struct): pep_mz, pep_ch, mod_short, pep_seq, display.
+
+pep_rts [n×1]: RT nominal por fila.
+
+pep_intens [n×…]: intensidad escalar (si <=0, no se busca pico local).
+
+isorts [T×1]: eje temporal en minutos.
+
+mono_isointens [T×n]: traza mono-isotópica por fila.
+
+MS2_index (metadatos por escaneo): col 2=RT, col 4=precursor m/z, col 6=código instrumento, col 7=índice en MS2_peaks.
+
+MS2_peaks [L×2]: (m/z, intensidad) concatenados de todos los MS2.
+
+special: nDAmode (2 = DIA), nhmass (elige lista de iones “H” vs normal).
+
+Salida
+
+Un PDF con N subplots (N = filas con pep_rts>4 & display==1).
+
+Flujo paso a paso
+
+Filtrado: sólo filas con pep_rts>4 y display==1.
+
+Para cada fila válida:
+
+Determina un seed c_ms1pos (último tiempo <= RT). Si no hay, fuerza 1 (nuevo guard).
+
+Si pep_intens>0, intenta detectar pico local e intervalo con GetTopBottom11 + GetLocal.
+Si no hay subrango, terminus=[seed seed] y se avisa.
+La RT mostrada del pico se fija a pep_rts.
+
+Si pep_intens<=0, usa fallback (terminus=[seed seed], intensidad=0).
+
+Fija límites globales X con los extremos de terminus (−5 a la izda., +25 a la dcha.).
+
+Dibuja XIC, coloca apex y texto (mod, m/z, carga, RT, intensidad), y las líneas magenta.
+
+Si special.nDAmode==2, llama a MatchMS2 y superpone fragmentos:
+
+Determina tipo (CID→b/y, ETD→c/z) y tolerancia: IT (códigos impares) tol=0.4; FT (pares) tol=0.02.
+
+Calcula una escala para encajar intensidades MS2 en el panel.
+
+Dibuja N-series a la izquierda (−4 min) y C-series a la derecha (+3 min), con etiquetas (b7, y10, c5, z8…).
+
+Añade etiquetas globales y exporta a PDF.
+
+Errores comunes y defensas
+
+Índices vacíos al fijar ventana: ahora se comprueba p1/p2 y se fuerzan a valores válidos (1 y numel(isorts)) con warnings.
+
+RT fuera de rango: si pep_rts < min(isorts), el seed se fuerza a 1 (antes podía romper).
+
+Sin MS2 en la ventana: el overlay se omite silenciosamente.
+
+Modo DIA (MS2)
+
+Ventana MS2 acotada a [isorts(terminus(1))±0.001, isorts(terminus(2))±0.001].
+
+Si no hay coincidencia exacta de precursor m/z, se usa el rango completo como fallback.
+
+Instrumento determina serie (CID/HCD → b/y; ETD → c/z) y tolerancia (IT vs FT).
+
+Si hay instrumentos heterogéneos, en esta versión se recalcula ActiveType/tol y la lista de iones por cada escaneo (y vecinos).
+
+Diferencias clave respecto a la versión anterior
+
+Guardas de seguridad nuevas
+
+p1/p2 pueden ser vacíos → ahora se fuerzan valores seguros con warning (evita “Array indices must be positive…”).
+
+Si pep_rts está por debajo del mínimo de isorts, el seed c_ms1pos se fija a 1.
+
+Cálculo de límites X
+
+Misma lógica de fondo, pero expresada en dos pasos (primero st=isorts(min(..)), luego st=max(st-5,1)), manteniendo el resultado.
+
+Overlay MS2 más robusto
+
+MatchMS2 ahora itera pno=cpos-1:cpos+1 (escaneo central y vecinos), no solo el central.
+
+Si hay mezcla de instrumentos, re-evalúa ActiveType/tol y recalcula la lista de iones por escaneo.
+
+Mensajería
+
+Se añaden warnings explícitos para diagnósticos (p.ej., IX vacío, seed forzado).
+
+En resumen: esta versión es más defensiva (evita fallos por índices vacíos) y más flexible en el matching MS2 (vecinos + instrumentos heterogéneos).
+
+Ejemplo de uso
+cur_outpath  = 'C:\resultados\sampleA\detail';
+out_filename = 'H3_27_40_v1_sampleA';
+
+% Estructuras y matrices ya calculadas en pasos previos del pipeline:
+% His, pep_rts, pep_intens, isorts, mono_isointens, MS2_index, MS2_peaks
+
+special.nDAmode = 2;  % activar overlay MS2 (DIA-like)
+special.nhmass  = 0;  % usar lista de iones estándar
+
+draw_layout(cur_outpath, out_filename, His, pep_rts, pep_intens, ...
+            isorts, mono_isointens, MS2_index, MS2_peaks, special);
+% → genera ..\H3_27_40_v1_sampleA.pdf
+
+Lectura rápida del PDF
+
+Azul: XIC MS1.
+
+Magenta: apex y límites.
+
+Rojo: etiqueta (mod, m/z, carga, RT, intensidad).
+
+Colores varios: mini-trazas de fragmentos MS2 (izda. N-series; dcha. C-series) con etiquetas b#/y# o c#/z#.
+
+Reality Filter
+
+No puedo verificar aquí la semántica exacta de GetTopBottom11, GetLocal, GetMods, get_key_ions1/1H ni el mapeo definitivo de códigos de instrumento. La documentación anterior se basa en cómo se usan en el código. Si necesitas confirmación formal, tendríamos que revisar las implementaciones originales o su doc.

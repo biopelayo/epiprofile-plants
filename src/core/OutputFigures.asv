@@ -1,0 +1,1822 @@
+ function OutputFigures(layout_path,raw_names)
+%% OutputFigures — QC and summary figures from EpiProfile MAT outputs (H3/H4 variant)
+%
+%  VERSION 3: Now includes Phenodata integration for sample grouping (e.g., YNG vs SEN)
+% 
+% OUTPUTS (FILES WRITTEN)
+%    ... (Todas las 39 Figuras) ...
+%    <layout_path>/heatmap_clustering/Figure Legends.txt
+% -------------------------------------------------------------------------
+%% OutputFigures — QC and summary figures from EpiProfile MAT outputs (H3/H4 variant)
+%
+%  VERSION 3: Now includes Phenodata integration for sample grouping (e.g., YNG vs SEN)
+% 
+% OUTPUTS (FILES WRITTEN)
+%    ... (Todas las 39 Figuras) ...
+%    <layout_path>/heatmap_clustering/Figure Legends.txt
+% -------------------------------------------------------------------------
+%% 0. Carga de Fenotipos y Preparación de Grupos
+pheno_path = fullfile(layout_path, 'phenodata_arabidopsis_project.tsv');
+if ~exist(pheno_path, 'file')
+    error('Phenodata file not found: %s. Place "phenodata_arabidopsis_project.tsv" in your layout_path.', pheno_path);
+end
+% --- Bloque de lectura de tabla corregido para ser tolerante a nombres y delimitadores ---
+pheno_table = readtable(pheno_path, 'FileType','text','Delimiter','\t');
+
+% Normalizar Code y Sample_Name a cellstr sin espacios
+codes_raw = pheno_table.Code;
+names_raw = pheno_table.Sample_Name;
+
+if isstring(codes_raw); codes_raw = cellstr(codes_raw); end
+if isstring(names_raw); names_raw = cellstr(names_raw); end
+
+codes_clean = cellfun(@strtrim, codes_raw,  'UniformOutput', false);
+names_clean = cellfun(@strtrim, names_raw,  'UniformOutput', false);
+
+n_samples  = numel(raw_names);
+sample_groups = cell(n_samples, 1);
+clean_names   = cell(1, n_samples);
+original_raw_names_for_legend = cell(1, n_samples);
+
+for i = 1:n_samples
+    current_raw_name = strtrim(raw_names{i});  % por si viniera con espacios
+    match_idx = [];
+
+    % 1) match exacto en Code
+    match_idx = find(strcmp(codes_clean, current_raw_name), 1);
+
+    % 2) si falla, subcadena en Sample_Name
+    if isempty(match_idx)
+        match_idx = find(contains(names_clean, current_raw_name), 1);
+    end
+
+    if isempty(match_idx)
+        error('Raw name "%s" not found as exact match in "Code" or as substring in "Sample_Name" of phenodata_arabidopsis_project.tsv. PLEASE CHECK YOUR PHENODATA FILE FOR MISSING ROWS OR EXTRA SPACES.', ...
+              current_raw_name);
+    end
+
+    temp_name             = codes_clean{match_idx};
+    sample_groups{i}      = pheno_table.Sample_Group{match_idx};
+    clean_names{i}        = strrep(temp_name, '_', '-');
+    original_raw_names_for_legend{i} = sprintf('%d, %s', i, clean_names{i});
+end
+
+[unique_groups, ~, group_idx_num] = unique(sample_groups, 'stable');
+num_groups = length(unique_groups);
+disp(raw_names(:))
+disp(pheno_table)
+
+% --- ARREGLO DE LEYENDA (h_leg) ---
+h_leg = [];
+% Vector para rastrear si ya hemos dibujado la primera línea de cada grupo
+grupo_dibujado = false(1, num_groups);
+% ---------------------------------
+
+% Paleta fija y reutilizable para todos los plots
+group_colors = palette_groups(num_groups);
+% Encontrar límites de grupo para líneas verticales
+group_boundaries = find(diff(group_idx_num)) + 0.5;
+
+%% 1. Carga de datos y Dibujo de Figuras (ESTA ES LA PARTE QUE DEBES REVISAR AHORA)
+% ... (Tu código para cargar los archivos .mat y dibujar las figuras comienza aquí)
+
+
+%% 1. Carga de Datos y Procesamiento
+% (Código de carga de datos sin cambios)
+i = 1;
+cur_rawname = raw_names{i};
+if i<10
+    prefix = ['0',num2str(i)];
+else
+    prefix = num2str(i);
+end;
+cur_outpath = fullfile(layout_path,[prefix,'_',cur_rawname],'detail');
+npeps = 0;
+out_file1 = fullfile(cur_outpath,'*.mat');
+matfiles = dir(out_file1);
+for j=1:length(matfiles)
+    matfile1 = fullfile(cur_outpath,matfiles(j).name);
+    load(matfile1, 'His'); 
+    npeps = npeps + size(His.pep_mz,1);
+end;
+c_npeps = zeros([2,1]);
+out_file1 = fullfile(cur_outpath,'*.mat');
+matfiles = dir(out_file1);
+for j=1:length(matfiles)
+    matfile1 = fullfile(cur_outpath,matfiles(j).name);
+    load(matfile1, 'His');
+    cnp = size(His.pep_mz,1);
+    pepname = matfiles(j).name(1:end-4);
+    if 1==strcmp(pepname(1:2),'HH')
+        pepname = pepname(2:end);
+    end;
+    if 1==strcmp(pepname(1:2),'H3')
+        c_npeps(1) = c_npeps(1) + cnp;
+    elseif 1==strcmp(pepname(1:2),'H4')
+        c_npeps(2) = c_npeps(2) + cnp;
+    end;
+end;
+m = 0;
+peptides = repmat({''},[npeps,1]);
+out_file1 = fullfile(cur_outpath,'*.mat');
+matfiles = dir(out_file1);
+for j=1:length(matfiles)
+    matfile1 = fullfile(cur_outpath,matfiles(j).name);
+    load(matfile1, 'His'); 
+    pepname = matfiles(j).name(1:end-4);
+    if 1==strcmp(pepname(1:2),'HH')
+        pepname = pepname(2:end);
+    end;
+    p = strfind(pepname,'_');
+    version = pepname(p(1)+1:p(2)-1);
+    bvar = 0;
+    if length(version)>=4
+        if 1==strcmp(pepname(1:7),'H3_04v3')
+            version = version(4);
+        else
+            version = version(4:end);
+        end;
+        histone_pos = [pepname(1:p(1)-1),version,'_',pepname(p(2)+1:p(3)-1),'_',pepname(p(3)+1:end)];
+    elseif length(version)==3 && version(3)=='v'
+        bvar = 1;
+        histone_pos = ['_',pepname(p(2)+1:p(3)-1),'_',pepname(p(3)+1:end)];
+    else
+        histone_pos = [pepname(1:p(1)-1),'_',pepname(p(2)+1:p(3)-1),'_',pepname(p(3)+1:end)];
+    end;
+    nlen = size(His.pep_mz,1);
+    for ino = m+1:m+nlen
+        if 1==bvar
+            x = strfind(His.mod_short{ino-m},'.');
+            if 1==strcmp(pepname(1:3),'H2B')
+                peptides{ino,1} = ['H2B',His.mod_short{ino-m}(1:x(1)-1),histone_pos];
+            else
+                peptides{ino,1} = [His.mod_short{ino-m}(1:x(1)-1),histone_pos];
+            end;
+        else
+            peptides{ino,1} = [histone_pos,' ',His.mod_short{ino-m}];
+        end;
+    end;
+    m = m+nlen;
+end;
+info = zeros([npeps,length(raw_names)*3]);
+for i=1:length(raw_names)
+    cur_rawname = raw_names{i};
+    if i<10
+        prefix = ['0',num2str(i)];
+    else
+        prefix = num2str(i);
+    end;
+    cur_outpath = fullfile(layout_path,[prefix,'_',cur_rawname],'detail');
+    m = 0;
+    for j = 1:length(matfiles)
+        matfile1 = fullfile(cur_outpath,matfiles(j).name);
+        load(matfile1, 'auc', 'His');
+        nlen = size(His.pep_mz,1);
+        info(m+1:m+nlen,(i-1)*3+1:(i-1)*3+3) = auc;
+        m = m+nlen;
+    end;
+end;
+info0 = zeros([npeps,length(raw_names)*3]);
+for jno=1:length(raw_names)
+    info0(:,jno) = info(:,(jno-1)*3+1);
+end;
+for jno=1:length(raw_names)
+    info0(:,length(raw_names)+jno) = info(:,(jno-1)*3+2);
+end;
+for jno=1:length(raw_names)
+    info0(:,2*length(raw_names)+jno) = info(:,(jno-1)*3+3);
+end;
+info = info0;
+info_auc = info(1:npeps,length(raw_names)+1:2*length(raw_names));
+info_ratio = info(1:npeps,2*length(raw_names)+1:3*length(raw_names));
+info_ratio_log = log2((info_ratio+1e-10)*2^5);
+zscore_ratio = zscore(info_ratio_log,[],2);
+
+%% Preparación de Figuras
+fig_path = fullfile(layout_path,'heatmap_clustering');
+if 0==exist(fig_path,'dir') && 0==mkdir(fig_path)
+    fprintf(1,'Cannot create: %s\n',fig_path);
+    return;
+end;
+ratio_labels = {'0.1%','0.2%','0.4%','0.8%','1.6%','3.125%','6.25%','12.5%','25%','50%','100%'};
+
+%% 01---------------------
+cur_fig = '01_bar_peptide_number';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 6.8 4.8]);  % un poco más grande
+
+% --- datos ---
+pepnos = sum(info_auc > 0, 1)';
+
+% --- barras, coloreadas por grupo ---
+hBar = bar(pepnos,'FaceColor','flat');
+ax = gca;
+ax.Box      = 'off';
+ax.FontName = 'Arial';
+ax.FontSize = 11;   % ejes un pelín más grandes
+
+% colorear cada barra según Sample_Group
+for i = 1:n_samples
+    g_idx = group_idx_num(i);              % índice de grupo (YNG/BOT/...)
+    hBar.CData(i,:) = group_colors(g_idx,:);
+end
+
+% ejes
+xlabel('Sample','FontSize',12);
+ylabel('Number of quantified peptides','FontSize',12);
+
+% límites y ticks
+xlim([0.5 n_samples+0.5]);
+ylim([0 max(pepnos)*1.25]);  % más espacio arriba para separar título
+set(ax,'XTick',1:n_samples,'XTickLabel',clean_names,'XTickLabelRotation',45);
+
+% --- título grande + subtítulo corto ---
+mainTitle = 'Quantified peptide count per sample';
+subTitle  = sprintf('Total theoretical peptides: %d', npeps);
+title({mainTitle; subTitle}, ...
+      'FontSize',14, 'FontWeight','bold');
+
+% --- líneas de grupo (como antes) ---
+hold on;
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b) group_boundaries(b)], ylim, ...
+         'Color',[0.6 0.6 0.6], 'LineStyle','--', 'LineWidth',1);
+end
+hold off;
+
+% --- explicación simple en un lateral (fuera de los ejes) ---
+fig = gcf;
+annotation(fig,'textbox',[0.13 0.02 0.74 0.05], ...  % [x y w h] en coords normalizadas
+    'String','Bars show peptides with Area > 0 in each sample.', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize',9, ...
+    'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 02---------------------
+cur_fig = '02_boxplot_peptide_intensity';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 6.8 4.8]);  % igual tamaño que la 01
+
+% --- datos (log10, limpiando infinitos) ---
+data_log10 = log10(info_auc);
+data_log10(~isfinite(data_log10)) = NaN;
+
+% matriz de colores por muestra (según Sample_Group)
+colmat = zeros(n_samples,3);
+for i = 1:n_samples
+    colmat(i,:) = group_colors(group_idx_num(i),:);
+end
+
+% --- boxplot básico, coloreado por grupo ---
+boxplot(data_log10, ...
+        'Labels', clean_names, ...
+        'PlotStyle','compact', ...
+        'Colors', colmat, ...
+        'Symbol','+');
+
+ax = gca;
+ax.Box      = 'off';
+ax.FontName = 'Arial';
+ax.FontSize = 11;
+
+% título + subtítulo
+mainTitle = 'Distribution of peptide intensity';
+subTitle  = 'Log_{10} peak area per sample';
+title({mainTitle; subTitle}, ...
+      'FontSize',14,'FontWeight','bold');
+
+% ejes
+xlabel('Sample','FontSize',12);
+ylabel('Peptide intensity (log_{10} area)','FontSize',12);
+set(ax,'XTickLabelRotation',45);
+
+% límites y margen vertical
+yl = ylim;
+ylim([yl(1) yl(2)+0.10*diff(yl)]);  % un poco de aire arriba
+
+% --- líneas de grupo en gris claro ---
+hold on;
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b) group_boundaries(b)], ylim, ...
+         'Color',[0.6 0.6 0.6], 'LineStyle','--', 'LineWidth',1);
+end
+hold off;
+
+% --- explicación simple abajo, fuera del eje ---
+fig = gcf;
+annotation(fig,'textbox',[0.13 0.02 0.74 0.05], ...
+    'String','Boxplots of log_{10} peptide areas. Used to check sample loading and MS sensitivity.', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize',9, ...
+    'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 03---------------------
+% --- PCA con grupos (versión publicación) ---
+cur_fig = '03_pca';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 5.5 5.0]);   % más cuadrada
+
+% Datos: PCA sobre matriz de ratios z-score
+cur_ratio = zscore_ratio;
+[~, score, latent] = pca(cur_ratio');
+
+% Scatter por grupos con puntos grandes y rellenos
+ax = gca;
+[ax, Scat] = scatter_grouped(score(:,1), score(:,2), ...
+                             sample_groups, group_colors, 55);  % tamaño punto
+
+ax.FontName = 'Arial';
+ax.FontSize = 11;
+grid(ax,'on');
+box(ax,'on');
+
+% % varianza explicada
+varPC1 = latent(1)/sum(latent)*100;
+varPC2 = latent(2)/sum(latent)*100;
+
+% Títulos y labels tipo publicación
+title({'PCA of samples', ...
+       'All peptides (log_{2}-ratio matrix)'}, ...
+      'FontSize',14,'FontWeight','bold');
+
+xlabel(sprintf('PC1 (%.1f%%%% variance)', varPC1), 'FontSize',12);
+ylabel(sprintf('PC2 (%.1f%%%% variance)', varPC2), 'FontSize',12);
+
+% Ajustar márgenes alrededor de los puntos
+pad_axes(ax,0.06);
+
+% Leyenda de grupos, horizontal abajo
+leg = legend(Scat.handles, Scat.names, ...
+             'Location','SouthOutside', ...
+             'Orientation','horizontal', ...
+             'Box','off');
+leg.FontSize = 10;
+
+% Explicación simple abajo, fuera del eje
+fig = gcf;
+annotation(fig,'textbox',[0.12 0.01 0.76 0.05], ...
+    'String','PCA on Z-scored log_{2} ratios. Samples coloured by Sample_Group; distances reflect similarity.', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize',9, ...
+    'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+
+%% --------------------------------------------------------------------------------
+% --- BLOQUE DE PLOTS AMPLIADO (Figuras 14 a 39) ---
+% --------------------------------------------------------------------------------
+index = [1;cumsum(c_npeps)+1];
+data_H3 = info_ratio_log(index(1):index(2)-1,:);
+data_H4 = info_ratio_log(index(2):index(3)-1,:);
+full_data = [data_H3; data_H4];
+sample_indices = repmat(1:n_samples, size(full_data, 1), 1);
+full_data_flat = full_data(:);
+sample_indices_flat = sample_indices(:);
+
+%% 14---------------------
+% --- Violin / boxplot H3 vs H4 por muestra (versión publicación, con color por histona) ---
+cur_fig  = '14_violinplot_ratio_H3_H4';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 10 4.8]);   % ancho para muchas muestras
+
+ax = gca;
+ax.FontName = 'Arial';
+ax.FontSize = 11;
+ax.Box      = 'on';
+hold(ax,'on');
+
+% --- colores para cada histona (H3 / H4) usando tu paleta ---
+hist_cols = palette_groups(2);   % [color_H3; color_H4]
+col_H3    = hist_cols(1,:);
+col_H4    = hist_cols(2,:);
+
+if exist('violin','file')
+    % --- montaje de factores: muestra (1..n) y clase (H3/H4) ---
+    group_var_class = [repmat({'H3'}, size(data_H3, 1), 1); ...
+                       repmat({'H4'}, size(data_H4, 1), 1)];
+    group_var_class_flat = repmat(group_var_class, n_samples, 1);
+
+    % Violin plot: dos violines por muestra (H3 / H4)
+    hv = violin(full_data_flat, ...
+                'groups', {sample_indices_flat, group_var_class_flat}, ...
+                'histType','area', ...
+                'medc','k', ...
+                'width',0.8, ...
+                'bandwidth',0.5, ...
+                'plotLine',true);
+
+    % Recolorear violines: alternando H3 (izq) / H4 (der) por muestra
+    % Buscamos los patches, los ordenamos por posición X media y alternamos colores
+    patches = findobj(ax,'Type','patch');
+    nP      = numel(patches);
+    xmean   = zeros(nP,1);
+    for k = 1:nP
+        xv       = get(patches(k),'XData');
+        xmean(k) = mean(xv(:));
+    end
+    [~,ord] = sort(xmean);           % de izquierda a derecha
+    patches = patches(ord);
+
+    for k = 1:nP
+        if mod(k,2)==1
+            set(patches(k), 'FaceColor', col_H3, 'EdgeColor',[0.2 0.2 0.2]);
+        else
+            set(patches(k), 'FaceColor', col_H4, 'EdgeColor',[0.2 0.2 0.2]);
+        end
+    end
+
+    % Poner el tick entre H3/H4 de cada muestra
+    set(ax,'XTick', 1.5:2:(2*n_samples-0.5), ...
+           'XTickLabel', clean_names, ...
+           'XTickLabelRotation',45);
+
+else
+    % --- fallback: boxplots compactos si no existe violin.m ---
+    fprintf(1,'WARNING: ''violin'' function not found. Generating Boxplots for Figure 14.\n');
+
+    G                = cell(length(full_data_flat), 1);
+    group_order_list = cell(1, 2*n_samples);
+    N_peps_H3        = size(data_H3, 1);
+    N_peps_H4        = size(data_H4, 1);
+    offset           = N_peps_H3 * n_samples;
+
+    for i = 1:n_samples
+        group_h3 = ['H3_S', num2str(i)];
+        group_h4 = ['H4_S', num2str(i)];
+        group_order_list{2*i-1} = group_h3;
+        group_order_list{2*i}   = group_h4;
+
+        idx_H3_start = (i-1) * N_peps_H3 + 1;
+        idx_H3_end   = i * N_peps_H3;
+        G(idx_H3_start:idx_H3_end) = {group_h3};
+
+        idx_H4_start = offset + (i-1) * N_peps_H4 + 1;
+        idx_H4_end   = offset + i * N_peps_H4;
+        G[idx_H4_start:idx_H4_end) = {group_h4};
+    end
+
+    valid_indices = ~isnan(full_data_flat);
+    boxplot(full_data_flat(valid_indices), G(valid_indices), ...
+            'plotstyle','compact', ...
+            'GroupOrder', group_order_list);
+
+    % Etiquetas: nombre de muestra + clase
+    x_tick_labels = cell(1, 2*n_samples);
+    for i = 1:n_samples
+        x_tick_labels{2*i-1} = [clean_names{i}, ' (H3)'];
+        x_tick_labels{2*i}   = [clean_names{i}, ' (H4)'];
+    end
+    set(ax,'XTickLabel',x_tick_labels,'XTickLabelRotation',45);
+
+    % Colorear las cajas: odd = H3, even = H4
+    boxes = findobj(ax,'Tag','Box');
+    nB    = numel(boxes);
+    xmean = zeros(nB,1);
+    for k = 1:nB
+        xv       = get(boxes(k),'XData');
+        xmean(k) = mean(xv(:));
+    end
+    [~,ord] = sort(xmean);   % de izquierda a derecha
+    boxes   = boxes(ord);
+
+    for k = 1:nB
+        if mod(k,2)==1
+            set(boxes(k),'Color',col_H3,'LineWidth',1.2);
+        else
+            set(boxes(k),'Color',col_H4,'LineWidth',1.2);
+        end
+    end
+end
+
+% Título y ejes “journal-like”
+title({'Log_{2} ratio distribution per sample', ...
+       'H3 vs H4 histone classes'}, ...
+      'FontSize',14,'FontWeight','bold');
+
+xlabel('Sample','FontSize',12);
+ylabel('Relative abundance (log_{2} ratio)','FontSize',12);
+
+% Añadir líneas de grupo (cada grupo ocupa 2 posiciones: H3 y H4)
+yl = ylim;
+for b = 1:length(group_boundaries)
+    xg = group_boundaries(b)*2;
+    line([xg xg], yl, 'Color',[0.5 0.5 0.5], 'LineStyle','--', 'LineWidth',1);
+end
+ylim(yl);   % mantener límites
+
+% Algo de aire alrededor
+pad_axes(ax,0.04);
+
+% Leyenda H3/H4 usando dummy handles coloreados
+hH3 = plot(ax, nan, nan, 's', ...
+    'MarkerFaceColor', col_H3, 'MarkerEdgeColor','k', ...
+    'LineWidth',1.0, 'DisplayName','H3');
+hH4 = plot(ax, nan, nan, 's', ...
+    'MarkerFaceColor', col_H4, 'MarkerEdgeColor','k', ...
+    'LineWidth',1.0, 'DisplayName','H4');
+
+legend([hH3 hH4], {'H3','H4'}, 'Location','NorthEastOutside','Box','off');
+
+% Explicación sencilla fuera del eje (abajo)
+fig = gcf;
+annotation(fig,'textbox',[0.12 0.01 0.76 0.05], ...
+    'String','Distributions of log_{2} peptide ratios for H3 and H4 in each sample. Two entries per sample: H3 (left) and H4 (right).', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize',9, ...
+    'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 15---------------------
+% QC summary table per sample (counts, missingness, medians)
+cur_fig  = '15_scatter_Area_vs_Ratio';   % dejamos el nombre de fichero igual
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 8.5 5.5]);  % formato “tabla”
+
+ax = gca;
+ax.Visible   = 'off';         % sin ejes
+ax.Position  = [0.05 0.05 0.9 0.85];
+
+% --- métricas por muestra ---
+total_peps       = size(info_auc,1);
+pep_count        = sum(info_auc>0,1);           % nº péptidos cuantificados
+missing_count    = sum(info_auc==0,1);          % nº péptidos missing
+missing_pct      = 100*missing_count/total_peps;
+
+log10_area       = log10(info_auc);
+log10_area(info_auc<=0) = NaN;
+median_log10     = median(log10_area, 1, 'omitnan');
+
+median_log2ratio = median(info_ratio_log, 1, 'omitnan');
+
+% --- título ---
+title({'QC summary by sample', ...
+       'Peptide counts, missing values and central tendencies'}, ...
+       'FontSize',14,'FontWeight','bold');
+
+% --- cabecera y filas (texto monoespaciado) ---
+fontName  = 'Consolas';
+base_y    = 0.90;
+dy        = 0.045;
+
+header = sprintf('%-10s  %-10s  %8s  %10s  %14s  %14s', ...
+                 'Sample','Group','n_peps','Missing_%', ...
+                 'median log_{10}A','median log_{2}ratio');
+text(0.02, base_y, header, 'FontName',fontName, ...
+     'FontSize',10, 'FontWeight','bold', 'Interpreter','none');
+
+for i = 1:n_samples
+    this_name  = clean_names{i};
+    if length(this_name) > 10
+        this_name = this_name(1:10);
+    end
+    this_group = sample_groups{i};
+    if length(this_group) > 10
+        this_group = this_group(1:10);
+    end
+
+    row_str = sprintf('%-10s  %-10s  %8d  %10.1f  %14.2f  %14.2f', ...
+                      this_name, ...
+                      this_group, ...
+                      pep_count(i), ...
+                      missing_pct(i), ...
+                      median_log10(i), ...
+                      median_log2ratio(i));
+
+    text(0.02, base_y - i*dy, row_str, ...
+         'FontName',fontName, 'FontSize',9, ...
+         'Interpreter','none');
+end
+
+% pequeña nota al pie
+annotation(gcf,'textbox',[0.02 0.01 0.96 0.04], ...
+    'String','Summary statistics computed over all quantified peptides (rows in the AUC / ratio matrices).', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize',9, 'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+
+
+%% 16---------------------
+% --- HEATMAP DE MISSING VALUES, SEPARANDO H3/H4 Y RESUMIENDO PÉPTIDOS ---
+cur_fig = '16_heatmap_missing_values';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 6 8]);   % algo más ancho/alto
+
+% matriz binaria de detección
+detection_matrix = double(info_auc > 0);    % [n_peps x n_samples]
+[npeps, ~]       = size(detection_matrix);
+
+% límites H3 / H4 (ya vienen de c_npeps)
+index    = [1; cumsum(c_npeps)+1];          % index(1)=1, index(2)=H3+1, index(3)=H3+H4+1
+ix_H3    = index(1):index(2)-1;
+ix_H4    = index(2):index(3)-1;
+
+% heatmap
+imagesc(detection_matrix);
+
+% colormap: gris secuencial (missing = blanco, detectado = gris oscuro)
+if exist('sequential_grey','file')
+    colormap(sequential_grey(2));
+else
+    colormap([1 1 1; 0.3 0.3 0.3]);
+end
+
+ax = gca;
+ax.FontName = 'Arial';
+ax.FontSize = 9;
+
+% título y subtítulo
+mainTitle = 'Peptide detection matrix (missing values)';
+subTitle  = sprintf('Rows = individual histone peptides (H3/H4); columns = %d samples', n_samples);
+title({mainTitle; subTitle}, 'FontSize',12,'FontWeight','bold');
+
+% ejes
+xlabel('Sample','FontSize',11);
+ylabel('Peptide class','FontSize',11);
+
+% ticks de X: muestras
+set(ax, 'XTick', 1:n_samples, ...
+        'XTickLabel', clean_names, ...
+        'XTickLabelRotation', 45);
+
+% ticks de Y: sólo centro H3 y centro H4 (para que se lean bien)
+mid_H3 = (ix_H3(1) + ix_H3(end))/2;
+mid_H4 = (ix_H4(1) + ix_H4(end))/2;
+set(ax, 'YTick', [mid_H3 mid_H4], ...
+        'YTickLabel', {sprintf('H3 peptides (n = %d)', numel(ix_H3)), ...
+                       sprintf('H4 peptides (n = %d)', numel(ix_H4))});
+
+% línea horizontal separando H3 y H4
+hold on;
+yline(ix_H4(1)-0.5, 'k-', 'LineWidth', 1.2);
+
+% líneas verticales de grupo (YNG / BOT / FLOR / SEN, etc.)
+for b = 1:length(group_boundaries)
+    xline(group_boundaries(b), 'Color',[0.5 0.5 0.5], 'LineStyle','--', 'LineWidth',1);
+end
+hold off;
+
+% colorbar binario
+cb = colorbar('Ticks', [0.25, 0.75], ...
+              'TickLabels', {'Missing (Area = 0)', 'Detected (Area > 0)'}, ...
+              'Position', [0.92 0.2 0.02 0.65]);
+cb.Label.String = 'Detection status';
+
+% ---------------------------
+% RESUMEN DE PÉPTIDOS: TOP MISSING
+% ---------------------------
+missing_pct = 100 * sum(detection_matrix == 0, 2) / n_samples;
+[sorted_missing, idx_missing] = sort(missing_pct, 'descend');
+
+n_show = min(8, npeps);  % máximo 8 péptidos para que se lean
+lines = cell(n_show+1,1);
+lines{1} = 'Top peptides by missing percentage:';
+
+for k = 1:n_show
+    pep_name = peptides{idx_missing(k)};
+    % recortar nombre si es larguísimo para que quepa
+    if numel(pep_name) > 45
+        pep_name = [pep_name(1:42) '...'];
+    end
+    lines{k+1} = sprintf('%2d) %s  (%.1f%% missing)', ...
+                         k, pep_name, sorted_missing(k));
+end
+
+annotation(gcf,'textbox',[0.03 0.02 0.94 0.16], ...
+    'String', lines, ...
+    'FontSize',8, ...
+    'FontName','Consolas', ...
+    'Interpreter','none', ...
+    'HorizontalAlignment','left', ...
+    'VerticalAlignment','top', ...
+    'EdgeColor','none');
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+
+%% 17---------------------
+% --- LOLLIPOP PLOT DE % DE PÉPTIDOS CON RATIO BAJO (<1%) ---
+cur_fig = '17_barplot_low_ratio_percentage';   % mantengo el nombre para no romper nada aguas abajo
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 7.0 5.0]);  % un poco más grande
+
+ax = gca;
+ax.FontName = 'Arial';
+ax.FontSize = 10;
+
+% --- cálculo del % de péptidos con ratio < 1%% ---
+title_str = 'Low-abundance peptide ratios per sample';
+subtitle_str = 'Share of peptides with estimated ratio < 1%';
+
+threshold = log2((0.01 + 1e-10)*2^5); 
+low_ratio_count = sum(info_ratio_log < threshold, 1);
+low_ratio_percentage = (low_ratio_count ./ size(info_ratio_log, 1)) * 100;
+
+% --- eje Y = muestras, eje X = porcentaje ---
+y_pos = 1:n_samples;
+
+hold on;
+
+% lollipop por muestra, coloreado por Sample_Group
+for i = 1:n_samples
+    this_color = group_colors(group_idx_num(i), :);
+
+    % “palito”
+    plot([0 low_ratio_percentage(i)], [y_pos(i) y_pos(i)], '-', ...
+        'Color', this_color, 'LineWidth', 1.5);
+
+    % “chupa-chups” (punto final)
+    plot(low_ratio_percentage(i), y_pos(i), 'o', ...
+        'MarkerFaceColor', this_color, ...
+        'MarkerEdgeColor', 'k', ...
+        'MarkerSize', 5);
+end
+
+% límites y ejes
+xmax = max(low_ratio_percentage)*1.15;
+if xmax < 5
+    xmax = 5;
+end
+xlim([0 xmax]);
+ylim([0.5 n_samples+0.5]);
+
+set(ax, 'YTick', y_pos, ...
+        'YTickLabel', clean_names, ...
+        'YTickLabelRotation', 0);
+
+xlabel('% peptides with ratio < 1%', 'FontSize', 11);
+ylabel('Sample', 'FontSize', 11);
+
+% invertimos el eje Y para que la primera muestra quede arriba (opcional)
+set(ax, 'YDir', 'reverse');
+
+% --- líneas de grupo horizontales (YNG/BOT/FLOR/SEN, etc.) ---
+for b = 1:length(group_boundaries)
+    yb = group_boundaries(b);
+    line([0 xmax], [yb yb], 'Color', [0.7 0.7 0.7], ...
+         'LineStyle', '--', 'LineWidth', 1);
+end
+
+% --- leyenda por grupo (dummy handles) ---
+leg_handles = gobjects(num_groups,1);
+for g = 1:num_groups
+    leg_handles(g) = plot(nan, nan, '-', ...
+        'Color', group_colors(g,:), ...
+        'LineWidth', 2, ...
+        'DisplayName', unique_groups{g});
+end
+legend(leg_handles, unique_groups, 'Location', 'SouthEastOutside');
+
+% --- título principal + subtítulo corto ---
+title({title_str; subtitle_str}, 'FontSize', 12, 'FontWeight', 'bold');
+
+% --- pequeña nota explicativa en la parte inferior izquierda ---
+annotation(gcf,'textbox',[0.05 0.02 0.7 0.12], ...
+    'String','Each line-dot shows the percentage of peptides with very low estimated ratio (<1%). Higher values may indicate noisier quantification for that sample.', ...
+    'FontSize',8, ...
+    'FontName','Arial', ...
+    'HorizontalAlignment','left', ...
+    'VerticalAlignment','top', ...
+    'EdgeColor','none');
+
+box on;
+grid on;
+
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 18---------------------
+cur_fig = '18_boxplot_log10area_by_class';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+log10_area_H3_full = log10(info_auc(index(1):index(2)-1,:));
+log10_area_H4_full = log10(info_auc(index(2):index(3)-1,:));
+log10_area_H3 = log10_area_H3_full(isfinite(log10_area_H3_full));
+log10_area_H4 = log10_area_H4_full(isfinite(log10_area_H4_full));
+all_log10_area = [log10_area_H3; log10_area_H4];
+group_area = [repmat({'H3'}, length(log10_area_H3), 1); repmat({'H4'}, length(log10_area_H4), 1)];
+boxplot(all_log10_area, group_area, 'plotstyle', 'compact', 'GroupOrder', {'H3', 'H4'});
+title('Peptide Abundance Distribution: H3 vs H4','FontSize',12);
+xlabel('Histone Class','FontSize',10);
+ylabel('Peptide Intensity (Log_{10} Area)','FontSize',10);
+box off;
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 19---------------------
+% --- MEJORADO CON GRUPOS ---
+cur_fig = '19_scatter_avg_ratio_H3_vs_H4';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+avg_ratio_H3 = mean(data_H3, 1);
+avg_ratio_H4 = mean(data_H4, 1);
+% Usar gscatter para colorear por grupo
+gscatter(avg_ratio_H3, avg_ratio_H4, sample_groups, group_colors, '.', 12);
+title('Average Ratio Profile Correlation: H3 vs H4','FontSize',12);
+xlabel('Average H3 Ratio (Log_{2} Scale)','FontSize',10);
+ylabel('Average H4 Ratio (Log_{2} Scale)','FontSize',10);
+hold on;
+p = polyfit(avg_ratio_H3', avg_ratio_H4', 1);
+yfit = polyval(p, get(gca,'XLim'));
+plot(get(gca,'XLim'), yfit, 'k--', 'LineWidth', 1.5, 'DisplayName', 'Trend Line');
+hold off;
+R = corrcoef(avg_ratio_H3, avg_ratio_H4);
+text(min(xlim), max(ylim), sprintf('R = %.2f', R(1,2)), 'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+box on;
+legend('Location', 'NorthEastOutside');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 20---------------------
+% --- CORREGIDO Y AGRUPADO ---
+cur_fig = '20_heatmap_sample_correlation';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 10 9]); 
+R_matrix = corr(info_ratio_log, 'Type', 'Spearman', 'rows', 'pairwise');
+imagesc(R_matrix);
+try
+    colormap(coolwarm); 
+catch
+    colormap(parula); 
+end
+caxis([-1 1]);
+title('Sample-to-Sample Correlation (Spearman R)','FontSize',14,'FontWeight','bold');
+xlabel('Sample','FontSize',12);
+ylabel('Sample','FontSize',12);
+set(gca, 'XTick', 1:n_samples, 'XTickLabel', clean_names, 'XTickLabelRotation', 45);
+set(gca, 'YTick', 1:n_samples, 'YTickLabel', clean_names);
+cb = colorbar('Position', [0.8 0.1 0.02 0.8]);
+cb.Label.String = 'Spearman R';
+% Añadir líneas de grupo
+hold on;
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b) group_boundaries(b)], ylim, 'Color', 'k', 'LineStyle', '--', 'LineWidth', 2);
+    line(xlim, [group_boundaries(b) group_boundaries(b)], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 2);
+end
+hold off;
+h = text(0.5, 0.5, ...
+    'Measures consistency between samples. Replicates should show high correlation (R > 0.9).', ...
+    'FontSize',9, 'VerticalAlignment','top', 'HorizontalAlignment', 'left', 'Units', 'normalized');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 21---------------------
+cur_fig = '21_barplot_class_count';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+total_H3 = sum(c_npeps(1));
+total_H4 = sum(c_npeps(2));
+bar([total_H3, total_H4]);
+set(gca, 'XTickLabel', {'H3', 'H4'});
+title('Total Number of Theoretical Peptides by Class','FontSize',12);
+ylabel('Total Peptide Count','FontSize',10);
+text(1, total_H3, num2str(total_H3), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+text(2, total_H4, num2str(total_H4), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+box off;
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 22---------------------
+cur_fig = '22_boxplot_ratio_all_peptides';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 4 4]);
+boxplot(info_ratio_log(:), 'plotstyle', 'compact');
+set(gca, 'XTickLabel', {'Global Ratio'});
+title('Overall Ratio Distribution (Log_{2})','FontSize',12);
+ylabel('Relative Abundance Ratio (Log_{2} Scale)','FontSize',10);
+box off;
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 23---------------------
+% --- MEJORADO CON GRUPOS ---
+cur_fig = '23_lineplot_median_ratio_profile';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 8 4.5]);
+median_ratio_H3 = median(data_H3, 1);
+median_ratio_H4 = median(data_H4, 1);
+plot(1:n_samples, median_ratio_H3, 'b-o', 'LineWidth', 1.5, 'MarkerSize', 6, 'DisplayName', 'H3 Class Median');
+hold on;
+plot(1:n_samples, median_ratio_H4, 'r-s', 'LineWidth', 1.5, 'MarkerSize', 6, 'DisplayName', 'H4 Class Median');
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b) group_boundaries(b)], ylim, 'Color', 'r', 'LineStyle', '--', 'DisplayName', 'Group Boundary');
+end
+hold off;
+title('Median Ratio Profile Across Samples (H3 vs H4)','FontSize',12);
+xlabel('Sample','FontSize',10);
+ylabel('Median Ratio (Log_{2} Scale)','FontSize',10);
+set(gca, 'XTick', 1:n_samples, 'XTickLabel', clean_names, 'XTickLabelRotation', 45);
+grid on;
+legend('Location', 'best');
+box on;
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 24---------------------
+% --- MEJORADO CON LÍNEAS DE GRUPO ---
+cur_fig = '24_boxplot_ratio_noise';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+noise_threshold = 1; 
+noise_data = info_ratio_log;
+noise_data(abs(info_ratio_log) > noise_threshold) = NaN;
+boxplot(noise_data, clean_names, 'plotstyle', 'compact', 'orientation', 'horizontal');
+title(['Distribution of "Noise" Ratio (Log_{2} |Ratio| < ', num2str(noise_threshold), ')'],'FontSize',12);
+xlabel('Relative Abundance Ratio (Log_{2} Scale)','FontSize',10);
+ylabel('Sample','FontSize',10);
+set(gca, 'YTickLabelRotation', 0);
+grid on;
+box on;
+hold on;
+for b = 1:length(group_boundaries)
+    line(xlim, [group_boundaries(b) group_boundaries(b)], 'Color', 'r', 'LineStyle', '--');
+end
+hold off;
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 25---------------------
+% --- MEJORADO CON GRUPOS ---
+cur_fig = '25_pca_H3_only';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+cur_ratio_H3 = zscore(data_H3,[],2);
+[wcoeff_H3,score_H3,latent_H3] = pca(cur_ratio_H3');
+gscatter(score_H3(:,1),score_H3(:,2), sample_groups, group_colors, '.', 12);
+title(sprintf('PCA of Samples (H3 Peptides Only)\nVariance Explained: PC1=%.1f%%, PC2=%.1f%%', latent_H3(1)/sum(latent_H3)*100, latent_H3(2)/sum(latent_H3)*100),'FontSize',12);
+xlabel('1st Principal Component (H3)','FontSize',10);
+ylabel('2nd Principal Component (H3)','FontSize',10);
+grid on;
+box on;
+legend('Location', 'NorthEastOutside');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 26---------------------
+% --- MEJORADO CON GRUPOS ---
+cur_fig = '26_pca_H4_only';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+cur_ratio_H4 = zscore(data_H4,[],2);
+[wcoeff_H4,score_H4,latent_H4] = pca(cur_ratio_H4');
+gscatter(score_H4(:,1),score_H4(:,2), sample_groups, group_colors, '.', 12);
+title(sprintf('PCA of Samples (H4 Peptides Only)\nVariance Explained: PC1=%.1f%%, PC2=%.1f%%', latent_H4(1)/sum(latent_H4)*100, latent_H4(2)/sum(latent_H4)*100),'FontSize',12);
+xlabel('1st Principal Component (H4)','FontSize',10);
+ylabel('2nd Principal Component (H4)','FontSize',10);
+grid on;
+box on;
+legend('Location', 'NorthEastOutside');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 27---------------------
+% --- MEJORADO CON COLORES DE GRUPO ---
+%% 27---------------------
+cur_fig = '27_overlay_histogram_ratios';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_wide_figure();
+hold on;
+
+h_arr   = gobjects(1, n_samples);           % ← handles (no double)
+bins    = -6:0.5:6;                          % ← define primero
+centers = (bins(1:end-1) + bins(2:end))/2;   % ← ahora sí
+
+for i = 1:n_samples
+    data_sample = info_ratio_log(:, i);
+    data_sample = data_sample(isfinite(data_sample));
+    [N, ~] = histcounts(data_sample, bins);
+    h_arr(i) = plot(centers, N, 'Color', group_colors(group_idx_num(i),:), 'LineWidth', 1.5);
+end
+
+% (NO hagas hold off aquí)
+h_leg = gobjects(num_groups,1);              % ← handles (no double)
+for g = 1:num_groups
+    h_leg(g) = plot(nan, nan, '-', 'Color', group_colors(g,:), 'LineWidth', 2, ...
+                    'HandleVisibility','on');
+end
+legend(h_leg, unique_groups, 'Location', 'NorthEastOutside');
+grid on; box on;
+print('-dpdf','-painters','-r600',out_file);
+hold off;                                     % ← ahora sí
+close();
+
+
+%% 28---------------------
+cur_fig = '28_histogram_peptide_completeness';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+detection_count = sum(info_auc > 0, 2); 
+bins = 0.5:1:(n_samples + 0.5);
+histogram(detection_count, bins, 'Normalization', 'count');
+title('Peptide Completeness (Detection Frequency)','FontSize',12);
+xlabel('Number of Samples Peptide was Detected In','FontSize',10);
+ylabel('Number of Peptides','FontSize',10);
+set(gca, 'XTick', 1:n_samples);
+box on;
+h = text(min(xlim), min(ylim)-0.2*range(ylim), ...
+    'Histogram of how many samples each peptide was successfully quantified (Area > 0).', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 29---------------------
+% --- MEJORADO CON LÍNEAS DE GRUPO ---
+cur_fig = '29_barplot_sample_missing_count';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+missing_count = sum(info_auc == 0, 1); 
+bar(missing_count);
+title('Missing Peptide Count per Sample','FontSize',12);
+xlabel('Sample','FontSize',10);
+ylabel('Number of Missing Peptides (Area = 0)','FontSize',10);
+set(gca, 'XTick', 1:n_samples, 'XTickLabel', clean_names, 'XTickLabelRotation', 45);
+box off;
+hold on;
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b) group_boundaries(b)], ylim, 'Color', 'r', 'LineStyle', '--');
+end
+hold off;
+h = text(0.5, max(ylim)*0.9, ...
+    'Count of peptides with zero abundance per sample. Direct QC for sample specific data completeness/dropout rates.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 30-32 (H3_73_83 Specific)
+h3_73_83_indices = contains(peptides, 'H3_73_83');
+if ~any(h3_73_83_indices)
+    fprintf(1,'WARNING: No peptides matching H3_73_83 found. Skipping figures 30-32.\n');
+else
+    data_h3_73_83 = info_ratio_log(h3_73_83_indices,:);
+    peptides_h3_73_83 = peptides(h3_73_83_indices);
+    n_h3_73_83 = size(data_h3_73_83, 1);
+
+    %% 30---------------------
+    % --- MEJORADO CON LÍNEAS DE GRUPO ---
+    cur_fig = '30_heatmap_ratio_H3_73_83';
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure();
+    set(gcf,'Units','inches','Position',[0 0 6 4 + n_h3_73_83*0.2]); 
+    hmo = HeatMap(data_h3_73_83,'RowLabels',peptides_h3_73_83,'ColumnLabels',clean_names,'DisplayRange',5);
+    addTitle(hmo,'Log_{2} Ratio Heatmap for H3(73-83) Peptides','FontSize',12);
+    plot(hmo);
+    cb = colorbar('Position',[0.91 0.226 0.01 0.698],'YTick',1:11,'YTickLabel',ratio_labels);
+    cb.Label.String = 'Ratio (%)';
+    ax = gca;
+    hold(ax, 'on');
+    for b = 1:length(group_boundaries)
+        line(ax, [group_boundaries(b) group_boundaries(b)], ax.YLim, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2);
+    end
+    hold(ax, 'off');
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+    delete(hmo);
+
+    %% 31---------------------
+    % --- MEJORADO CON LÍNEAS DE GRUPO ---
+    cur_fig = '31_boxplot_ratio_H3_73_83';
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure();
+    set(gcf,'Units','inches','Position',[0 0 8 4.5]);
+    boxplot(data_h3_73_83, 'labels', clean_names);
+    title('Ratio Distribution (Log_{2}) of H3(73-83) Peptides','FontSize',12);
+    xlabel('Sample','FontSize',10);
+    ylabel('Relative Abundance Ratio (Log_{2} Scale)','FontSize',10);
+    set(gca, 'XTickLabelRotation', 45);
+    box on;
+    hold on;
+    for b = 1:length(group_boundaries)
+        line([group_boundaries(b) group_boundaries(b)], ylim, 'Color', 'r', 'LineStyle', '--');
+    end
+    hold off;
+    h = text(0.5, min(ylim)*0.9, ...
+        'Distribution of modification ratios specifically on the H3(73-83) peptide across all samples.', ...
+        'FontSize',9, 'VerticalAlignment','top');
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+
+    %% 32---------------------
+    % --- MEJORADO CON GRUPOS ---
+    cur_fig = '32_scatter_avg_ratio_H3_73_83_vs_H3';
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure();
+    avg_ratio_H3_73_83 = mean(data_h3_73_83, 1); 
+    avg_ratio_H3_all = mean(data_H3, 1);         
+    gscatter(avg_ratio_H3_all, avg_ratio_H3_73_83, sample_groups, group_colors, '.', 12);
+    title('Correlation: H3(73-83) Average Ratio vs. All H3 Average Ratio','FontSize',12);
+    xlabel('Average Ratio of ALL H3 Peptides (Log_{2} Scale)','FontSize',10);
+    ylabel('Average Ratio of H3(73-83) Peptides (Log_{2} Scale)','FontSize',10);
+    hold on;
+    p = polyfit(avg_ratio_H3_all', avg_ratio_H3_73_83', 1);
+    yfit = polyval(p, get(gca,'XLim'));
+    plot(get(gca,'XLim'), yfit, 'k--', 'LineWidth', 1.5, 'DisplayName', 'Trend Line');
+    hold off;
+    R = corrcoef(avg_ratio_H3_all, avg_ratio_H3_73_83);
+    text(min(xlim), max(ylim), sprintf('R = %.2f', R(1,2)), 'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+    box on;
+    legend('Location', 'NorthEastOutside');
+    h = text(min(xlim), min(ylim)*0.9, ...
+        'Assesses if the global trends observed in all H3 modifications are reflected in the specific H3(73-83) region.', ...
+        'FontSize',9, 'VerticalAlignment','top');
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+end
+
+%% 33---------------------
+% --- MEJORADO CON GRUPOS (Coloreado de etiquetas) ---
+cur_fig = '33_dendrogram_sample_clustering';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 8 6]);
+cur_data = zscore_ratio'; 
+D = pdist(cur_data, 'Euclidean');
+Z = linkage(D, 'ward'); 
+[H, ~, outperm] = dendrogram(Z, 0, 'Labels', clean_names); 
+set(gca, 'XTickLabelRotation', 45);
+title('Hierarchical Clustering (Dendrogram) of Samples','FontSize',12);
+ylabel('Distance (Ward Linkage, Euclidean Z-Score Ratio)','FontSize',10);
+box off;
+% Colorear etiquetas por grupo
+ax = gca;
+labels = ax.XTickLabels;
+groups_in_dendro_order = sample_groups(outperm);
+for k = 1:length(labels)
+    group_color_idx = strcmp(unique_groups, groups_in_dendro_order{k});
+    labels{k} = sprintf('\\color[rgb]{%f,%f,%f}%s', group_colors(group_color_idx,:), labels{k});
+end
+ax.XTickLabels = labels;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Visualizes the dissimilarity between samples. Labels colored by group. Shorter links indicate tighter grouping.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 34---------------------
+% --- MEJORADO CON LÍNEAS DE GRUPO ---
+cur_fig = '34_paired_boxplot_H3_vs_H4_per_sample';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 10 6]); 
+all_ratios_paired = [];
+group_labels = {};
+group_idx = [];
+current_start = 1;
+for i = 1:n_samples
+    sample_data_h3 = data_H3(:, i);
+    sample_data_h3 = sample_data_h3(isfinite(sample_data_h3));
+    num_h3_vals = length(sample_data_h3);
+    sample_data_h4 = data_H4(:, i);
+    sample_data_h4 = sample_data_h4(isfinite(sample_data_h4));
+    num_h4_vals = length(sample_data_h4);
+    all_ratios_paired = [all_ratios_paired; sample_data_h3; sample_data_h4];
+    group_idx = [group_idx; repmat(2*i - 1, num_h3_vals, 1); repmat(2*i, num_h4_vals, 1)];
+    group_labels{2*i-1} = [clean_names{i}, ' (H3)'];
+    group_labels{2*i} = [clean_names{i}, ' (H4)'];
+end
+boxplot(all_ratios_paired, group_idx, 'plotstyle', 'compact');
+set(gca, 'XTick', 1:length(group_labels), 'XTickLabel', group_labels, 'XTickLabelRotation', 60);
+title('Log_{2} Ratio Distribution: H3 vs. H4 per Sample','FontSize',14,'FontWeight','bold');
+xlabel('Sample and Histone Class','FontSize',12);
+ylabel('Relative Abundance Ratio (Log_{2} Scale)','FontSize',12);
+box on;
+grid on;
+hold on;
+for b = 1:length(group_boundaries)
+    line([group_boundaries(b)*2 group_boundaries(b)*2], ylim, 'Color', 'r', 'LineStyle', '--');
+end
+hold off;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Compares the distribution of modification ratios between H3 and H4 within each sample. Reveals class-specific trends.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 35---------------------
+cur_fig = '35_density_plot_ratio_H3_vs_H4';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 8 5]); 
+hold on;
+[f_h3, xi_h3] = ksdensity(data_H3(isfinite(data_H3(:)))); 
+plot(xi_h3, f_h3, 'LineWidth', 2, 'Color', [0 0.4470 0.7410], 'DisplayName', 'All H3 Peptides');
+[f_h4, xi_h4] = ksdensity(data_H4(isfinite(data_H4(:)))); 
+plot(xi_h4, f_h4, 'LineWidth', 2, 'Color', [0.8500 0.3250 0.0980], 'DisplayName', 'All H4 Peptides');
+hold off;
+title('Density Plot of Log_{2} Ratio Distribution (H3 vs. H4)','FontSize',14,'FontWeight','bold');
+xlabel('Relative Abundance Ratio (Log_{2} Scale)','FontSize',12);
+ylabel('Density','FontSize',12);
+legend('Location', 'NorthWest');
+grid on;
+box on;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Compares the global distribution shape of modification ratios for H3 and H4 peptides. Reveals overall biases.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 36---------------------
+cur_fig = '36_heatmap_corr_H3_73_83_vs_all_H3';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+if exist('data_h3_73_83', 'var') && ~isempty(data_h3_73_83)
+    figure('visible','off');
+    setup_publication_figure();
+    set(gcf,'Units','inches','Position',[0 0 8 10]); 
+    index_H3 = index(1):index(2)-1;
+    data_H3_all_peptides = info_ratio_log(index_H3, :);
+    peptides_H3_all = peptides(index_H3);
+    idx_not_h3_73_83_in_all_H3 = ~contains(peptides_H3_all, 'H3_73_83');
+    data_H3_other_peptides = data_H3_all_peptides(idx_not_h3_73_83_in_all_H3, :);
+    peptides_H3_other = peptides_H3_all(idx_not_h3_73_83_in_all_H3);
+    Corr_matrix = corr(data_h3_73_83', data_H3_other_peptides', 'Type', 'Spearman', 'rows', 'pairwise');
+    imagesc(Corr_matrix);
+    try
+        colormap(coolwarm);
+    catch
+        colormap(parula);
+    end
+    caxis([-1 1]);
+    title('Spearman Correlation: H3(73-83) Peptides vs. Other H3 Peptides','FontSize',14,'FontWeight','bold');
+    xlabel('Other H3 Peptides','FontSize',12);
+    ylabel('H3(73-83) Peptides','FontSize',12);
+    set(gca, 'YTick', 1:size(data_h3_73_83, 1), 'YTickLabel', peptides_h3_73_83, 'YTickLabelRotation', 0, 'FontSize', 8);
+    set(gca, 'XTick', 1:size(data_H3_other_peptides, 1), 'XTickLabel', peptides_H3_other, 'XTickLabelRotation', 90, 'FontSize', 6);
+    cb = colorbar('Position', [0.91 0.1 0.02 0.8]);
+    cb.Label.String = 'Spearman R';
+    box on;
+    grid off;
+    h = text(min(xlim), min(ylim)*0.9, ...
+        'Identifies co-regulating or inversely regulating H3 peptides with the H3(73-83) region. Strong correlations (positive or negative) indicate functional relationships.', ...
+        'FontSize',9, 'VerticalAlignment','top');
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+else
+    fprintf(1,'WARNING: No H3_73_83 peptides data available to generate Figure 36.\n');
+end
+
+%% 37---------------------
+cur_fig = '37_barplot_top_variable_peptides';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 10 8]); 
+peptide_variability = std(info_ratio_log, 0, 2, 'omitnan');
+[sorted_variability, sort_idx] = sort(peptide_variability, 'descend');
+n_top = 25;
+if n_top > npeps; n_top = npeps; end 
+top_peptides = peptides(sort_idx(1:n_top));
+top_variability = sorted_variability(1:n_top);
+barh(flip(top_variability)); 
+set(gca, 'YTick', 1:n_top, 'YTickLabel', flip(top_peptides), 'FontSize', 8);
+title('Top 25 Most Variable Peptides (by Log_{2} Ratio SD)','FontSize',14,'FontWeight','bold');
+xlabel('Standard Deviation of Log_{2} Ratio','FontSize',10);
+ylabel('Peptide','FontSize',10);
+grid on;
+box on;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Identifies peptides with the highest variance across all samples. These drive separation in PCA/Clustering.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 38---------------------
+cur_fig = '38_heatmap_peptide_correlation';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+set(gcf,'Units','inches','Position',[0 0 8 8]); 
+R_peptide_matrix = corr(info_ratio_log', 'Type', 'Spearman', 'rows', 'pairwise');
+imagesc(R_peptide_matrix);
+try
+    colormap(coolwarm);
+catch
+    colormap(parula);
+end
+caxis([-1 1]);
+title('Peptide-Peptide Correlation (Spearman R)','FontSize',14,'FontWeight','bold');
+xlabel('Peptide Index','FontSize',10);
+ylabel('Peptide Index','FontSize',10);
+cb = colorbar;
+cb.Label.String = 'Spearman R';
+box on;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Correlation matrix of all peptides. Blocks of red/blue indicate modules of co-regulated peptides.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 39---------------------
+cur_fig = '39_MA_plot_peptides';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+A = mean(log10(info_auc), 2, 'omitnan');
+M = mean(info_ratio_log, 2, 'omitnan');
+valid_ma = isfinite(A) & isfinite(M);
+A = A(valid_ma);
+M = M(valid_ma);
+scatter(A, M, 5, '.', 'MarkerEdgeAlpha', 0.1);
+hold on;
+line(xlim, [0 0], 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1);
+hold off;
+title('MA Plot (Ratio vs. Intensity)','FontSize',14,'FontWeight','bold');
+xlabel('A (Average Log_{10} Intensity)','FontSize',10);
+ylabel('M (Average Log_{2} Ratio)','FontSize',10);
+grid on;
+box on;
+h = text(min(xlim), min(ylim)*0.9, ...
+    'Plots average ratio (M) vs. average intensity (A) for each peptide. Most peptides should center at M=0.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% 40---------------------
+% --- NUEVO PLOT DE BATCH EFFECT ---
+cur_fig = '40_pca_batch_effect';
+out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+warning off all;
+figure('visible','off');
+setup_publication_figure();
+% Asegura 'pheno_table' en este ámbito (evita el error de variable no compartida)
+
+% Asegura 'pheno_table' y acceso robusto a la columna Batch (insensible a mayúsculas)
+pheno_table = readtable(fullfile(layout_path,'phenodata_arabidopsis_project.tsv'), ...
+                        'FileType','text','Delimiter','\t');
+varnames = pheno_table.Properties.VariableNames;
+ixBatch  = find(strcmpi(varnames,'Batch'),1);
+ixCode   = find(strcmpi(varnames,'Code'),1);
+ixSName  = find(strcmpi(varnames,'Sample_Name'),1);
+
+sample_batches = cell(n_samples,1);
+
+% Si no hay columna Batch, márcalo como 'Unknown' y sigue
+if isempty(ixBatch)
+    [sample_batches{:}] = deal('Unknown');
+else
+    BATCH = pheno_table.(varnames{ixBatch});
+    if isstring(BATCH); BATCH = cellstr(BATCH); end  % a celdas de char
+
+    for i = 1:n_samples
+        % 1) intento exacto por Code == raw_names{i}
+        match_idx = [];
+        if ~isempty(ixCode)
+            CODE = pheno_table.(varnames{ixCode});
+            if isstring(CODE); CODE = cellstr(CODE); end
+            match_idx = find(strcmp(CODE, raw_names{i}), 1);
+        end
+
+        % 2) intento por Code == clean_names (cambiando '-' por '_')
+        if isempty(match_idx) && ~isempty(ixCode)
+            alt = strrep(clean_names{i},'-','_');
+            match_idx = find(strcmp(CODE, alt), 1);
+        end
+
+        % 3) intento por subcadena en Sample_Name que contenga raw_names{i}
+        if isempty(match_idx) && ~isempty(ixSName)
+            SNAME = pheno_table.(varnames{ixSName});
+            if isstring(SNAME); SNAME = cellstr(SNAME); end
+            match_idx = find(contains(SNAME, raw_names{i}), 1);
+            if isempty(match_idx)  % subcadena con clean_names también
+                match_idx = find(contains(SNAME, strrep(clean_names{i},'-','_')), 1);
+            end
+        end
+
+        % Asignación segura
+        if isempty(match_idx) || isempty(BATCH{match_idx})
+            sample_batches{i} = 'Unknown';
+        else
+            sample_batches{i} = BATCH{match_idx};
+        end
+    end
+end
+
+% Usar los mismos datos de PCA que la Figura 03
+
+% Usar los mismos datos de PCA que la Figura 03
+gscatter(score(:,1),score(:,2), sample_batches, 'rb', 'x.', 12); % Colorear por Batch (A/B)
+
+title(sprintf('PCA of Samples (Colored by Batch)\nVariance Explained: PC1=%.1f%%, PC2=%.1f%%', latent(1)/sum(latent)*100, latent(2)/sum(latent)*100),'FontSize',12);
+xlabel('1st Principal Component','FontSize',10);
+ylabel('2nd Principal Component','FontSize',10);
+grid on;
+box on;
+legend('Location', 'NorthEastOutside');
+h = text(min(xlim), min(ylim)*0.9, ...
+    'QC Plot: PCA colored by processing Batch. Ideal clustering is by Sample_Group (Fig 03), not by Batch.', ...
+    'FontSize',9, 'VerticalAlignment','top');
+print('-dpdf','-painters','-r600',out_file);
+close();
+
+%% Final Function Calls
+heatmap_histone(fig_path,info_ratio_log,original_raw_names_for_legend,peptides,c_npeps,ratio_labels, clean_names, group_boundaries); 
+
+%write_txt(fig_path, pheno_table); 
+write_txt(fig_path, readtable(fullfile(layout_path,'phenodata_arabidopsis_project.tsv'), 'FileType','text','Delimiter','\t'));
+end
+
+
+
+% -------------------------------------------------------------------------
+% --- SUBFUNCIONES REQUERIDAS POR MATLAB (DEBEN IR AL FINAL) ---
+% -------------------------------------------------------------------------
+function setup_publication_figure()
+    set(gcf,'Color','w'); 
+    set(gcf,'PaperPositionMode','auto'); 
+    set(gcf,'Units','inches','Position',[0 0 6 4]); 
+    set(gca,'FontSize',10,'FontName','Arial'); 
+end
+% -------------------------------------------------------------------------
+function setup_wide_figure()
+    set(gcf,'Color','w');
+    set(gcf,'PaperPositionMode','auto');
+    set(gcf,'Units','inches','Position',[0 0 10 4]); 
+    set(gca,'FontSize',10,'FontName','Arial');
+end
+% -------------------------------------------------------------------------
+function heatmap_histone(fig_path,info_ratio_log,raw_names_legend,peptides,c_npeps,ratio_labels, clean_names, group_boundaries)
+% 10---------------------
+mat_file = fullfile(fileparts(fig_path),'histone_ratios_single_PTMs.mat');
+if 0~=exist(mat_file,'file')
+    load(mat_file, 'targets', 'sratios'); 
+    sratios = log2((sratios+1e-10)*2^5);%#ok
+    
+    cur_fig = '10_heatmap_ratio_single_PTMs';
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure(); 
+    set(gcf,'Units','inches','Position',[0 0 6 8]); 
+    
+    cur_ratio = sratios;
+    hmo = HeatMap(cur_ratio,'RowLabels',targets,'ColumnLabels',clean_names,'DisplayRange',5); 
+    addTitle(hmo,'Log_{2} Ratio Heatmap for Single PTMs','FontSize',12);
+    plot(hmo);
+    cb = colorbar('Position',[0.91 0.226 0.01 0.698],'YTick',1:11,'YTickLabel',ratio_labels);
+    cb.Label.String = 'Ratio (%)';
+    ax = gca;
+    hold(ax, 'on');
+    for b = 1:length(group_boundaries)
+        line(ax, [group_boundaries(b) group_boundaries(b)], ax.YLim, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2);
+    end
+    hold(ax, 'off');
+    
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+    delete(hmo);
+    
+    cur_fig = '10_heatmap_zscore_single_PTMs';
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure();
+    set(gcf,'Units','inches','Position',[0 0 6 8]); 
+    
+    cur_ratio = zscore(sratios,[],2);
+    cgo = clustergram(cur_ratio,'RowLabels',targets,'ColumnLabels',clean_names,'Cluster',1,'DisplayRatio',[1e-6 0.2]);
+    addTitle(cgo,'Z-score Heatmap for Single PTMs','FontSize',12);
+    plot(cgo);
+    
+    print('-dpdf','-r600',out_file);
+    close();
+    delete(cgo);
+end;
+% 11---------------------
+all_figs = {'11_heatmap_ratio_H3','11_heatmap_ratio_H4'};
+index = [1;cumsum(c_npeps)+1];
+for ino=1:length(c_npeps)
+    cur_fig = all_figs{ino};
+    out_file = fullfile(fig_path,[cur_fig,'.pdf']);
+    warning off all;
+    figure('visible','off');
+    setup_publication_figure();
+    
+    p = strfind(cur_fig,'_');
+    histone_class = cur_fig(p(3)+1:end);
+    IX = index(ino):index(ino+1)-1;
+    cur_ratio = info_ratio_log(IX,1:length(raw_names_legend));
+    hmo = HeatMap(cur_ratio,'RowLabels',peptides(IX),'ColumnLabels',clean_names,'DisplayRange',5);
+    addTitle(hmo,['Peptide Log_{2} Ratio Heatmap: ',histone_class],'FontSize',12);
+    plot(hmo);
+    cb = colorbar('Position',[0.91 0.226 0.01 0.698],'YTick',1:11,'YTickLabel',ratio_labels);
+    cb.Label.String = 'Ratio (%)';
+    ax = gca;
+    hold(ax, 'on');
+    for b = 1:length(group_boundaries)
+        line(ax, [group_boundaries(b) group_boundaries(b)], ax.YLim, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2);
+    end
+    hold(ax, 'off');
+    
+    print('-dpdf','-painters','-r600',out_file);
+    close();
+    delete(hmo);
+end;
+end % heatmap_histone
+% -------------------------------------------------------------------------
+function clustering_histone(fig_path,info_ratio,raw_names,peptides,ratio_labels)%#ok
+% (Función opcional de K-means, sin cambios)
+end % clustering_histone
+% -------------------------------------------------------------------------
+
+function C = palette_groups(k)
+% Paleta para grupos (bien contrastada, reproducible)
+base = [ ...
+    0.121 0.466 0.705;  % azul
+    1.000 0.498 0.054;  % naranja
+    0.172 0.627 0.172;  % verde
+    0.839 0.153 0.157;  % rojo
+    0.580 0.404 0.741;  % morado
+    0.549 0.337 0.294;  % marrón
+    0.890 0.467 0.761;  % rosa
+    0.498 0.498 0.498;  % gris
+    0.737 0.741 0.133;  % oliva
+    0.090 0.745 0.811]; % cian
+if k<=size(base,1), C = base(1:k,:); else
+    C = interp1(linspace(0,1,size(base,1)), base, linspace(0,1,k), 'pchip');
+end
+end
+
+function M = diverging_balance(n)
+% Divergente suave: azul↔gris↔rojo, ajustado para ratios/correlaciones
+x = linspace(-1,1,n)'; 
+r = 0.5+0.5*tanh( 2.2*x);
+b = 0.5+0.5*tanh(-2.2*x);
+g = 0.50 + 0.40*(1-abs(x)).^1.3;
+M = [b g r]; M = max(min(M,1),0);
+end
+
+function M = sequential_grey(n)
+% Secuencial gris para binarios/missing
+M = linspace(1,0.3,n)'; M = [M M M];
+end
+
+function pad_axes(ax, p)
+% Añade margen porcentual a X/Y para “respirar”
+if nargin<2, p = 0.05; end
+xl = xlim(ax); yl = ylim(ax);
+dx = diff(xl); dy = diff(yl);
+xlim(ax, [xl(1)-dx*p, xl(2)+dx*p]);
+ylim(ax, [yl(1)-dy*p, yl(2)+dy*p]);
+end
+
+function [ax,Scat] = scatter_grouped(x,y,groups,cols,sz)
+% Scatter por grupos (leyenda estable y limpia)
+ax = gca; hold(ax,'on');
+[ug,~,gi] = unique(groups,'stable');
+m = numel(ug);
+H = gobjects(m,1);
+for g = 1:m
+    idx = gi==g;
+    H(g) = scatter(ax, x(idx), y(idx), sz, ...
+        'Marker','o','MarkerFaceColor',cols(g,:), ...
+        'MarkerEdgeColor','k','MarkerFaceAlpha',0.85,'MarkerEdgeAlpha',0.8);
+end
+Scat.handles = H; Scat.names = ug;
+Scat.leg = H; % para legend(H, ug, ...)
+end
+
+function text_repel(ax, x, y, labels, varargin)
+% Etiquetas con “repulsión” tipo ggrepel (simple y robusto)
+% Uso: text_repel(gca, x, y, clean_names, 'MaxIter',200,'Force',0.05,'Leader',true)
+p = inputParser;
+addParameter(p,'MaxIter',200);
+addParameter(p,'Force',0.05);      % empuje base
+addParameter(p,'FontSize',9);
+addParameter(p,'Leader',true);     % dibuja líneas guía
+parse(p,varargin{:});
+opt = p.Results;
+
+% puntos iniciales (desfase mínimo)
+nx = x(:); ny = y(:);
+tx = nx + 0.005*range(x)*sign(nx-mean(nx));
+ty = ny + 0.005*range(y)*sign(ny-mean(y));
+
+% BBoxes aproximados (mismo tamaño, rápido)
+fs = opt.FontSize; 
+tw = 0.012*range(x) * ones(size(tx));  % ancho aprox.
+th = 0.028*range(y) * ones(size(ty));  % alto aprox.
+
+% Iteraciones de relajación
+for it = 1:opt.MaxIter
+    moved = false;
+    for i = 1:numel(tx)
+        dx = tx(i)-tx; dy = ty(i)-ty;
+        dd = hypot(dx,dy) + eps;
+        % colisiones: si superponen cajas
+        overlap = (abs(dx) < (tw+tw(i))/2) & (abs(dy) < (th+th(i))/2);
+        overlap(i) = false;
+        if any(overlap)
+            % empuje vectorial lejos de vecinos
+            push = sum([(dx(overlap)./dd(overlap)), (dy(overlap)./dd(overlap))],1);
+            if any(isfinite(push))
+                tx(i) = tx(i) + opt.Force * push(1);
+                ty(i) = ty(i) + opt.Force * push(2);
+                moved = true;
+            end
+        end
+        % evita solape con el punto original (mínima distancia)
+        vx = tx(i)-nx(i); vy = ty(i)-ny(i);
+        if hypot(vx,vy) < 0.012*max(range(x),range(y))
+            tx(i) = tx(i) + opt.Force * sign(vx + (vx==0)) * 0.5;
+            ty(i) = ty(i) + opt.Force * sign(vy + (vy==0)) * 0.5;
+            moved = true;
+        end
+    end
+    if ~moved, break; end
+end
+
+% Limitar a los límites del eje con un poco de aire
+xl = xlim(ax); yl = ylim(ax);
+tx = min(max(tx, xl(1)), xl(2));
+ty = min(max(ty, yl(1)), yl(2));
+
+% Pintar
+hold(ax,'on');
+for i = 1:numel(tx)
+    if opt.Leader
+        plot(ax, [nx(i) tx(i)], [ny(i) ty(i)], '-', 'Color',[0 0 0 0.35], 'LineWidth',0.8);
+    end
+    text(ax, tx(i), ty(i), labels{i}, ...
+        'HorizontalAlignment','center','VerticalAlignment','middle', ...
+        'FontSize',opt.FontSize, 'FontName','Arial', 'BackgroundColor',[1 1 1 0.65], ...
+        'Margin',2, 'Clipping','on');
+end
+hold(ax,'off');
+end
+
+
+function write_txt(fig_path, pheno_table)
+%% write_txt — emit a plain-text legend file describing the main figures (EXPANDED and in ENGLISH)
+txt_file = fullfile(fig_path,'Figure Legends.txt');
+fp = fopen(txt_file,'w');
+if -1==fp
+    fprintf(1,'Cannot open: %s\r\n',txt_file);
+    return;
+end;
+
+fprintf(fp,'--- Data Overview ---\r\n');
+fprintf(fp,'This analysis includes %d samples across %d groups:\r\n', height(pheno_table), length(unique(pheno_table.Sample_Group)));
+groups = unique(pheno_table.Sample_Group);
+for g = 1:length(groups)
+    count = sum(strcmp(pheno_table.Sample_Group, groups{g}));
+    fprintf(fp,'  - Group: %s (n=%d)\r\n', groups{g}, count);
+end
+fprintf(fp,'\r\n');
+
+fprintf(fp,'--- Sample QC Figures ---\r\n');
+fprintf(fp,'Figure 01: Bar plot of **Quantified Peptide Count** per sample. Bar height indicates the number of peptides detected with Area > 0. Used as a QC metric; low counts suggest low sensitivity or sample quality issues. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 02: Box plot displaying the **Log_{10} transformed peptide intensity** (Area) distribution per sample. The median and quartile ranges assess consistency in sample loading and overall MS performance. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 16: **Binary Heatmap** (Missing Values). Shows peptide detection (1=Detected, 0=Missing) across samples. Visual QC for data completeness and missing data patterns. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 17: **Bar plot** of the percentage of peptides in each sample with a Log2-Ratio corresponding to an extremely low relative abundance (Ratio < 1%%). High percentage may indicate low signal quality or high noise in quantification. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 29: **Bar plot of Missing Peptide Count**. Shows the total number of peptides (Area = 0) per sample. Direct QC for sample specific data completeness/dropout rates. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 24: **Box plot** of "Noise" Ratios (Log2 Ratio where |Ratio| < 1) for each sample. QC for system stability near the baseline signal. Horizontal dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'--- Sample Clustering and Correlation (All Peptides) ---\r\n');
+fprintf(fp,'Figure 03: **Principal Component Analysis (PCA)** of all samples based on the Z-scored Log2 ratio matrix. Displays the distance/clustering between samples. Points are colored by Sample_Group. Replicates should cluster tightly.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 20: **Heatmap of Spearman Correlation (R-value)** between all sample pairs. Ideal QC: technical replicates should show high correlation (R > 0.9). Columns/Rows are grouped by Sample_Group and separated by dashed lines.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 33: **Hierarchical Clustering Dendrogram**. Shows the clustering of samples based on the Euclidean distance of the Z-scored Log2 ratio matrix (using Ward linkage). Labels are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 40: **PCA (colored by Batch)**. QC Plot: PCA colored by processing Batch. Ideal clustering is by Sample_Group (Fig 03), not by Batch. Separation by Batch indicates technical artifacts.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'--- Histone Class Specific Analysis (H3 vs H4) ---\r\n');
+fprintf(fp,'Figure 11: **Heatmaps of Log2-scaled ratios** for H3 and H4 peptides separately. Shows peptide-level abundance patterns. Columns are grouped by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 14: **Violin/Box plot** showing the distribution of Log2-transformed ratio values, separated by H3 and H4 histone classes for each sample. \r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 18: **Box plot** comparing the global Log_{10}(Area) distribution between H3 peptides and H4 peptides.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 19: **Scatter plot** comparing the average Log2 Ratio profile of H3 peptides vs. H4 peptides across samples. Points are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 21: **Bar plot** showing the total theoretical peptide count for the H3 class and the H4 class.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 23: **Line plot** comparing the Median Log2 Ratio profile of H3 and H4 peptides across all samples. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 25: **PCA** of the samples using **H3 peptide ratios (Z-scored) ONLY**. Points are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 26: **PCA** of the samples using **H4 peptide ratios (Z-scored) ONLY**. Points are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 34: **Paired Box Plot: H3 vs. H4 Ratio per Sample**. Displays side-by-side distributions for H3 and H4 within each sample. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 35: **Density Plot: Overall Log2 Ratio Distribution (H3 vs. H4)**. Compares the global distribution shapes for all H3 and H4 peptides.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'--- H3(73-83) Specific Analysis ---\r\n');
+fprintf(fp,'Figure 30: **Log_{2} Ratio Heatmap for H3(73-83) Peptides**. Shows the relative abundance of all modification isoforms quantified on the H3(73-83) region. Columns are grouped.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 31: **Box plot** of the **Ratio Distribution (Log_{2})** for H3(73-83) peptides only. Compares the variability of these specific modifications across samples. Vertical dashed lines separate Sample_Groups.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 32: **Scatter plot** comparing the **Average Log2 Ratio profile of H3(73-83)** peptides versus the **Average Log2 Ratio of ALL H3** peptides. Points are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 36: **Spearman Correlation Heatmap: H3(73-83) Peptides vs. Other H3 Peptides**. Visualizes pairwise correlation between H3(73-83) isoforms (Y-axis) and all other H3 peptides (X-axis).\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'--- Peptide-Centric Analysis (All Peptides) ---\r\n');
+fprintf(fp,'Figure 10: **Heatmaps of single PTM ratios** (Log2-scaled) and Z-scores (if auxiliary file exists). Columns are grouped.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 15: **Scatter plot** comparing Log_{10}(Area) vs. Log_{2}-transformed Ratio (all peptides). A minimal correlation (R near 0) confirms robust normalization.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 22: **Single Box plot** displaying the overall Log2 Ratio distribution across ALL quantified peptides and ALL samples combined.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 27: **Overlay Histogram** showing the frequency distribution of Log2 Ratios for each sample. Lines are colored by Sample_Group.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 28: **Histogram of Peptide Completeness**. Shows the distribution of how many samples each peptide was successfully detected in (Area > 0).\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 37: **Bar plot of Top 25 Most Variable Peptides**. Identifies peptides with the highest standard deviation in Log2 Ratio, which are the main drivers of variance in the dataset.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 38: **Peptide-Peptide Correlation Heatmap**. Shows the Spearman R correlation between all pairs of peptides. Blocks of color indicate modules of co-regulated peptides.\r\n');
+fprintf(fp,'\r\n');
+fprintf(fp,'Figure 39: **MA Plot (Ratio vs. Intensity)**. Plots average ratio (M) vs. average intensity (A) for each peptide. In a well-normalized dataset, most peptides should center symmetrically around M=0.\r\n');
+fclose(fp);
+end % write_txt
