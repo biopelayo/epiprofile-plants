@@ -27,7 +27,7 @@ clc;                          % Clear MATLAB command window (purely cosmetic).
 
 t1 = clock;                   % Start a wall-clock timer to report total elapsed time.
 
-%% paras
+% paras
 % read paras
 if 0==nargin || 1==isempty(para_txtfile) || 0==exist(para_txtfile,'file')
     % If no input argument, empty value, or path does not exist: default to 'paras.txt'
@@ -193,3 +193,4 @@ fprintf(['\nelapsed time: ' num2str(etime(t2,t1)) 'sec(' num2str(etime(t2,t1)/60
 % Stop logging:
 diary off;
 end
+
