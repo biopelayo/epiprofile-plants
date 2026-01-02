@@ -66,7 +66,7 @@ if ~(nsource>=1 && nsource<=length(data_source))
     return;
 end;
 
-%% raws
+% raws
 % raw names
 if 1==isempty(raw_names)
     % If there are no samples to process, exit gracefully.
@@ -141,7 +141,7 @@ end;
 % Start logging console output to a persistent text file:
 diary(fullfile(raw_path,'histone_logs.txt'));
 
-%% profiles
+% profiles
 % get profiles
 % Build the 'special' struct that carries context into DrawISOProfile* helpers.
 special.raw_path  = raw_path;
@@ -193,4 +193,5 @@ fprintf(['\nelapsed time: ' num2str(etime(t2,t1)) 'sec(' num2str(etime(t2,t1)/60
 % Stop logging:
 diary off;
 end
+
 
