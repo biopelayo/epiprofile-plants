@@ -1,0 +1,72 @@
+README — find_pair_new (ES)
+¿Qué hace?
+
+Empareja un tiempo de retención del grupo 3 (t3) con su “pareja” en el grupo 4 (t4) usando:
+
+una ventana de búsqueda asimétrica alrededor de top1_rt3, cuya orientación depende de rt3_up;
+
+selección por máxima intensidad dentro de rts4 para decidir t4;
+
+y, si no hay candidato en la ventana, un desplazamiento sintético de ±0,5 unidades.
+
+A diferencia de find_pair, aquí no se comparan intensidades entre grupos: siempre se ancla en top1_rt3 cuando hay datos de ambos.
+
+Entradas
+
+top1_rt3 (double): RT “top” del grupo 3 (ancla).
+
+rts4 (vector double): candidatos de RT del grupo 4.
+
+top1_rt4 (double): RT “top” del grupo 4 (solo para casos límite).
+
+inten_sum4 (vector double): intensidades alineadas con rts4.
+
+rt3_up (0/1): orden esperado:
+
+1 → se espera t3 > t4 (grupo 3 más tardío).
+Ventana: [top1_rt3 − 2, top1_rt3 + 0.5]; fallback: t4 = top1_rt3 − 0.5.
+
+0 → se espera t3 < t4 (grupo 3 más temprano).
+Ventana: [top1_rt3 − 0.5, top1_rt3 + 2]; fallback: t4 = top1_rt3 + 0.5.
+
+Requisito: numel(rts4) == numel(inten_sum4) y están índice a índice.
+
+Salidas
+
+t3, t4 (double): pareja de RTs. Si el “compañero” no aparece en la ventana, se usa ±0,5 desde el ancla.
+
+Lógica de decisión
+
+Ambos top presentes (top1_rt3 y top1_rt4 no vacíos):
+
+Fija t3 = top1_rt3.
+
+Busca en rts4 dentro de la ventana definida por rt3_up.
+
+Si hay candidatos → elige el de mayor intensidad (max(inten_sum4(id))) y fija t4.
+
+Si no hay → fallback: t4 = top1_rt3 ± 0,5 (signo según rt3_up).
+
+Solo hay top1_rt3: empareja con t4 = top1_rt3 ± 0,5 (signo según rt3_up).
+
+Solo hay top1_rt4: sintetiza t3 = top1_rt4 ∓ 0,5 (signo opuesto al de arriba) y t4 = top1_rt4.
+
+Ninguno: (t3, t4) = (0, 0).
+
+Ventanas asimétricas y sentido físico
+
+rt3_up = 1: se espera que el grupo 3 esté desplazado hacia tiempos mayores → ventana sesgada hacia el lado temprano para encontrar al grupo 4; si falla, t4 se fija 0,5 antes que t3.
+
+rt3_up = 0: se espera grupo 3 antes → ventana sesgada hacia el lado tardío; si falla, t4 se fija 0,5 después que t3.
+
+Esta asimetría modela desplazamientos sistemáticos entre canales (p. ej., por etiquetado isotópico o sesgo cromatográfico).
+
+Detalles y buenas prácticas
+
+El patrón 0==isempty(x) se usa para comprobar “no vacío” (idéntico a ~isempty(x)).
+
+Las unidades de RT no se imponen (normalmente, minutos).
+
+Si aparecen muchas parejas sintéticas (±0,5), revisa si la ventana ([−2, +0,5] o [−0,5, +2]) es adecuada para tu sistema; los ajustes deberían hacerse en funciones de nivel superior (no aquí).
+
+Verifica que rts4 e inten_sum4 están perfectamente alineados.
