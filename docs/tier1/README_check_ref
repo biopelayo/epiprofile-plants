@@ -1,0 +1,71 @@
+# README — check_ref (EN)
+
+## What does it do?
+
+It tries to resolve the reference retention time (`rt_ref`) for a sequence+modification combination (encoded in `new_seq`) using the file:
+
+`<raw_path>/histone_layouts/0_ref_info.mat`
+
+If it finds a match, it updates `rt_ref` and sets `ndebug = -1` (meaning a reference was applied).
+If it does not find a match (or it should not search), it changes nothing.
+
+---
+
+## Inputs
+
+- `raw_path` *(string)*: project base path containing `histone_layouts/0_ref_info.mat`.
+
+- `new_seq` *(string)*: lookup key; it must correspond to the concatenation `[pep_seq, mod_type]` used in the reference file.
+
+- `rt_ref` *(double)*: current/default RT value (used as the return value if there is no match).
+
+- `ndebug` *(double)*: controls whether the lookup is performed:
+
+  - lookup is performed only if `ndebug == 0` or `ndebug == -1`.
+  - for any other value, the lookup is skipped.
+
+---
+
+## Outputs
+
+- `rt_ref` *(double)*: if there is a match (unique or disambiguated), it is updated to `AllUnHis.rt_ref(i)`.
+
+- `ndebug` *(double)*: set to `-1` when the reference is applied; otherwise it is left unchanged.
+
+---
+
+## How matching is performed
+
+**Gödel-like key:** it computes:
+
+```text
+new_godel = sum((new_seq-'0'+49) .* log(2:1+length(new_seq)))
+
+
+MAT requirements
+
+AllUnHis must exist and contain at least:
+
+seq_godel (numeric vector)
+
+rt_ref (numeric vector)
+
+pep_seq (cellstr N×1)
+
+mod_type (cellstr N×1)
+
+When it will not do anything
+
+ndebug is not 0 and not -1.
+
+the MAT file does not exist.
+
+there are no seq_godel matches (and no exact string match in the multiple-match case).
+
+Practical tips
+
+Make sure you build new_seq exactly as in the MAT file: concatenation of pep_seq and mod_type with no separator.
+
+If you change how seq_godel is generated, regenerate the entire field in the MAT file before using this function.
+
+Document in a changelog when and why ndebug changes to -1 (marker for “reference applied”).

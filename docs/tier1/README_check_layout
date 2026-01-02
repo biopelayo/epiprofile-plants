@@ -1,0 +1,56 @@
+# check_layout.m — Function Note (Tier 1)
+
+## Purpose
+Interactive helper to load a reference MAT-file, inspect/edit the variable **`AllUnHis`** in the MATLAB debugger, and **save changes only if you decide to**.
+
+Target file:
+`<raw_path>/histone_layouts/0_ref_info.mat`
+
+This script is meant to be used with a **breakpoint on the last line** (`save(...)`). While paused, you can review and modify `AllUnHis`, then either continue to save or stop debugging to discard edits.
+
+**Tier classification:** T1 (runtime logic identical to upstream EpiProfile 2.0 Arabidopsis; documentation added only).
+
+---
+
+## Inputs / outputs
+**Inputs:** no arguments.  
+Reads `paras.txt` via `ReadInput('paras.txt')` to obtain `raw_path`.
+
+**Outputs:** none returned.  
+**Side-effect:** if execution reaches the final line, it overwrites the MAT-file by saving **only** `AllUnHis`.
+
+---
+
+## Dependencies
+- `ReadInput('paras.txt')` → must return `[bOK, raw_path]`
+- `<raw_path>/histone_layouts/0_ref_info.mat` must exist
+- MATLAB must have read/write permissions in that folder
+
+---
+
+## Recommended usage (step-by-step)
+1) Set a breakpoint on the last line:
+   `save(mat_file,'AllUnHis')` (press **F12**).
+2) Run the function (**F5**).
+3) The function will:
+   - clear the Command Window (`clc`)
+   - read `paras.txt` to get `raw_path`
+   - locate and `load` `0_ref_info.mat`
+4) Execution stops at the breakpoint. Inspect/edit `AllUnHis` in the function workspace.
+5) Decide:
+   - **Save**: press **F5** to continue and execute `save(...)`
+   - **Do not save**: click **Quit Debugging** (red square) to stop before saving
+
+---
+
+## Silent early-exit behavior
+- If `ReadInput` fails (`bOK == 0`) → returns with no error.
+- If the MAT-file does not exist → returns with no error.
+- Prints a single message: `checking layouts...`
+- If `AllUnHis` is not present when saving, MATLAB will error at `save(...)`.
+
+---
+
+## Good practices
+- Make a backup of `0_ref_info.mat` before editing.
+- Keep a small changelog (date + reason) describing what you changed in `AllUnHis`.

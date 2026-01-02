@@ -1,0 +1,76 @@
+# README — check_otherparas (EN)
+
+## What does it do?
+
+Initializes default analysis parameters and extracts the list of `*.RAW` files in a given directory. It returns:
+
+- default tolerance in ppm (`def_ptol`),
+- a two-character output code (`soutput`),
+- figure and debug/reference flags (`nfigure`, `ndebug`),
+- and the base names of the RAW files found (`raw_names`, without extension).
+
+---
+
+## Input
+
+- `raw_path` *(string)*: path to the folder containing files with the **uppercase** `.RAW` extension.
+
+⚠️ On case-sensitive systems, lowercase `.raw` will **not** match and the listing will be empty.
+
+---
+
+## Outputs
+
+- `def_ptol` *(double)*: default tolerance in ppm. A comment indicates: “FT: 10 ppm; others < 100 ppm”.
+
+- `soutput` *(char)*: two-character code:
+
+  **First digit (H3/H4):**  
+  `1` = basic H3/H4  
+  `2` = basic + H3S10ph  
+  `3` = all H3/H4
+
+  **Second digit (H1/H2AB):**  
+  `1` = include H1/H2AB  
+  `0` = do not include H1/H2AB
+
+  Example: `'30'` → H3/H4 “all”; H1/H2AB “no”.
+
+- `nfigure` *(0/1)*: `1` = generate figures; `0` = do not generate.
+
+- `ndebug` *(0/1/2)*:
+  - `0` = normal + reference
+  - `1` = debugging
+  - `2` = normal without reference
+
+- `raw_names` *(cell N×1)*: RAW base names without the `.RAW` extension.  
+  If no files are found, returns `{}` and prints `no raws`.
+
+---
+
+## Summary of the workflow
+
+1) Sets defaults:
+   - `def_ptol = 10`
+   - `soutput = '30'`
+   - `nfigure = 0`
+   - `ndebug = 0`
+2) Searches for `*.RAW` in `raw_path`.
+3) If no matches → `raw_names = {}` and prints `no raws`.
+4) If matches exist → fills `raw_names` by stripping the `.RAW` extension.
+
+---
+
+## Dependencies
+
+Uses only built-in MATLAB functions: `dir`, `fullfile`, `repmat`, `fprintf`.  
+No project-specific functions are called.
+
+---
+
+## Notes / recommended practices
+
+- **Extension:** ensure files end with `.RAW` (uppercase) if your filesystem is case-sensitive.
+- **Folder:** if `raw_path` does not exist or is empty, you will get `no raws` and `raw_names = {}`.
+- **Downstream use of `soutput`:** it is a string (not an integer). Downstream code must interpret its digits accordingly.
+- **Traceability:** if you change any defaults, document it in the pipeline changelog (date + reason).
