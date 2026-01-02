@@ -1,0 +1,57 @@
+README ampliado — get_histone12.m
+¿Qué hace?
+
+get_histone12 extrae, para un péptido hno y todas sus cargas, las trazas isotópicas MS1 en una ventana muy estrecha de RT (±0,2 min) alrededor de His.rt_ref(hno), detecta picos candidatos con GetTopBottom, elige el de mayor área entre los situados cerca del RT de referencia y integra el área con get_area. Devuelve:
+
+cur_rts (RT del apex por carga),
+
+cur_intens (área integrada por carga),
+
+cur_mono_isointens (traza monoisotópica para la primera carga).
+
+¿En qué se diferencia de get_histone11?
+Diferencia clave	get_histone11	get_histone12	Efecto práctico
+Ancho de ventana RT	delta = 0.5 min	delta = 0.2 min	Más específico (menos ruido/co-elución), pero más sensible a deriva de RT (riesgo de perder el pico).
+Detector de picos	GetTopBottom11	GetTopBottom	La heurística de detección/segmentación puede variar; esperar pequeñas diferencias de apex/bounds.
+Filtro RT candidatos	±0.5 min	±0.5 min	Con extracción ±0.2, este filtro es no restrictivo (todo lo extraído ya cae dentro).
+Validaciones extra	(si no las añadiste, mínimas)	(idéntico patrón del original)	Misma susceptibilidad a índices vacíos si no hay scans en la ventana.
+
+Resumen: get_histone12 es la variante “ventana estrecha”. Ideal cuando los picos son muy finos (FWHM ~10–15 s). Más limpia frente a interferencias, pero si hay un desplazamiento de RT > 0,2 min, puedes no encontrar el pico y devolver 0.
+
+¿Por qué afecta (razón proteómico-técnica)?
+
+Ventanas estrechas reducen la probabilidad de integrar co-eluyentes o hombros, típico en péptidos de histonas muy modificados.
+
+Pero en LC reales hay deriva de RT entre corridas/lotes. Si rt_ref no está bien actualizado por especie/condición, ±0,2 puede quedarse corto y perder el apex (falsos negativos).
+
+[Inferencia] En gradientes rápidos (p. ej., métodos tipo 30 SPD), los picos son más afilados y ±0,2 puede ser adecuado; en gradientes largos o si cambiaste columna, quizá necesites ±0,3–0,5 o alineación de RT previa.
+
+Ejemplo de cómo afecta
+
+His.rt_ref(hno) = 22.40 min, pico real en 22.55 min (deriva +0.15).
+
+get_histone12 (±0.2): ventana [22.20, 22.60] → capta el pico; menos interferencia que con ±0.5.
+
+Si la deriva fuera +0.35: ventana [22.20, 22.60] no lo capta (pico en 22.75) → cur_intens = 0.
+
+get_histone11 (±0.5): ventana [21.90, 22.90] → sí capta; pero puede incluir más ruido/co-eluyentes.
+
+Susceptibilidades (y cómo mitigarlas sin tocar esta función)
+
+Ventana sin scans (si rt_ref±0.2 cae en un hueco): el código asume p(1)/pp(end) existen → riesgo de error de índice.
+Mitiga: recalcular rt_ref por lote, o usar la versión robusta con comprobaciones (como te hice en get_histone11), o un fallback que reintente con ±0.5 si falla.
+
+nb(x(end)+1) fuera de rango si hay varios candidatos: misma susceptibilidad que el original.
+Mitiga: aplicar el mismo guardado que te propuse en la versión documentada de get_histone11.
+
+Consejos para EpiProfile_PLANTS
+
+Si tus picos en AT/MP/CR son estrechos, get_histone12 te dará mejor especificidad.
+
+Si detectas muchos ceros en ontogenia o entre especies, revisa:
+
+Alineación de RT (actualiza His.rt_ref por lote/especie),
+
+Aumenta delta a 0.3–0.4, o
+
+Añade un fallback automático (si falla ±0.2, reintenta ±0.5 y lo registras en log).
