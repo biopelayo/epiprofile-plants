@@ -1,0 +1,438 @@
+README (en castellano, extenso)
+¿Qué hace DrawISOProfile1?
+Es el orquestador del procesamiento por muestra en el pipeline EpiProfile (adaptado a histonas). Para cada muestra en raw_names:
+
+
+Crea la estructura de carpetas de salida histone_layouts/<##>_<sample>/detail/.
+
+
+Carga cuatro ficheros .mat ya generados en pasos previos:
+
+
+MS1_index, MS1_peaks (de raw_path/MS1/).
+
+
+MS2_index, MS2_peaks (de raw_path/MS2/).
+
+
+
+
+Decide si el modo es DIA o DDA con una heurística (véase abajo).
+
+
+Llama a un conjunto de funciones panel (e.g. H3_02_9_17, H4_01_4_17, …), que:
+
+
+Extraen XICs, cuantifican áreas, validan con MS2, generan figuras/matrices por ventana peptídica.
+
+
+
+
+Recalcula ratios internos (columna 3 de auc) en ventanas con variantes (p. ej., H3_02 + H3_02a + H3_02b), normalizando por la suma total de áreas del grupo.
+
+
+Genera resúmenes (H3_Snapshot, H4_Snapshot) y, si procede, benchmarks (GetBenchmark).
+
+
+Al finalizar todas las muestras, agrega resultados:
+
+
+OutputTogether → tabla general histone_ratios.xls con Ratio, Area, RT por péptido y muestra.
+
+
+OutputSinglePTMs → tabla por marcas individuales (solo fuentes 1 y 2).
+
+
+OutputFigures → figuras cruzadas si está activado y hay suficientes muestras.
+
+
+
+
+
+Entradas
+
+
+raw_path (string): carpeta raíz con subcarpetas MS1/ y MS2/.
+
+
+raw_names (cellstr): nombres base de cada muestra (sin extensión).
+
+
+ptol (num): tolerancia de masa usada por los paneles (ppm/u; según implementación downstream).
+
+
+special (struct) con banderas:
+
+
+nsource:
+
+
+1 = histone_normal
+
+
+2 = histone_SILAC
+
+
+3 = histone_C13
+
+
+4 = histone_N15
+
+
+5 = histone_13CD3
+
+
+
+
+nsubtype (solo para N15): 0..5 (0=N14 light, 1=N15 light, 2=N14 heavy, 3=N15 heavy, 4=0+1, 5=0+3).
+
+
+soutput (string/char): controla qué paneles H3/H4 se ejecutan en fuentes 1/2:
+
+
+'1' → básico H3+H4
+
+
+'2' → básico + H3S10ph (con recálculo rápido de ratios en H3_02/02a)
+
+
+otro  → completo (más ventanas y recálculos: H3_02/02a/02b; H3_04/04a y 04v3/04v3a)
+
+
+
+
+nfigure (0/1): si 1 y numel(raw_names) > 2, genera OutputFigures.
+
+
+nDAmode (se fija dentro de esta función por heurística DIA/DDA; ver más abajo).
+
+
+
+
+
+Salidas
+No devuelve variables. Produce ficheros dentro de histone_layouts/.../detail/ (por panel) y en la raíz de histone_layouts/ (agregados como histone_ratios.xls), más PDFs y .mat intermedios.
+
+Estructura de carpetas de salida
+<raw_path>/histone_layouts/
+└── 01_<sampleA>/
+    └── detail/
+        ├── H3_02_9_17.mat / .pdf / ...
+        ├── H3_04_27_40.mat / .pdf / ...
+        └── ...
+└── 02_<sampleB>/
+    └── detail/
+        └── ...
+...
+(histone_ratios.xls, histone_ratios_single_PTMs.xls, etc.)
+
+
+Heurística DIA vs DDA
+
+
+Se calcula nlen = length(unique(MS2_index(:,4))) (número de precursores únicos en MS2).
+
+
+Se comprueba si hay patrones repetidos cada nlen filas en MS2_index(:,4) con offsets 0..4 (c0..c4).
+
+
+Si nlen < 270 y alguno de c0..c4 es verdadero ⇒ special.nDAmode = 2 (DIA).
+
+
+En caso contrario ⇒ special.nDAmode = 1 (DDA).
+
+
+
+[Reality Filter — No verificado] Es una heurística: no garantiza clasificación perfecta, pero suele detectar DIA (ventanas sistemáticas). Ajustar el umbral (270) puede ser necesario en otros equipos/métodos.
+
+
+Paneles ejecutados (resumen)
+
+
+Fuentes 1/2 (normal/SILAC):
+
+
+soutput(1)=='1': paneles H3/H4 básicos.
+
+
+soutput(1)=='2': básicos + H3S10ph (vía H3_06_54_63), y recal_ratio_H3_0201.
+
+
+En otro caso: todos los paneles listados (H3 y H4 amplios) y recálculos recal_ratio_H3_0202 y recal_ratio_H3_0402.
+
+
+Además, si soutput(2)=='1', se añade HH2A_01u_1_7.
+
+
+Si el modo es DDA, se lanza GetBenchmark(cur_outpath).
+
+
+
+
+Fuente 3 (C13): subconjunto (H3 02/03/04/04v3; H4 01; H2A varias).
+
+
+Fuente 4 (N15): según nsubtype, paneles H3_*/H4_* o sus variantes H3N_*/H4N_* y HH2AN_*.
+
+
+Fuente 5 (13CD3): subconjunto para esa estrategia de marcado.
+
+
+
+Cada panel típico genera un .mat con His y auc (donde, por convención en EpiProfile, auc(:,1:3) suelen corresponder a RT, Area, Ratio).
+
+
+Recalibración de ratios (recal_ratio_*)
+
+
+Objetivo: cuando una ventana peptídica se divide en variantes (p. ej. H3_02, H3_02a, H3_02b), se recalcula auc(:,3) como fracción del área respecto a la suma de áreas de todas las variantes (columna 2).
+
+
+Implementación:
+
+
+Lee cada .mat del grupo, suma auc(:,2), calcula s = total, y reescribe auc(:,3) = auc(:,2)/s en cada fichero del grupo.
+
+
+
+
+Casos implementados:
+
+
+H3_02 + H3_02a (recal_ratio_H3_0201).
+
+
+H3_02 + H3_02a + H3_02b (recal_ratio_H3_0202).
+
+
+H3_04 + H3_04a, y H3_04v3 + H3_04v3a (doble pareja) (recal_ratio_H3_0402).
+
+
+
+
+
+Agregados finales
+
+
+OutputTogether(layout_path, raw_names) → crea un .xls global con (por defecto) Ratio, Area, RT por péptido/forma y por muestra.
+
+
+OutputSinglePTMs(layout_path, raw_names) → suma ratios de formas que corresponden a la misma marca PTM (solo en normal/SILAC).
+
+
+OutputFigures(layout_path, raw_names) → figuras de comparación si special.nfigure == 1 y numel(raw_names) > 2.
+
+
+
+Ejemplo de uso
+raw_path  = 'E:\project\run_01';
+raw_names = {'S01','S02','S03'};     % sin extensiones
+ptol      = 10;                      % ejemplo (ver tolerancia real del pipeline)
+
+special.nsource  = 1;                % 1=normal
+special.soutput  = '13';             % '1' → básicos; segundo char '3' es libre aquí
+special.nfigure  = 1;                % generar figuras si hay >2 muestras
+special.nsubtype = 0;                % no aplica a source=1; se ignora
+
+DrawISOProfile1(raw_path, raw_names, ptol, special);
+
+
+Errores comunes y diagnóstico
+
+
+“can not create: …/histone_layouts” → sin permisos o ruta inválida.
+
+
+MAT faltantes (*_MS1scans.mat, etc.) → asegúrate de ejecutar antes la conversión (p.ej., Raw2MS) o el paso que genera esos .mat.
+
+
+Campos de special mal definidos → revisa nsource, soutput, nsubtype, nfigure.
+
+
+Tablas .xls vacías → puede no haberse ejecutado ningún panel (p.ej., soutput no esperado) o falló la lectura de .mat intermedios.
+
+
+Ratios incoherentes entre variantes → ejecuta los recal_ratio_* correctos (esta función ya lo hace en casos 2/else de fuentes 1/2).
+
+
+
+Notas y limitaciones
+
+
+Los nombres de paneles (H3_02_9_17, etc.) están predefinidos y corresponden a ventanas de secuencia; añadir nuevas requiere nuevas funciones.
+
+
+La detección DIA/DDA es heurística y puede requerir ajuste según instrumento/método.
+
+
+Se asume que cada .mat de panel contiene His y auc con las columnas esperadas (RT, Area, Ratio).
+
+
+soutput se trata como string/char y se consulta por posición (soutput(1), soutput(2)).
+
+
+
+[Reality Filter] No puedo verificar aquí las implementaciones internas de cada H3_*/H4_*, ni el significado exacto de todas las columnas de MS1_index/MS2_index. La explicación se basa en cómo se usan en el código mostrado y en la convención habitual de EpiProfile. Si necesitas confirmación formal, habría que revisar esas funciones/formatos originales.
+
+
+
+Diferencias clave (resumen rápido)
+
+Ventana H3_06
+
+Antes: en “básico” y en “all” salía H3_06_53_63 (y en “+H3S10ph” salía H3_06_54_63).
+
+Ahora: en básico y en all usas H3_06_54_63 (y mantienes H3_06a_53_63 en “all”).
+➜ Cambia el tramo de esa ventana base (53–63 → 54–63) en dos ramas, lo que puede desplazar/alterar la cuantificación alrededor de S10.
+
+Paneles H3 “11–18” eliminados en el modo “básico”
+
+Antes (básico) incluías H3_11_3_8, H3_12_9_17, H3_13_18_26, H3_14_27_40, H3_16_53_63, H3_17_73_83, H3_18_117_128.
+
+Ahora (básico) no aparecen esos siete paneles.
+➜ Menos cobertura en “básico” para H3 (afecta comparabilidad si mezclas salidas viejo/nuevo).
+
+Gran ampliación de H1/H2 cuando soutput(2)=='1'
+
+Antes: solo HH2A_01u_1_7.
+
+Ahora: bloque grande de H1, H2A y H2B (múltiples variantes) con ramificación por especie (humano/ratón).
+➜ Muchísima más cobertura de H1/H2; si las funciones no existen en tu path, fallará. Aumenta tiempo de cómputo y ficheros generados.
+
+Introduces special.norganism (Human vs Mouse) dentro de esta función
+
+Antes: esta función no ramificaba por organismo.
+
+Ahora: si special.norganism==1 ejecuta conjuntos Human; si no, conjuntos Mouse para H1/H2A/H2B.
+➜ Necesitas setear special.norganism coherente y tener implementadas las variantes Mo (Mouse).
+
+C13 (fuente 3): añades un panel extra de H2A
+
+Antes: en C13 tenías HH2A_02m1_4_11, 04oV_1_19, 04oZ_1_19, 05m1_12_17.
+
+Ahora: añades HH2A_03m1_1_11.
+➜ Cobertura ampliada para H2A en condiciones C13; nuevo .mat/.pdf esperados.
+
+Benchmark (DDA) y snapshots: orden general igual, pero con más trabajo previo
+
+Sigues llamando H3_Snapshot/H4_Snapshot antes del bloque H1/H2 y GetBenchmark si DDA.
+
+Pero ahora, si soutput(2)=='1', se ejecuta un bloque mucho mayor antes del benchmark.
+
+Diferencias detalladas por bloque
+A) Detección DIA/DDA
+
+Sin cambio: misma heurística con nlen y patrones c0..c4.
+
+B) Rama nsource==1|2 (normal/SILAC)
+“Básico” (soutput(1)=='1')
+
+Antes:
+H3_01_3_8, H3_02_9_17, H3_03_18_26, H3_04_27_40, H3_04v3_27_40, H3_06_53_63, H3_07_73_83, H3_08_117_128
++ H3_11_3_8, H3_12_9_17, H3_13_18_26, H3_14_27_40, H3_16_53_63, H3_17_73_83, H3_18_117_128
+
+Ahora:
+igual pero H3_06_54_63 (no 53_63) y sin los siete paneles H3_11…H3_18.
+
+Implicación: menos ventanas H3 en básico y cambio de corte en 06.
+
+“Básico + H3S10ph” (soutput(1)=='2')
+
+Antes: ya usabas H3_06_54_63 y luego recal_ratio_H3_0201.
+
+Ahora: igual (sin cambio relevante).
+
+“All” (otro valor de soutput(1))
+
+Antes: incluías H3_06_53_63 y H3_06a_53_63.
+
+Ahora: cambias a H3_06_54_63 (no 53_63) y mantienes H3_06a_53_63.
+También se mantiene recal_ratio_H3_0202 y recal_ratio_H3_0402.
+
+Implicación: mezcla 54_63 (base) + 53_63 (versión “a”); revisa que esto es deliberado.
+
+Sub-bloque H1/H2 cuando soutput(2)=='1'
+
+Antes: solo HH2A_01u_1_7 (sin especie).
+
+Ahora:
+
+H1 (HH1/HH1Mo): varias ventanas distintas para Human vs Mouse.
+
+H2A (HH2A/HH2AMo): muchas más ventanas; en dos de ellas hay variante Mo.
+
+H2B (HH2B/HH2BMo): nuevas ventanas; Human incluye 01o1A_81_87, 02v_1_29, 03u_1_100; Mouse incluye 02v, 03u; 01m1B_80_86 se ejecuta en ambos.
+
+Implicación:
+
+Mucha más salida y dependencia de funciones extra (deben existir).
+
+Requiere special.norganism bien definido: 1=Human, otro=Mouse.
+
+Aumenta tiempo y tamaño de resultados; actualiza documentación/README.
+
+C) Rama nsource==3 (C13)
+
+Antes: H3 (02,03,04,04v3), H4_01, y H2A (02m1, 04oV, 04oZ, 05m1).
+
+Ahora: añades HH2A_03m1_1_11.
+
+Implicación: un .mat/.pdf más en C13 → ojo si scripts downstream esperan columnas/archivos fijos.
+
+D) Rama nsource==4 (N15)
+
+Sin cambio funcional visible: misma lista y misma lógica nsubtype.
+
+E) Rama nsource==5 (13CD3)
+
+Sin cambio: mantiene H3_06_54_63 (ya estaba así antes).
+
+F) Agregados finales
+
+Sin cambio: OutputTogether, OutputSinglePTMs (en 1/2), OutputFigures (condicional).
+
+G) recal_ratio_*
+
+Sin cambio: misma lógica de normalización de auc(:,3) por suma de áreas del grupo.
+
+Implicaciones prácticas y de control de calidad
+
+Comparabilidad entre versiones
+
+Si mezclas resultados “básico” de la versión vieja (que sí tenía H3_11–18) con la nueva (que ya no los incluye), perderás simetría de matrices. Documenta claramente qué “básico” usaste.
+
+Cambio de ventana H3_06 (53→54) en dos ramas
+
+Puede cambiar picos/áreas y afectar ratios en regiones cercanas a S10; si hay figuras o tablas previas, espera pequeñas discrepancias.
+
+Especie obligatoria en H1/H2
+
+Asegúrate de special.norganism correcto. Si no, ejecutarás paneles Mo sobre datos humanos (o viceversa).
+
+Verifica que todas las funciones HH1/HH2A/HH2B*** (y *Mo) estén en el path.
+
+Mayor tiempo de ejecución y volumen de datos
+
+El bloque extra de H1/H2 multiplica el número de archivos. Considera activar esa rama solo cuando lo necesites.
+
+C13 ampliado
+
+Si tienes scripts que postprocesan exactamente N ficheros, añade soporte para HH2A_03m1_1_11.
+
+Checklist rápido para elegir versión
+
+¿Quieres máxima cobertura H1/H2? → Nueva.
+
+¿Necesitas que “básico” incluya H3_11–18? → Antigua.
+
+¿Te importa que H3_06 sea (53–63) en “básico/all”? → Antigua. Si prefieres (54–63), → Nueva.
+
+¿Dependes de C13 sin cambios? → Ambas valen; la nueva añade un panel (ajusta tu downstream).
+
+Sugerencia de unificación (opcional)
+
+Parametriza la ventana 06 con special.h3_06_window = '53_63'|'54_63' para evitar bifurcaciones silenciosas.
+
+Añade special.include_H3_extra_basic = true/false para encender/apagar los H3_11–18 en “básico”.
+
+Encapsula el bloque H1/H2 bajo special.include_H1H2 y valida special.norganism al inicio (con error claro si falta).

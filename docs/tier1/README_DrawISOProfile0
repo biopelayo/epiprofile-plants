@@ -1,0 +1,100 @@
+README — DrawISOProfile0 (ES)
+¿Qué hace?
+
+Construye, desde cero, un archivo de referencia 0_ref_info.mat con los tiempos de retención de referencia (rt_ref) de todos los péptidos de histonas definidos por init_histone0. Para ello:
+
+Selecciona hasta 3 runs representativos (heurística top-3 basada en 4 anclas).
+
+Extrae RT e intensidad de cada péptido en esos runs con get_rts0.
+
+Fija rt_ref como la mediana de los RTs observados por péptido.
+
+Guarda la estructura AllUnHis en histone_layouts/0_ref_info.mat.
+
+⚠️ No sobreescribe: si el MAT ya existe, la función sale sin hacer nada.
+
+Entradas
+
+raw_path (string): ruta base con subcarpeta MS1/ (contiene *_MS1scans.mat y *_MS1peaks.mat)
+y la carpeta (a crear si no existe) histone_layouts/.
+
+raw_names (cellstr): nombres base de los RAW (sin extensión).
+
+ptol (double): tolerancia en ppm para get_rts0.
+
+special (struct): debe tener ndebug. Solo se ejecuta si special.ndebug == 0.
+
+Salida
+
+No devuelve variable; crea el archivo:
+
+<raw_path>/histone_layouts/0_ref_info.mat
+
+
+con al menos:
+
+AllUnHis.rt_ref (N×1): RT de referencia por péptido (mediana).
+
+AllUnHis.selected_raws (≤3×1): runs elegidos.
+
+Resto de campos provenientes de init_histone0 (p. ej., pep_mz, etc.).
+
+Detalles de la selección top-3 de runs
+
+Si hay ≤3 runs → usa todos (range = 1:N).
+
+Si hay >3:
+
+Anclas: ipos = [1,2,3,4] (comentadas como H3_01_3_8, H3_02_9_17, H3_03_18_26, H3_04_27_40).
+
+Para cada run y ancla: calcula (RT, intensidad) vía get_rts0.
+
+Ranking por ancla: mayor intensidad ⇒ mayor rango. Intensidad cero ⇒ rango 1.
+
+Score del run = producto de rangos en las 4 anclas (cuanto más alto, mejor).
+
+Elige el mejor run q (score máximo).
+
+Elige ancla p con mayor intensidad en q.
+
+Selecciona runs con |RT_p(run) − RT_p(q)| < 2 (ventana de similitud).
+
+Si ≥3 candidatos:
+
+Toma el centro: el más cercano a la mediana de RT.
+
+Toma izquierda (RT < centro) y derecha (RT > centro) con mayor intensidad en p.
+
+Resultado: [izq_mejor, centro, der_mejor].
+
+Dependencias
+
+Funciones del proyecto:
+
+init_histone0(special) → define AllUnHis (p. ej., índices de péptidos, pep_mz, etc.).
+
+get_rts0(MS1_index, MS1_peaks, ptol, AllUnHis, idx) → devuelve (rt, intensidad) para el péptido idx.
+
+Datos por run:
+
+<raw_path>/MS1/<raw>_MS1scans.mat (variable MS1_index)
+
+<raw_path>/MS1/<raw>_MS1peaks.mat (variable MS1_peaks)
+
+Condiciones de salida temprana
+
+length(raw_names) ≥ 100 o special.ndebug ≠ 0.
+
+No se puede crear histone_layouts/.
+
+Ya existe histone_layouts/0_ref_info.mat.
+
+Buenas prácticas
+
+Verifica que las .mat de MS1 contengan exactamente MS1_index y MS1_peaks.
+
+Mantén un backup si posteriormente vas a recalcular el MAT con otras anclas o reglas.
+
+Documenta el valor de ptol y los criterios de selección (ventana de 2 unidades en RT).
+
+Si cambian las anclas o la forma de priorizar runs, deja trazado en un CHANGELOG del pipeline.
