@@ -1,0 +1,166 @@
+# README — `draw_layout` (EN)
+
+## What does `draw_layout` do?
+
+`draw_layout` generates a **multi-panel PDF** (one subplot per peptide form / modification) showing:
+
+- The **MS1 mono-isotopic trace (XIC)** over chromatographic time.
+- The **local peak** and **integration boundaries** (magenta vertical lines).
+- A label with **modification, m/z, charge, RT and intensity**.
+- Optionally (if `special.nDAmode == 2`), a **DIA-like MS2 overlay**:
+  **b/y** fragments (CID/HCD-like) or **c/z** fragments (ETD), drawn as short colored traces and labeled by position (e.g., `b7`, `y10`, `c5`, `z8`, …).
+
+The PDF is saved as `../<out_filename>.pdf` (i.e., **one directory above** `cur_outpath`).
+
+---
+
+## Inputs
+
+### `cur_outpath`
+Working path for the current peptide window (used to determine the PDF output folder).
+
+### `out_filename`
+Logical name for the peptide window (used for the PDF filename and for the figure title).
+
+### `His` (struct)
+Expected fields:
+
+- `pep_mz` *(n×1)*: precursor m/z per row.
+- `pep_ch` *(n×1)*: precursor charge per row.
+- `mod_short` *(cell n×1)*: short modification label (e.g., `K9ac`, `K4me1`, …).
+- `pep_seq` *(char)*: peptide sequence for this window.
+- `display` *(n×1)*: 1 = show row, 0 = hide row.
+
+### `pep_rts` *(n×1)*
+Nominal retention time (minutes) per row.
+
+### `pep_intens` *(n×1)*
+Scalar intensity per row. If `> 0`, the function attempts a local peak search.
+
+### `isorts` *(T×1)*
+Time vector (minutes) used as the X axis for the MS1 XIC.
+
+### `mono_isointens` *(T×n)*
+MS1 mono-isotopic intensities (columns correspond to peptide rows/forms).
+
+### `MS2_index` *(S×… )*
+MS2 scan metadata. Columns used:
+
+- **(2)** RT (min)
+- **(4)** precursor m/z
+- **(6)** instrument type code (1..6) — original comment: `{'CIDIT','CIDFT','ETDIT','ETDFT','HCDIT','HCDFT'}`
+- **(7)** cumulative index used to slice `MS2_peaks`
+
+### `MS2_peaks` *(N×2)*
+Concatenated MS2 peak list across scans: `(m/z, intensity)` pairs.
+
+### `special` (struct)
+- `nDAmode`: if `== 2`, enables the MS2 overlay (DIA-like view).
+- `nhmass`: if `== 1`, uses `get_key_ions1H` (H-mass variant); otherwise uses `get_key_ions1`.
+
+> **Reality Filter — Not verified:** The exact semantics of `MS2_index(:,6)` / `MS2_index(:,7)` and helper functions
+> (`GetTopBottom11`, `GetLocal`, `GetMods`, `get_key_ions1/1H`) are not included here. They are described based on how
+> they are used in the code and the in-file comments.
+
+---
+
+## Output
+
+- A PDF file:  
+  `fullfile(fileparts(cur_outpath), [out_filename '.pdf'])`
+
+- Title format (derived from tokens inside `out_filename`):  
+  `<histone> <start>-<end> <pep_seq> +<charge> ions`
+
+- Each subplot corresponds to one modified form (one row of the window).
+
+---
+
+## How plotted rows are selected
+
+Rows are plotted only if:
+
+- `pep_rts > 4` minutes (filters out very early/likely noisy region), and
+- `His.display == 1` (respects pre-defined visibility flags).
+
+---
+
+## Axes and limits
+
+- **X axis:** minutes (`isorts`)
+- **Y axis:** intensity, rescaled to the **local maximum** within `[st, tm]` for each row.
+
+`st` / `tm` are computed from the most extreme integration limits across the visible rows, then padded:
+
+- left padding: `−5` minutes (with a floor)
+- right padding: `+25` minutes
+
+---
+
+## Labels and integration boundaries
+
+- **Apex marker (magenta):** stored in `localmax_rt` / `localmax_inten`, labeled as:  
+  `mod_short(mz,+z), RT, intensity`
+- **Integration limits (magenta):** vertical lines at both ends of `terminus` (indices in `isorts`)
+
+If `GetLocal` cannot find a valid contour, the function uses a **degenerate window**: `[seed seed]`.
+
+---
+
+## MS2 overlay (when `special.nDAmode == 2`)
+
+The function:
+
+1. Restricts MS2 scans to the RT window `[rt1, rt2]`, using the same XIC boundaries with `±0.001 min`.
+2. Chooses the precursor m/z in `MS2_index(:,4)` that is **closest** to `His.pep_mz(hno)`.
+3. Infers activation type:
+   - CID/HCD-like → **b/y** series
+   - ETD → **c/z** series
+4. Selects key ions (`K1`) using `get_key_ions1` or `get_key_ions1H` (based on `nhmass` and `ActiveType`).
+5. Matches, per scan, the closest peak to each `K1` within an **absolute tolerance**:
+   - odd instrument code (IT): `tol = 0.4`
+   - even instrument code (FT): `tol = 0.02`
+6. Draws short “mini-traces” and labels them (e.g., `b7`, `y10`, `c5`, `z8`, …), shifted for readability:
+   - N-series: `−4 min`
+   - C-series: `+3 min`
+
+> **Reality Filter — Not verified:** The `−4/+3 min` shift is a plotting choice to separate traces visually; it does not
+> represent a real chromatographic shift.
+
+---
+
+## External dependencies (helpers)
+
+- `GetTopBottom11(xic)`: heuristic for local top/bottom detection.
+- `GetLocal(seed_index, times, xic, nb)`: returns local apex and boundary indices.
+- `GetMods()`: modification catalog used for key-ion selection.
+- `get_key_ions1/1H(His,hno,Mods,ActiveType)`: defines fragment-ion m/z values (b/y or c/z).
+- `MatchMS2(...)`: local helper defined at the end of the file (uses `MS2_index` and `MS2_peaks`).
+
+---
+
+## Limitations and cautions
+
+- **Relative scaling:** the MS2 overlay uses a fold scaling based on local MS1 intensity. Do not compare absolute overlay
+  heights across subplots.
+- **Tolerances:** tolerance is inferred from instrument codes; if codes are wrong, fragment matching may fail.
+- **Precursor fallback:** if no exact precursor m/z match is found, the function falls back to using all scans in the RT window.
+- **Row filter:** `pep_rts > 4` and `display == 1` may hide real cases if your LC/gradient requires a different cutoff.
+- **Helper behavior:** final behavior depends on external helper implementations not shown here.
+
+---
+
+## Suggested usage
+
+```matlab
+% Assuming you already have:
+%   His, pep_rts, pep_intens, isorts, mono_isointens
+%   MS2_index, MS2_peaks
+%   special.nDAmode = 2 (to show MS2 overlay), special.nhmass = 0/1
+
+cur_outpath  = '/path/to/project/01_SampleA/detail';
+out_filename = 'H3_27_40_v1_...';  % the correct window name
+
+draw_layout(cur_outpath, out_filename, His, pep_rts, pep_intens, ...
+            isorts, mono_isointens, MS2_index, MS2_peaks, special);
+% Generates ../<out_filename>.pdf
