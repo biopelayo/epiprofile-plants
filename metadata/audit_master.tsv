@@ -1,0 +1,8 @@
+file_name	bundle_id	tier	module_block	role_1line
+calculate_pepmz.m	CORE	T1	core_quant	Compute peptide theoretical m/z
+check_layout.m	CORE	T1	qc_audit	Validate layout/paras consistency
+check_ref.m	CORE	T1	core_quant	Validate reference RT entries
+find_pair.m	CORE	T1	core_quant	Select best aligned pair
+find_pair_new.m	CORE	T1	core_quant	Select best aligned pair with RT window
+find_triple.m	CORE	T1	core_quant	Select best aligned triple
+get_area.m	CORE	T1	core_quant	Compute peptide area from isotopic envelope
