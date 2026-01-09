@@ -2,18 +2,18 @@ cff-version: 1.2.0
 message: "If you use EpiProfile_PLANTS, please cite it as below. Please also cite the original EpiProfile 2.0 publication."
 type: software
 title: "EpiProfile_PLANTS"
+
 authors:
   - family-names: "González de Lena Rodríguez"
     given-names: "Pelayo"
+    orcid: "https://orcid.org/0000-0001-9409-1457"
     email: "bio.pelayo@gmail.com"
     url: "https://github.com/biopelayo"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"   # <- añade tu ORCID cuando quieras
 
 repository-code: "https://github.com/biopelayo/epiprofile-plants"
 url: "https://github.com/biopelayo/epiprofile-plants"
 license: "GPL-3.0-only"
 
-# Usa semver: 0.x mientras esté en desarrollo; 1.0 cuando hagas release estable
 version: "0.1.0"
 date-released: "2026-01-09"
 
@@ -36,15 +36,13 @@ abstract: >
   that run with the same EpiProfile entrypoint, while maintaining transparent provenance and a function-level
   audit (T1–T4 tiers).
 
-# Cuando tengas Zenodo, añade esto:
-# doi: "10.5281/zenodo.XXXXXXX"
-
 preferred-citation:
   type: software
   title: "EpiProfile_PLANTS"
   authors:
     - family-names: "González de Lena Rodríguez"
       given-names: "Pelayo"
+      orcid: "https://orcid.org/0000-0001-9409-1457"
   version: "0.1.0"
   date-released: "2026-01-09"
   url: "https://github.com/biopelayo/epiprofile-plants"
@@ -56,7 +54,5 @@ references:
     authors:
       - family-names: "Yuan"
         given-names: "Zuo-Fei"
-    # journal: ""   # opcional si lo quieres
-    # year: 2018
-    # doi: ""       # si quieres, lo rellenamos con el DOI del paper oficial
-    # url: ""       # opcional
+    year: 2018
+    # doi: ""   # puedes rellenarlo cuando quieras
