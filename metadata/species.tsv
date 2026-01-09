@@ -1,0 +1,5 @@
+bundle_id	species	description	status
+EpiProfile2.0_AT	Arabidopsis thaliana	Standalone bundle for A. thaliana histone PTM screening	active
+EpiProfile2.0_MP	Marchantia polymorpha	Standalone bundle for M. polymorpha histone PTM screening	planned
+EpiProfile2.0_CR	Chlamydomonas reinhardtii	Standalone bundle for C. reinhardtii histone PTM screening	planned
+EpiProfile2.0_PP	Physcomitrella patens	Standalone bundle for P. patens histone PTM screening	planned
