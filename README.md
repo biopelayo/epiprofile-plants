@@ -1,467 +1,156 @@
-🌿 EpiProfile_PLANTS
+# 🌿 EpiProfile_PLANTS
 
-EpiProfile_PLANTS is a plant-oriented, auditable, and reproducible extension of EpiProfile 2.0 (Zuo-Fei Yuan et al., GPL-3.0) for the quantification of:
+**EpiProfile_PLANTS** is a plant-oriented, auditable, and reproducible extension of **EpiProfile 2.0** (Zuo-Fei Yuan et al., GPL-3.0) designed for precise and transparent quantification of histone modifications in botanical models.
 
-🧬 hDP — histone-derived peptides (peptide backbones)
+It supports the quantification of:
 
-🧩 hPF — histone peptideforms (PTM combinatorial states)
+- 🧬 **hDP** — *Histone-derived peptides* (peptide backbones)
+- 🧩 **hPF** — *Histone peptideforms* (PTM combinatorial states)
+- 🧷 **hPTM** — *Site-level histone PTMs* (marginal summaries derived from hPFs)
 
-🧷 hPTM — site-level histone PTMs (marginal summaries derived from hPFs)
+---
 
-…from bottom-up LC–MS/MS histone datasets generated under anhydride derivatization workflows (BottomMap-like).
+## 🚀 Overview
 
-🚀 TL;DR (one screen overview)
-✅ Gold-standard input
+### ✅ Gold-standard input (the “computational truth”)
 
-📄 *.mzML
+Unlike legacy workflows, EpiProfile_PLANTS defines the **true computational input** using three mandatory artifacts:
 
-📄 *.MS1
+- 📄 `*.mzML` — high-fidelity conversion output
+- 📄 `*.MS1` — extracted ion peaks
+- 📄 `*.MS2` — fragment evidence
 
-📄 *.MS2
+Optional legacy compatibility:
+- 🧯 `*.raw` — optional dummy placeholder for upstream/legacy expectations
 
-🧯 *.raw (optional dummy placeholder; legacy compatibility only)
+> **Key principle:** quantification is driven by **mzML + MS1 + MS2**.  
+> `.raw` is **not required** for quantification.
 
-✅ Canonical workflow
+---
+
+## 🔁 Canonical workflow
+
+```text
 RAW/WIFF  ->  (Docker + msconvert)  ->  mzML  ->  (xtract_xml.exe)  ->  MS1/MS2  ->  EpiProfile_PLANTS
+```
 
-✅ Deterministic execution
+### Mermaid diagram (optional; works in GitHub)
 
-📦 One MATLAB bundle at a time. Always.
+```mermaid
+graph LR
+    A[RAW/WIFF] --> B(Docker + msconvert)
+    B --> C[mzML]
+    C --> D(xtract_xml.exe)
+    D --> E[MS1/MS2]
+    E --> F[EpiProfile_PLANTS]
+```
 
-✨ What makes this repo different
-✅ 1) Gold-standard computational input is NOT RAW/WIFF
+---
 
-EpiProfile_PLANTS standardizes the true computational input as:
+## ✨ Key differentiators
 
-📦 Gold-standard input
+| Feature | EpiProfile 2.0 (Original) | EpiProfile_PLANTS |
+|---|---|---|
+| Target species | General / human-centric | Plant-specific (AT, MP, CR, PP) |
+| Input handling | Implicit / variable | **Gold-standard** (`mzML + MS1/MS2`) |
+| Runtime model | Shared MATLAB path | **Isolated species bundles** |
+| Auditability | Manual / ad hoc | **T1–T4 provenance model** |
+| Chemistry focus | Multiple chemistries | **Anhydride derivatization (BottomMap-like)** |
 
-*.mzML
+---
 
-*.MS1
+## ⚙️ Preprocessing pipeline (gold-standard input generation)
 
-*.MS2
+Reproducibility depends on generating the gold-standard artifacts correctly. Follow these two stages:
 
-🧯 Optional legacy compatibility
+### 🧱 Stage 1 — Conversion (RAW/WIFF → mzML)
 
-*.raw → may be a dummy empty placeholder if required by legacy assumptions
+- **Tool:** ProteoWizard `msconvert` (recommended via Docker)
+- **Settings:** 64-bit, vendor peak-picking, zlib compression
+- **Script:** `workflows/00_convert_raw_or_wiff_to_mzml.*`
 
-Key idea: quantification is driven by mzML + MS1 + MS2.
-.raw is not required for quantification.
+---
 
-✅ 2) Fully explicit preprocessing pipeline (Docker + xtract_xml)
+### 🧩 Stage 2 — Extraction (mzML → MS1/MS2)
 
-The gold-standard artifacts are generated through two explicit steps:
+- **Tool:** `xtract_xml.exe` *(external dependency)*
+- **Script:** `workflows/01_extract_ms1_ms2_from_mzml.*`
 
-🧱 Stage 1 — Conversion
+> ⚠️ **Licensing note:** `xtract_xml.exe` is treated as an **external dependency** and is not redistributed unless explicitly permitted.
 
-RAW/WIFF → mzML using ProteoWizard msconvert in Docker
+---
 
-🧩 Stage 2 — Extraction
+## 🗂️ Project structure
 
-mzML → MS1/MS2 using xtract_xml.exe (external dependency, long-lived binary)
-
-✅ 3) Deterministic runtime via bundle isolation
-
-EpiProfile_PLANTS is organized into species bundles.
-
-🚫 Invariant: load one bundle at a time in MATLAB path.
-
-✅ Why this matters:
-
-avoids function collisions
-
-guarantees deterministic behavior
-
-makes audits clean and attributable
-
-🧠 Concepts & terminology (repo-wide)
-Concept	Meaning	Output
-hDP	histone-derived peptide backbone	hDP × sample matrix
-hPF	peptideform (PTM combinatorial state)	peptideform-level artifacts
-hPTM	site-level PTM derived from hPFs	hPTM × sample matrix
-
-This separation prevents ambiguity and supports both peptide-level and site-level analytics.
-
-🧪 Experimental scope & assumptions
-
-EpiProfile_PLANTS assumes:
-
-✅ bottom-up histone proteomics
-✅ anhydride derivatization (BottomMap-like)
-✅ DDA-style LC–MS/MS acquisition
-✅ curated RT-aware layouts
-
-⚠️ If your chemistry/acquisition differs, results may require catalog/layout adaptation.
-
-⚙️ Preprocessing workflow (gold-standard input generation)
-🧱 Stage 1 — RAW/WIFF → mzML (Docker + msconvert)
-
-Conversion is performed using ProteoWizard msconvert inside Docker.
-
-✅ Recommended settings:
-
-64-bit mode
-
-peakPicking vendor
-
-zlib compression
-
-📁 Scripts:
-
-workflows/00_convert_raw_or_wiff_to_mzml.*
-
-🧩 Stage 2 — mzML → MS1/MS2 (xtract_xml.exe)
-
-✅ Generates:
-
-*.MS1
-
-*.MS2
-
-📁 Scripts:
-
-workflows/01_extract_ms1_ms2_from_mzml.*
-
-⚠️ Licensing note:
-xtract_xml.exe is an external dependency (not redistributed unless explicitly permitted).
-
-🗂️ Minimal folder recipe (recommended template)
-dataset/
-├── raw/                          # optional (source only)
-│   ├── sample1.raw / sample1.wiff
-│   └── ...
-├── mzML/
-│   ├── sample1.mzML
-│   └── ...
-├── MS1_MS2/
-│   ├── sample1.MS1
-│   ├── sample1.MS2
-│   └── ...
-├── layouts/
-│   ├── AT_histone_*.txt
-│   └── ...
-├── phenodata/
-│   └── phenodata.tsv
-├── output/
-│   ├── epiprofile/
-│   └── qc/
-└── logs/
-    ├── msconvert.log
-    └── xtract_xml.log
-
-
-✅ Rule: your quantification is defined by:
-
-mzML/
-
-MS1_MS2/
-
-layouts/
-
-phenodata/
-
-Everything else is provenance / traceability.
-
-⚡ Quickstart (reproducible, recommended)
-0) Ensure gold-standard input exists (per run)
-
-✅ run.mzML
-✅ run.MS1
-✅ run.MS2
-🧯 run.raw (optional placeholder)
-
-1) Run exactly one bundle in MATLAB
-
-Example: Arabidopsis bundle
-
-restoredefaultpath;
-addpath(genpath("bundles/EpiProfile2.0_AT"));
-
-which EpiProfile -all
-EpiProfile;
-
-
-✅ Sanity check:
-
-which EpiProfile -all returns exactly one EpiProfile.m
-
-otherwise your MATLAB path is contaminated
-
-🧾 Repository structure (software-grade)
+```text
 epiprofile-plants/
-├── README.md
-├── LICENSE
-├── CITATION.cff
-├── reference/                      # upstream intact baseline (EpiProfile 2.0)
-├── bundles/                        # species bundles (isolated runtime)
-├── metadata/                       # datasets + audit snapshots
-├── docs/                           # manual + architecture + provenance
-└── workflows/                      # reproducible scripts and recipes
+├── bundles/                # Isolated species-specific runtimes (AT, MP, CR, PP)
+├── docs/                   # Architecture, manuals, provenance tiers
+├── metadata/               # Audit snapshots and dataset manifests
+├── reference/              # Upstream EpiProfile 2.0 baseline
+└── workflows/              # Reproducible conversion scripts
+```
 
-📦 bundles/
+---
 
-Examples:
+## ⚡ Quickstart (MATLAB)
 
-bundles/EpiProfile2.0_AT/ — Arabidopsis
+To ensure deterministic execution, you must isolate the MATLAB path to **exactly one** species bundle.
 
-bundles/EpiProfile2.0_MP/ — Marchantia
-
-bundles/EpiProfile2.0_CR/ — Chlamydomonas
-
-bundles/EpiProfile2.0_PP/ — Physcomitrella
-
-Each bundle includes:
-
-full MATLAB runtime
-
-species catalogs (init_histone0_*)
-
-species panels + RT-aware layouts
-
-📤 Outputs (high-level)
-
-EpiProfile_PLANTS produces standardized artifacts enabling:
-
-🧬 hDP × sample matrices
-
-🧩 hPF artifacts (peptideforms)
-
-🧷 hPTM × sample matrices
-
-🧾 QC & audit artifacts
-
-📌 See: docs/MANUAL.md
-
-🧾 Provenance & audit model (T1–T4)
-
-All MATLAB functions are classified into four tiers:
-
-T1 — Reused unchanged
-
-T2 — Copied and modified
-
-T3 — Newly implemented
-
-T4 — Excluded intentionally (e.g., SILAC/C13-heavy)
-
-📌 Sources of truth:
-
-docs/tiers.md
-
-docs/provenance.md
-
-metadata/audit_master.tsv
-
-✅ Policy: any code change must update provenance + docs.
-
-✅ Reproducibility checklist (paper/tesis-ready)
-
-Before claiming reproducibility, ensure:
-
- ✅ Bundle isolation: only 1 bundle in MATLAB path
-
- ✅ Each run has mzML + MS1 + MS2
-
- ✅ paras.txt and layouts archived with the run
-
- ✅ Conversion logs archived (msconvert, xtract_xml)
-
- ✅ phenodata.tsv pinned to exact run IDs / filenames
-
- ✅ QC artifacts included (not only matrices)
-
- ✅ Repo version/commit hash recorded in metadata
-
-⚠️ Known failure modes (save yourself hours)
-🧨 1) MATLAB path contamination (multiple bundles loaded)
-
-Symptom: which EpiProfile -all returns >1 entry
-Fix:
-
+```matlab
+% 1) Clean environment
 restoredefaultpath;
+
+% 2) Load a single bundle (example: Arabidopsis)
 addpath(genpath("bundles/EpiProfile2.0_AT"));
 
-🧨 2) xtract_xml.exe generates empty MS1/MS2
+% 3) Sanity check: MUST return EXACTLY one path
+which EpiProfile -all
 
-Causes: wrong mzML type, missing vendor peak-picking, corrupted conversion
-Fix: regenerate mzML with recommended msconvert settings.
+% 4) Launch GUI
+EpiProfile;
+```
 
-🧨 3) Layout mismatch (wrong organism / wrong peptide catalog)
+✅ If `which EpiProfile -all` returns more than one entry, your MATLAB path is contaminated and results become non-deterministic.
 
-Fix: confirm correct bundle + corresponding layouts.
+---
 
-🧨 4) RT window drift (layout RT windows too strict)
+## 🧾 Provenance & audit model (T1–T4)
 
-Fix: widen/curate RT windows using representative runs.
+All MATLAB functions are tracked using a four-tier provenance model:
 
-🧨 5) Paths with spaces / unicode characters
+- **T1 (Reused):** upstream functions used without changes  
+- **T2 (Modified):** upstream code adapted for plant-specific workflows  
+- **T3 (New):** new implementations (e.g., `init_histone0_AT.m`)  
+- **T4 (Excluded):** intentionally removed / unused modules (e.g., SILAC/C13 modes)
 
-Fix: move dataset to a simple path:
+> **Detailed audit records:** `metadata/audit_master.tsv`
 
-C:\data\epiprofile\dataset\
-/mnt/data/epiprofile/dataset/
+---
 
-🧨 6) Dummy .raw placeholder issues
+## ⚠️ Known failure modes
 
-If a legacy path expects .raw, ensure:
+- **Path contamination:** if `which EpiProfile -all` returns more than one entry, execution is non-deterministic.
+- **Empty MS1/MS2:** often caused by missing **vendor peak-picking** during `msconvert`.
+- **RT window drift:** if quantification fails, widen RT windows in curated layouts.
+- **Special characters in paths:** avoid spaces or Unicode in dataset paths  
+  (use `C:\data\` instead of `C:\Users\Mi Usuario\Data`).
 
-file exists (can be empty)
+---
 
-name matches expected run ID
+## 📝 Citation & license
 
-correct path in paras.txt
+### License
+Distributed under **GPL-3.0**.
 
-🧩 Design principles & invariants (core contract)
+### How to cite
+- Cite **EpiProfile_PLANTS** using the repository `CITATION.cff`
+- Cite the upstream publication: **Zuo-Fei Yuan et al., EpiProfile 2.0**
 
-These are hard rules. Breaking them means the run is not considered valid/reproducible.
+---
 
-🔒 Invariants
+## 🔧 Optional repo setup helpers
 
-🧱 Bundle isolation
-
-exactly one bundle loaded in MATLAB path
-
-🧬 Quantification input is explicit
-
-mzML + MS1 + MS2 define the run (RAW/WIFF are upstream sources only)
-
-🧾 Traceability is mandatory
-
-preprocessing logs + parameters + layouts are archived
-
-🧩 Species awareness is explicit
-
-catalogs and layouts are organism-specific (no silent cross-species reuse)
-
-🧪 BottomMap scope
-
-supports bottom-up anhydride derivatization workflows; excluded modes are explicit (T4)
-
-🧠 QC philosophy (what “quality” means here)
-
-QC in EpiProfile_PLANTS is not “one plot”. It is a multi-layer audit:
-
-✅ QC layers
-
-🧪 Acquisition-level QC (instrument reports, chromatography stability)
-
-🧱 Conversion QC (msconvert settings + mzML integrity)
-
-🧩 Extraction QC (MS1/MS2 not empty; expected scan counts)
-
-🧬 Peptide-level QC (expected hDP presence, XIC sanity checks)
-
-🧷 PTM-level QC (expected ladders, isotopic patterns, RT alignment)
-
-📊 Matrix-level QC (missingness, zeros, distributions, batch effects)
-
-✅ QC principle
-
-If the pipeline cannot explain why a value is missing/zero, it is not auditable.
-
-⚖️ Licensing & dependencies (matrix)
-
-This repo is designed to keep licensing clean and explicit.
-
-Component	Role	Distributed in repo?	License / Notes
-EpiProfile_PLANTS MATLAB code	core quantification	✅ yes	GPL-3.0-only (derived from upstream)
-Upstream EpiProfile 2.0 baseline	reference/audit	✅ yes	GPL-3.0 (upstream)
-MATLAB	runtime	❌ no	proprietary (institutional license recommended)
-Docker	reproducible conversion	❌ no	external dependency
-ProteoWizard msconvert	RAW/WIFF → mzML	❌ no	used via Docker, separate distribution
-xtract_xml.exe	mzML → MS1/MS2	❌ no (default)	treated as external binary; placed locally by user
-Datasets (PRIDE PXDs)	validation	❌ no	referenced in metadata/datasets.tsv
-
-✅ Principle: this repo ships code + documentation, not vendor binaries.
-External tools are described and pinned via workflows/logs.
-
-🧾 Audit snapshot (example snippet)
-
-The authoritative audit is stored in:
-
-metadata/audit_master.tsv
-
-A typical record includes:
-
-function	tier	origin	notes
-EpiProfile.m	T2	copied+modified	bundle orchestration changes
-ReadInput.m	T2	copied+modified	plant-aware parsing / artifacts
-init_histone0_AT.m	T3	new	Arabidopsis catalog
-get_rts_AT.m	T3	new	RT library for AT
-RawToMS1.exe	T1	reused	upstream binary
-Extract_C13_*.m	T4	excluded	SILAC/C13-heavy mode not used
-✅ Tier policy
-
-T1/T2: must preserve upstream attribution + diff notes
-
-T3: must include standalone docs and rationale
-
-T4: must include explicit reason for exclusion
-
-🧭 Roadmap (high-level)
-🎯 Short-term
-
-strengthen QC/audit artifacts per run
-
-finalize stable bundle set (AT + MP + CR + PP)
-
-formalize minimal manifests: RUN_MANIFEST.tsv/json
-
-🧬 Mid-term
-
-cross-species “core peptide panel” bundle (init_histone0_core)
-
-standardized outputs for downstream R workflows (EDA + differential)
-
-📦 Long-term
-
-DOI-tagged releases (Zenodo)
-
-containerized reproducible workflows (where possible)
-
-optional Shiny/interactive QC viewer
-
-📝 Citation
-Cite EpiProfile_PLANTS
-
-Use CITATION.cff (GitHub: “Cite this repository”).
-Stable releases will have a Zenodo DOI.
-
-Cite upstream EpiProfile 2.0
-
-This software is derived from EpiProfile 2.0.
-Please cite the upstream publication when using EpiProfile_PLANTS.
-
-⚖️ License
-
-Distributed under GPL-3.0-only (see LICENSE).
-Derived work of EpiProfile 2.0 → upstream licensing applies.
-
-🤝 Contributing (strict rules)
-
-Contributions welcome under these constraints:
-
-🧱 Bundle isolation is sacred
-
-🧾 Update provenance (metadata/audit_master.tsv)
-
-📚 Document new/modified functions (docs/functions/ EN/ES)
-
-🆘 Support
-
-When opening an issue, include:
-
-OS + MATLAB version
-
-bundle used
-
-preprocessing logs (msconvert, xtract_xml)
-
-input artifacts (mzML + MS1 + MS2) or minimal subset
-
-paras.txt and layout files used
-
-✅ Final note
-
-This README defines the contract of EpiProfile_PLANTS:
-explicit inputs, isolated bundles, auditable provenance, and reproducible artifacts.
+If you want, I can generate:
+- `CITATION.cff` (ready for GitHub citation UI)
+- a template `metadata/audit_master.tsv` (T1–T4 audit scaffold)
