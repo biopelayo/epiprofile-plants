@@ -1,51 +1,60 @@
-file_name	bundle_id	tier	module_block	role_1line
-calculate_pepmz.m	CORE	T1	core_quant	Compute peptide theoretical m/z
-check_layout.m	CORE	T1	qc_audit	Validate layout/paras consistency
-check_ref.m	CORE	T1	core_quant	Validate reference RT entries
-find_pair.m	CORE	T1	core_quant	Select best aligned pair
-find_pair_new.m	CORE	T1	core_quant	Select best aligned pair with RT window
-find_triple.m	CORE	T1	core_quant	Select best aligned triple
-get_area.m	CORE	T1	core_quant	Compute peptide area from isotopic envelope
-Getaamass.m	AT	T1	core_quant	Get amino acid monoisotopic and average masses
-get_rts0.m	AT	T1	core_quant	Get retention times with single C13 isotope option
-get_rts2.m	AT	T1	core_quant	Get retention times with MS2 index support
-get_rts22.m	AT	T1	core_quant	Get retention times with MS2 and mass offset support
-get_key_ions.m	AT	T1	core_quant	Extract diagnostic key ions for peptide identification
-get_key_ions2.m	AT	T1	core_quant	Extract key ions with advanced filtering
-get_main_ch.m	AT	T1	core_quant	Reorder charge states with main charge first
-get_mod_mass.m	AT	T1	core_quant	Calculate modification mass delta
-get_theo_mz.m	AT	T1	core_quant	Compute theoretical m/z from peptide and mods
-calculate_pepmz0.m	AT	T1	core_quant	Calculate reference peptide m/z
-ReadInput.m	AT	T1	io_control	Read and parse experiment parameters
-relocateD.m	AT	T1	core_quant	Relocate retention times for deuterated peptides
-GetMods.m	AT	T1	core_quant	Load modification mass definitions and types
-H3_01_3_8.m	AT	T1	histone_module	Process H3 histone peptide positions 3-8
-H3_02_9_17.m	AT	T1	histone_module	Process H3 histone peptide positions 9-17
-H3_02a_9_17.m	AT	T1	histone_module	Process H3 histone variant a positions 9-17
-H3_02b_9_17.m	AT	T1	histone_module	Process H3 histone variant b positions 9-17
-H3_04_27_40.m	AT	T1	histone_module	Process H3 histone peptide positions 27-40
-H3_04a_27_40.m	AT	T1	histone_module	Process H3 histone variant a positions 27-40
-H3_04v3a_27_40.m	AT	T1	histone_module	Process H3 histone v3a variant positions 27-40
-H3_05_41_49.m	AT	T1	histone_module	Process H3 histone peptide positions 41-49
-H3_06_53_63.m	AT	T1	histone_module	Process H3 histone peptide positions 53-63
-H3_06a_53_63.m	AT	T1	histone_module	Process H3 histone variant a positions 53-63
-H3_07_73_83.m	AT	T1	histone_module	Process H3 histone peptide positions 73-83
-H3_09u_64_135.m	AT	T1	histone_module	Process H3 histone peptide positions 64-135
-H3_Snapshot.m	AT	T1	histone_module	Aggregate and visualize H3 modifications across positions
-H4_01_4_17.m	AT	T1	histone_module	Process H4 histone peptide positions 1-17
-H4_02_20_23.m	AT	T1	histone_module	Process H4 histone peptide positions 20-23
-H4_03_24_35.m	AT	T1	histone_module	Process H4 histone peptide positions 24-35
-H4_05_68_78.m	AT	T1	histone_module	Process H4 histone peptide positions 68-78
-H4_06_79_92.m	AT	T1	histone_module	Process H4 histone peptide positions 79-92
-H4_07u_24_102.m	AT	T1	histone_module	Process H4 histone peptide positions 24-102
-H4_Snapshot.m	AT	T1	histone_module	Aggregate and visualize H4 modifications across positions
-OutputTogether.m	AT	T1	io_output	Compile quantitative results across replicates
-GetBenchmark.m	AT	T1	qc_audit	Generate identification benchmark metrics report
-DrawISOProfile0.m	AT	T1	visualization	Draw isotope profile reference distributions
-draw_layout.m	AT	T1	visualization	Draw histone peptide chromatogram and spectrum layout
-get_histone4.m	AT	T1	histone_module	Calculate H4 histone quantification matrix
-get_histone6.m	AT	T1	histone_module	Calculate H6 histone quantification matrix
-get_rts.m	AT	T2	core_quant	Get retention times (plant-optimized RT windowing)
-init_histone0.m	AT	T2	histone_module	Initialize Arabidopsis reference histone catalog
-H3_04v3_27_40.m	AT	T2	histone_module	Process H3 histone v3 peptide (27-40, plant-adapted)
-OutputFigures.m	AT	T2	io_output	Output quantitative figures and matrices (plant-adapted)
+file_name\tbundle_id\ttier\tmodule_block\trole_1line
+calculate_pepmz.m\tCORE\tT1\tcore_quant\tCompute peptide theoretical m/z
+check_layout.m\tCORE\tT1\tqc_audit\tValidate layout/paras consistency
+check_ref.m\tCORE\tT1\tcore_quant\tValidate reference RT entries
+find_pair.m\tCORE\tT1\tcore_quant\tSelect best aligned pair
+find_pair_new.m\tCORE\tT1\tcore_quant\tSelect best aligned pair with RT window
+find_triple.m\tCORE\tT1\tcore_quant\tSelect best aligned triple
+get_area.m\tCORE\tT1\tcore_quant\tCompute peptide area from isotopic envelope
+Getaamass.m\tAT\tT1\tcore_quant\tGet amino acid monoisotopic and average masses
+get_rts0.m\tAT\tT1\tcore_quant\tGet retention times with single C13 isotope option
+get_rts2.m\tAT\tT1\tcore_quant\tGet retention times with MS2 index support
+get_rts22.m\tAT\tT1\tcore_quant\tGet retention times with MS2 and mass offset support
+get_key_ions.m\tAT\tT1\tcore_quant\tExtract diagnostic key ions for peptide identification
+get_key_ions2.m\tAT\tT1\tcore_quant\tExtract key ions with advanced filtering
+get_main_ch.m\tAT\tT1\tcore_quant\tReorder charge states with main charge first
+get_mod_mass.m\tAT\tT1\tcore_quant\tCalculate modification mass delta
+get_theo_mz.m\tAT\tT1\tcore_quant\tCompute theoretical m/z from peptide and mods
+calculate_pepmz0.m\tAT\tT1\tcore_quant\tCalculate reference peptide m/z
+ReadInput.m\tAT\tT1\tio_control\tRead and parse experiment parameters
+relocateD.m\tAT\tT1\tcore_quant\tRelocate retention times for deuterated peptides
+GetMods.m\tAT\tT1\tcore_quant\tLoad modification mass definitions and types
+H3_01_3_8.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 3-8
+H3_02_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 9-17
+H3_02a_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 9-17
+H3_02b_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone variant b positions 9-17
+H3_03_18_26.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 18-26
+H3_04_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 27-40
+H3_04a_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 27-40
+H3_04v3a_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone v3a variant positions 27-40
+H3_05_41_49.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 41-49
+H3_06_53_63.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 53-63
+H3_06a_53_63.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 53-63
+H3_07_73_83.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 73-83
+H3_09u_64_135.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 64-135
+H3_Snapshot.m\tAT\tT1\thistone_module\tAggregate and visualize H3 modifications across positions
+H4_01_4_17.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 1-17
+H4_02_20_23.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 20-23
+H4_02b_20_35.m\tAT\tT1\thistone_module\tProcess H4 histone variant b positions 20-35
+H4_03_24_35.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 24-35
+H4_05_68_78.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 68-78
+H4_06_79_92.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 79-92
+H4_07u_24_102.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 24-102
+H4_Snapshot.m\tAT\tT1\thistone_module\tAggregate and visualize H4 modifications across positions
+OutputTogether.m\tAT\tT1\tio_output\tCompile quantitative results across replicates
+OutputSinglePTMs.m\tAT\tT1\tio_output\tOutput single PTM quantifications by histone type
+GetBenchmark.m\tAT\tT1\tqc_audit\tGenerate identification benchmark metrics report
+DrawISOProfile0.m\tAT\tT1\tvisualization\tDraw isotope profile reference distributions
+draw_layout.m\tAT\tT1\tvisualization\tDraw histone peptide chromatogram and spectrum layout
+get_histone4.m\tAT\tT1\thistone_module\tCalculate H4 histone quantification matrix
+get_histone6.m\tAT\tT1\thistone_module\tCalculate H6 histone quantification matrix
+get_rts.m\tAT\tT2\tcore_quant\tGet retention times (plant-optimized RT windowing)
+init_histone0.m\tAT\tT2\thistone_module\tInitialize Arabidopsis reference histone catalog
+H3_04v3_27_40.m\tAT\tT2\thistone_module\tProcess H3 histone v3 peptide (27-40, plant-adapted)
+OutputFigures.m\tAT\tT2\tio_output\tOutput quantitative figures and matrices (plant-adapted)
+H3_06_53_63.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 53-63 (plant new variant)
+H3_11_3_8.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 3-8 (plant new variant)
+H3_12_9_17.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 9-17 (plant new variant)
+H3_13_18_26.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 18-26 (plant new variant)
+H3_14_27_40.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 27-40 (plant new variant)
+H3_16_53_63.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 53-63 (plant new variant)
