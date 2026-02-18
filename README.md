@@ -47,7 +47,7 @@ Deterministic execution requires the MATLAB path to include **exactly one** spec
 restoredefaultpath;
 
 % 2) Load a single bundle (example: Arabidopsis)
-addpath(genpath("bundles/EpiProfile2.0_AT"));
+addpath(genpath("bundles/AT/src"));
 
 % 3) Sanity check: MUST return EXACTLY one path
 which EpiProfile -all
