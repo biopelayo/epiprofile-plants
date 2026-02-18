@@ -1,1 +1,14 @@
+# CR/PV — Preliminary Validation
 
+This directory is reserved for preliminary validation materials for the
+*Chlamydomonas reinhardtii* bundle.
+
+## Planned contents
+
+- Raw output from initial test runs against CR histone LC-MS/MS data
+- Comparison tables: expected vs. observed peptides
+- Notes on RT behaviour and ion-pairing differences vs. AT
+
+## Status
+
+**Empty** — awaiting CR bundle completion and test data availability.

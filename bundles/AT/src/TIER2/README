@@ -1,1 +1,29 @@
+# TIER2 — Modified functions (plant-adapted)
 
+These 10 `.m` files were copied from upstream EpiProfile 2.0 basic and then
+modified to support plant histone analysis.
+
+## Files
+
+| File | Upstream origin | Key modifications |
+|------|----------------|-------------------|
+| EpiProfile.m | EpiProfile.m | Entry point; unchanged dispatch logic |
+| DrawISOProfile1.m | new (gap filled) | Main quantification runner; calls all T1+T2+T3 modules |
+| init_histone0.m | init_histone0.m | Plant peptide catalog (56 entries incl. AT variants) |
+| get_histone0.m | get_histone0.m | Gradient-aware unmod quantification; robustness guards |
+| get_histone11.m | get_histone11.m | GetTopBottom11 variant for extended peptides |
+| get_rts.m | get_rts.m | Robustness guards for RT reference lookup |
+| draw_layout.m | draw_layout.m | XIC plotting with robustness fixes |
+| H3_04v3_27_40.m | H3_04v3_27_40.m | H3.3 KSAPTTGGVKKPHR variant (plant-specific) |
+| OutputFigures.m | OutputFigures.m | QC figures adapted for plant PTM panel |
+| check_otherparas.m | check_otherparas.m | Default parameters (ptol=10, ndebug=0) |
+
+## Modification principles
+
+1. Robustness — Added guards against empty MS1/MS2 arrays, missing RT
+   references, and edge-case gradient lengths that occur with plant samples.
+2. Catalog expansion — init_histone0.m registers all AT-specific peptide
+   sequences identified through MSA (see TIER3 README for the variant list).
+3. Pipeline completeness — DrawISOProfile1.m was created to fill the
+   gap between DrawISOProfile0 (reference builder) and DrawISOProfile2
+   (SILAC mode, excluded as T4 for plants).

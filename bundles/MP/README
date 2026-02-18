@@ -1,1 +1,40 @@
+# MP — *Marchantia polymorpha* bundle
 
+## Status
+
+**Assembled** — TIER1/TIER2/TIER3 populated; pending validation against MP
+LC-MS/MS data.
+
+## Species information
+
+| Item | Value |
+|------|-------|
+| Organism | *Marchantia polymorpha* |
+| Clade | Bryophyte (liverwort) |
+| Relevance | Model for basal land-plant epigenetics |
+
+## Known sequence differences vs. AT / human
+
+Key substitutions identified from preliminary MSA:
+
+- H3 27-40: **KSAPSTGGVKKPHR** (differs from both human KSAPATGGVKKPHR
+  and AT H3.3 KSAPTTGGVKKPHR)
+- H4 20-23: **KVFR** (instead of human/AT KVLR)
+- Additional variants pending full MSA characterisation
+
+## Bundle contents
+
+| Directory | Files | Description |
+|-----------|-------|-------------|
+| `src/TIER1/` | 72 | Upstream EpiProfile 2.0 basic (unchanged) |
+| `src/TIER2/` | 10 | Modified: init_histone0 + DrawISOProfile1 + robustness |
+| `src/TIER3/` | 10 | AT-derived + MP-specific (H3_14_27_40, H4_02v_20_23) |
+
+## Running
+
+```matlab
+cd bundles/MP/src
+EpiProfile
+```
+
+See `docs/tiers.md` for tier definitions.

@@ -1,1 +1,39 @@
+# TIER3 — New functions for plant sequence variants
 
+These 9 `.m` files are entirely new, written to quantify histone peptides
+whose sequences differ from the human reference due to amino acid substitutions
+identified by Multiple Sequence Alignment (MSA) of histone FASTA files.
+
+## Modules and their peptide variants
+
+| Module | Residues | Peptide sequences (propionylated + trypsin) |
+|--------|----------|---------------------------------------------|
+| H3_11_3_8.m | 3-8 | TKQTAR, TKQSAR*, SNQTAR* |
+| H3_12_9_17.m | 9-17 | KSTGGKAPR, KSTGGKGPR*, KSHGGKAPR*, ISTGGKAPR* |
+| H3_13_18_26.m | 18-26 | KQLATKAAR, KELATKAAR*, TLLATKAAR*, KQLAPKAAR* |
+| H3_14_27_40.m | 27-40 | KSAPATGGVKKPHR, KSAPTTGGVKKPHR*, QSAPATGGVKKPHR* |
+| H3_06_53_63.m | 53-63 | KYQKSTELLIR (full PTM panel + relocate) |
+| H3_16_53_63.m | 53-63 | KYQKSTELLIR, KYQKSTELLNR* |
+| H3_17_73_83.m | 73-83 | EIAQDFKTDLR, EIAQDYKTDLR* |
+| H3_18_117_128.m | 117-128 | VTIMPKDIQLAR, VTIMPKDVQLAR*, VTIMPKEIQLAR* |
+| H3_Snapshot.m | all | Aggregator: collects all TIER3 hDP results per run |
+
+(*) = plant-specific variant not present in human EpiProfile.
+
+## How variants were identified
+
+1. Retrieve histone H3/H4 protein sequences for the target species from
+   UniProt/Phytozome.
+2. Perform MSA (ClustalW / MUSCLE) against the human H3.1 reference.
+3. Apply in-silico propionylation + trypsin digestion to predict the
+   observable peptide set.
+4. For each substitution-containing peptide, write a new quantification
+   module following the upstream H3_XX pattern (see docs/MANUAL.md
+   section 7: Anatomy of a quantification module).
+
+## Data flow
+
+Each TIER3 module writes its results to
+`histone_layouts/<run>/detail/H3_<id>_<range>.mat`.
+H3_Snapshot.m aggregates these into the per-run snapshot used by
+OutputTogether.m for the final cohort-level PTM tables.

@@ -1,1 +1,37 @@
+# PXD014739 — Arabidopsis histone PTM reference workflow
 
+## Dataset
+
+| Item | Value |
+|------|-------|
+| PRIDE accession | PXD014739 |
+| Organism | *Arabidopsis thaliana* (Col-0) |
+| Sample | Acid-extracted histones, propionylated |
+| Acquisition | DDA (data-dependent) |
+| Instrument | Q Exactive (Thermo) |
+
+## Files in this directory
+
+| File | Description |
+|------|-------------|
+| `histone_ratios_PXD014739.xls` | Cohort-level PTM ratio table (OutputTogether output) |
+| `PXD014739_XIC_gallery_subset_cropped.pdf` | Representative XIC traces for selected peptides |
+| `paper_PXD014739.pdf` | Associated publication (open access) |
+
+## How to reproduce
+
+```matlab
+% 1. Download RAW files from PRIDE: https://www.ebi.ac.uk/pride/archive/projects/PXD014739
+% 2. Place them in a folder (e.g., data/PXD014739/)
+% 3. Run the AT bundle:
+cd bundles/AT/src
+EpiProfile
+% 4. When prompted, point to the RAW folder
+% 5. Output appears in data/PXD014739/histone_layouts/
+```
+
+## Parameters used
+
+- Mass tolerance: 10 ppm (default, set in `check_otherparas.m`)
+- Debug mode: off (`ndebug = 0`)
+- Figures: enabled (`nfigure = 1`)

@@ -1,1 +1,44 @@
+# CR — *Chlamydomonas reinhardtii* bundle
 
+## Status
+
+**Assembled** — TIER1/TIER2/TIER3 populated; pending validation against CR
+LC-MS/MS data.
+
+## Species information
+
+| Item | Value |
+|------|-------|
+| Organism | *Chlamydomonas reinhardtii* |
+| Clade | Chlorophyte (green alga) |
+| Relevance | Model for algal chromatin biology |
+
+## Known sequence differences vs. AT / human
+
+Key substitution identified from preliminary MSA:
+
+- H3 27-40: **KTPATGGVKKPHR** (shorter motif; differs from human
+  KSAPATGGVKKPHR and AT variants)
+- Additional variants pending full MSA characterisation
+
+## Subdirectories
+
+- `PV/` — Preliminary validation data and notes (currently empty).
+
+## Bundle contents
+
+| Directory | Files | Description |
+|-----------|-------|-------------|
+| `src/TIER1/` | 72 | Upstream EpiProfile 2.0 basic (unchanged) |
+| `src/TIER2/` | 10 | Modified: init_histone0 + DrawISOProfile1 + robustness |
+| `src/TIER3/` | 9 | AT-derived + CR-specific (H3_14_27_40 with KTPATGGVKKPHR) |
+| `PV/` | 0 | Preliminary validation (awaiting test data) |
+
+## Running
+
+```matlab
+cd bundles/CR/src
+EpiProfile
+```
+
+See `docs/tiers.md` for tier definitions.

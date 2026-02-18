@@ -1,60 +1,97 @@
-file_name\tbundle_id\ttier\tmodule_block\trole_1line
-calculate_pepmz.m\tCORE\tT1\tcore_quant\tCompute peptide theoretical m/z
-check_layout.m\tCORE\tT1\tqc_audit\tValidate layout/paras consistency
-check_ref.m\tCORE\tT1\tcore_quant\tValidate reference RT entries
-find_pair.m\tCORE\tT1\tcore_quant\tSelect best aligned pair
-find_pair_new.m\tCORE\tT1\tcore_quant\tSelect best aligned pair with RT window
-find_triple.m\tCORE\tT1\tcore_quant\tSelect best aligned triple
-get_area.m\tCORE\tT1\tcore_quant\tCompute peptide area from isotopic envelope
-Getaamass.m\tAT\tT1\tcore_quant\tGet amino acid monoisotopic and average masses
-get_rts0.m\tAT\tT1\tcore_quant\tGet retention times with single C13 isotope option
-get_rts2.m\tAT\tT1\tcore_quant\tGet retention times with MS2 index support
-get_rts22.m\tAT\tT1\tcore_quant\tGet retention times with MS2 and mass offset support
-get_key_ions.m\tAT\tT1\tcore_quant\tExtract diagnostic key ions for peptide identification
-get_key_ions2.m\tAT\tT1\tcore_quant\tExtract key ions with advanced filtering
-get_main_ch.m\tAT\tT1\tcore_quant\tReorder charge states with main charge first
-get_mod_mass.m\tAT\tT1\tcore_quant\tCalculate modification mass delta
-get_theo_mz.m\tAT\tT1\tcore_quant\tCompute theoretical m/z from peptide and mods
-calculate_pepmz0.m\tAT\tT1\tcore_quant\tCalculate reference peptide m/z
-ReadInput.m\tAT\tT1\tio_control\tRead and parse experiment parameters
-relocateD.m\tAT\tT1\tcore_quant\tRelocate retention times for deuterated peptides
-GetMods.m\tAT\tT1\tcore_quant\tLoad modification mass definitions and types
-H3_01_3_8.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 3-8
-H3_02_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 9-17
-H3_02a_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 9-17
-H3_02b_9_17.m\tAT\tT1\thistone_module\tProcess H3 histone variant b positions 9-17
-H3_03_18_26.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 18-26
-H3_04_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 27-40
-H3_04a_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 27-40
-H3_04v3a_27_40.m\tAT\tT1\thistone_module\tProcess H3 histone v3a variant positions 27-40
-H3_05_41_49.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 41-49
-H3_06_53_63.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 53-63
-H3_06a_53_63.m\tAT\tT1\thistone_module\tProcess H3 histone variant a positions 53-63
-H3_07_73_83.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 73-83
-H3_09u_64_135.m\tAT\tT1\thistone_module\tProcess H3 histone peptide positions 64-135
-H3_Snapshot.m\tAT\tT1\thistone_module\tAggregate and visualize H3 modifications across positions
-H4_01_4_17.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 1-17
-H4_02_20_23.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 20-23
-H4_02b_20_35.m\tAT\tT1\thistone_module\tProcess H4 histone variant b positions 20-35
-H4_03_24_35.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 24-35
-H4_05_68_78.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 68-78
-H4_06_79_92.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 79-92
-H4_07u_24_102.m\tAT\tT1\thistone_module\tProcess H4 histone peptide positions 24-102
-H4_Snapshot.m\tAT\tT1\thistone_module\tAggregate and visualize H4 modifications across positions
-OutputTogether.m\tAT\tT1\tio_output\tCompile quantitative results across replicates
-OutputSinglePTMs.m\tAT\tT1\tio_output\tOutput single PTM quantifications by histone type
-GetBenchmark.m\tAT\tT1\tqc_audit\tGenerate identification benchmark metrics report
-DrawISOProfile0.m\tAT\tT1\tvisualization\tDraw isotope profile reference distributions
-draw_layout.m\tAT\tT1\tvisualization\tDraw histone peptide chromatogram and spectrum layout
-get_histone4.m\tAT\tT1\thistone_module\tCalculate H4 histone quantification matrix
-get_histone6.m\tAT\tT1\thistone_module\tCalculate H6 histone quantification matrix
-get_rts.m\tAT\tT2\tcore_quant\tGet retention times (plant-optimized RT windowing)
-init_histone0.m\tAT\tT2\thistone_module\tInitialize Arabidopsis reference histone catalog
-H3_04v3_27_40.m\tAT\tT2\thistone_module\tProcess H3 histone v3 peptide (27-40, plant-adapted)
-OutputFigures.m\tAT\tT2\tio_output\tOutput quantitative figures and matrices (plant-adapted)
-H3_06_53_63.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 53-63 (plant new variant)
-H3_11_3_8.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 3-8 (plant new variant)
-H3_12_9_17.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 9-17 (plant new variant)
-H3_13_18_26.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 18-26 (plant new variant)
-H3_14_27_40.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 27-40 (plant new variant)
-H3_16_53_63.m\tAT\tT3\thistone_module\tProcess H3 histone peptide positions 53-63 (plant new variant)
+file_name	bundle_id	tier	module_block	role_1line
+calculate_pepmz.m	CORE	T1	core_quant	Compute peptide theoretical m/z from sequence, mods and charge
+check_layout.m	CORE	T1	qc_audit	Interactive layout inspector (breakpoint-based)
+check_ref.m	CORE	T1	core_quant	Look up RT reference from 0_ref_info.mat by seq_godel hash
+find_pair.m	CORE	T1	core_quant	Select best co-eluting pair (me2/me3) by intensity and RT proximity
+find_pair_new.m	CORE	T1	core_quant	Select best pair with directional RT constraint
+find_triple.m	CORE	T1	core_quant	Select best co-eluting triple by intensity and RT proximity
+get_area.m	CORE	T1	core_quant	Compute peptide AUC from XIC with overlap deconvolution
+get_mod_mass.m	CORE	T1	core_quant	Calculate modification mass delta vector for a peptide
+get_mod_postype.m	CORE	T1	core_quant	Parse modification position and type from mod_type string
+get_theo_mz.m	CORE	T1	core_quant	Compute theoretical m/z from peptide and mods (standalone)
+Getaamass.m	AT	T1	core_quant	Amino acid monoisotopic and average mass table (26 entries)
+GetMods.m	AT	T1	core_quant	Modification mass table (pr, ac, me1-3, ph, cr, ub, ox, etc.)
+GetIPV.m	AT	T1	core_quant	Isotope pattern vector lookup table
+GetProfiles.m	AT	T1	core_quant	Extract XIC profiles from MS1 scans for a set of m/z values
+GetTopBottom.m	AT	T1	core_quant	Peak detection: find local maxima and boundaries in XIC
+GetTopBottom11.m	AT	T1	core_quant	Peak detection variant with narrower window for relocated peaks
+GetLocal.m	AT	T1	core_quant	Local maxima/minima detection helper
+JudgeLocalmaxmin.m	AT	T1	core_quant	Judge whether a point is local max or min
+get_rts0.m	AT	T1	core_quant	Get RT and intensity for a single peptide (reference building)
+get_rts2.m	AT	T1	core_quant	Get RT using MS2 confirmation (DIA mode)
+get_rts22.m	AT	T1	core_quant	Get RT using MS2 with mass offset support
+get_key_ions.m	AT	T1	core_quant	Extract diagnostic fragment ions for peptide ID
+get_key_ions1.m	AT	T1	core_quant	Extract key ions variant 1
+get_key_ions2.m	AT	T1	core_quant	Extract key ions with advanced filtering
+get_main_ch.m	AT	T1	core_quant	Reorder charge states putting main charge first
+get_histone1.m	AT	T1	histone_quant	Quantify a single modified peptideform (relocated RT)
+get_histone2.m	AT	T1	histone_quant	Quantify peptideform variant 2
+get_histone4.m	AT	T1	histone_quant	Quantify peptideform variant 4
+get_histone6.m	AT	T1	histone_quant	Quantify peptideform variant 6
+get_histone10.m	AT	T1	histone_quant	Quantify peptideform variant 10
+get_histone12.m	AT	T1	histone_quant	Quantify peptideform variant 12
+get_histone13.m	AT	T1	histone_quant	Quantify peptideform variant 13
+get_histone22.m	AT	T1	histone_quant	Quantify peptideform variant 22
+ReadInput.m	AT	T1	io_control	Parse paras.txt for raw_path, organism, source, subtype
+Raw2MS.m	AT	T1	io_control	Convert RAW files to MS1/MS2 .mat format
+relocateD.m	AT	T1	core_quant	Debug-mode RT relocation (narrow +/-1 min window per peptide)
+GetPSM.m	AT	T1	io_output	Extract peptide-spectrum matches from MS2 (DDA)
+GetPSM2.m	AT	T1	io_output	Extract PSMs for sequence-variant modules
+GetBenchmark.m	AT	T1	qc_audit	Generate identification benchmark metrics
+DrawISOProfile0.m	AT	T1	runner	Build RT reference (0_ref_info.mat) from top-3 runs
+DrawISOProfile2.m	AT	T1	runner	Runner for SILAC mode (calls Extract_SILAC)
+output_histone.m	AT	T1	io_output	Save per-region .mat with His struct and auc matrix
+output_histone2.m	AT	T1	io_output	Save per-region .mat variant 2
+OutputTogether.m	AT	T1	io_output	Aggregate all runs into histone_ratios.xls (cohort export)
+OutputSinglePTMs.m	AT	T1	io_output	Compute single-PTM marginal ratios across peptideforms
+H3_01_3_8.m	AT	T1	histone_module	H3 K4 region (TKQTAR): unmod, K4me1/2/3, K4ac
+H3_02_9_17.m	AT	T1	histone_module	H3 K9/K14 region (KSTGGKAPR): K9/K14 me/ac combos
+H3_02a_9_17.m	AT	T1	histone_module	H3 K9/K14 with S10ph
+H3_02b_9_17.m	AT	T1	histone_module	H3 K9/K14 with K9ac
+H3_03_18_26.m	AT	T1	histone_module	H3 K18/K23 region (KQLATKAAR): me/ac combos
+H3_04_27_40.m	AT	T1	histone_module	H3 K27/K36 region (KSAPATGGVKKPHR): me/ac combos (17 states)
+H3_04a_27_40.m	AT	T1	histone_module	H3 K27/K36 phospho/acetyl panel (S28ph combos)
+H3_04v3a_27_40.m	AT	T1	histone_module	H3.3 variant (KSAPSTGGVKKPHR): phospho/acetyl panel
+H3_05_41_49.m	AT	T1	histone_module	H3 41-49 region (YRPGTVALR)
+H3_06_53_63.m	AT	T1	histone_module	H3 K56 region (KYQKSTELLIR): K56me1/2/3, K56ac
+H3_06a_53_63.m	AT	T1	histone_module	H3 K56 variant (RYQKSTELLIR)
+H3_07_73_83.m	AT	T1	histone_module	H3 K79 region (EIAQDFKTDLR): K79me1/2/3, K79ac
+H3_08_117_128.m	AT	T1	histone_module	H3 K122 region (VTIMPKDIQLAR): K122ac
+H3_09u_64_135.m	AT	T1	histone_module	H3 misc peptides (KLPFQR, RIRGER, IRGERA)
+H3_Snapshot.m	AT	T1	histone_module	Aggregate H3 PTM positions across all regions
+H4_01_4_17.m	AT	T1	histone_module	H4 K5/K8/K12/K16 region (GKGGKGLGKGGAKR): 16 ac combos
+H4_02_20_23.m	AT	T1	histone_module	H4 K20 region (KVLR): K20me1/2/3, K20ac
+H4_02a_18_23.m	AT	T1	histone_module	H4 18-23 region (HRKVLR)
+H4_02b_20_35.m	AT	T1	histone_module	H4 20-35 long peptide (KVLRDNIQGITKPAIR)
+H4_03_24_35.m	AT	T1	histone_module	H4 24-35 region (DNIQGITKPAIR)
+H4_04_40_45.m	AT	T1	histone_module	H4 K44 region (RGGVKR)
+H4_05_68_78.m	AT	T1	histone_module	H4 68-78 region (DAVTYTEHAKR)
+H4_06_79_92.m	AT	T1	histone_module	H4 79-92 region (KTVTAMDVVYALKR)
+H4_07u_24_102.m	AT	T1	histone_module	H4 misc peptides (DNIQGITKPAIRR, ISGLIYEETR, etc.)
+H4_Snapshot.m	AT	T1	histone_module	Aggregate H4 PTM positions across all regions
+draw_layout.m	AT	T1	visualization	Draw XIC layout with peak boundaries (TIER1 version)
+EpiProfile.m	AT	T2	runner	Main entry point: read params, convert RAW, dispatch runners
+DrawISOProfile1.m	AT	T2	runner	Main runner for histone_normal mode (per-run quant + aggregation)
+init_histone0.m	AT	T2	histone_module	Master peptide catalog for AT (56 entries incl. plant variants + H2A)
+get_rts.m	AT	T2	core_quant	Get RT within window with robustness guards for empty ranges
+get_histone0.m	AT	T2	histone_quant	Quantify unmod reference peptide with gradient-aware logic
+get_histone11.m	AT	T2	histone_quant	Quantify peptideform with GetTopBottom11 and diagnostic fprintf
+draw_layout.m	AT	T2	visualization	Draw XIC layout with robustness fixes for edge cases
+H3_04v3_27_40.m	AT	T2	histone_module	H3.3 variant (KSAPTTGGVKKPHR): 17 PTM states (plant-adapted)
+OutputFigures.m	AT	T2	io_output	QC figures: bar, boxplot, PCA, heatmaps, clustergram
+check_otherparas.m	AT	T2	io_control	Default parameters (ptol=10, ndebug=0) and RAW file discovery
+H3_06_53_63.m	AT	T3	histone_module	H3 53-63 KYQKSTELLIR with full PTM panel (plant new)
+H3_11_3_8.m	AT	T3	histone_module	H3 3-8 sequence variants: TKQTAR, TKQSAR, SNQTAR
+H3_12_9_17.m	AT	T3	histone_module	H3 9-17 sequence variants: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR
+H3_13_18_26.m	AT	T3	histone_module	H3 18-26 sequence variants: KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR
+H3_14_27_40.m	AT	T3	histone_module	H3 27-40 sequence variants: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR
+H3_16_53_63.m	AT	T3	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQKSTELLNR
+H3_17_73_83.m	AT	T3	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR
+H3_18_117_128.m	AT	T3	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR
+H3_Snapshot.m	AT	T3	histone_module	Aggregate H3 PTM positions (TIER3 version for plant variants)
+Extract_SILAC.m	AT	T4	runner	SILAC extraction (not ported — upstream only)
+Extract_SILAC_1.m	AT	T4	runner	SILAC extraction variant (not ported — upstream only)
+GetaamassH.m	AT	T4	core_quant	Heavy amino acid masses for N15 (not ported)
+DrawISOProfile3.m	AT	T4	runner	C13 mode runner (not ported)
+DrawISOProfile4.m	AT	T4	runner	N15 mode runner (not ported)
+DrawISOProfile5.m	AT	T4	runner	13CD3 mode runner (not ported)
