@@ -3,6 +3,7 @@
 This document summarizes the recommended preprocessing pipeline (“gold-standard artifact generation”), deterministic MATLAB execution, the EpiProfile_PLANTS quantification data model (hDP/hPF/hPTM), expected outputs, provenance/audit conventions (T1–T4), RT reference hygiene, common failure modes, practical chemistry notes, and citation/license guidance.
 
 ---
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/824b5399-9c0b-4168-8f19-b5d4c62f7e9a" />
 
 ## ⚙️ Preprocessing pipeline (gold-standard artifact generation)
 
@@ -202,6 +203,9 @@ EpiProfile_PLANTS is commonly used with derivatization-based histone workflows (
 ---
 
 ## 🔧 Optional repo helpers (templates)
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/5536709d-12b9-4e60-86dd-a0ed2d843f2e" />
+
+
 
 This repository can include (or you can generate) ready-to-use templates:
 - `CITATION.cff` (GitHub citation UI compatible)
