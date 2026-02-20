@@ -3,7 +3,7 @@
 This document summarizes the recommended preprocessing pipeline (“gold-standard artifact generation”), deterministic MATLAB execution, the EpiProfile_PLANTS quantification data model (hDP/hPF/hPTM), expected outputs, provenance/audit conventions (T1–T4), RT reference hygiene, common failure modes, practical chemistry notes, and citation/license guidance.
 
 ---
-<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/824b5399-9c0b-4168-8f19-b5d4c62f7e9a" />
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/8b96045b-2299-4b97-a733-eba23f62410c" />
 
 ## ⚙️ Preprocessing pipeline (gold-standard artifact generation)
 
