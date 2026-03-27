@@ -1,0 +1,210 @@
+file_name	species	histone_name	histone_type	pep_seq	pep_len	pos_start	pos_end	n_mods	mod_shorts	charges	mz_unmod_ch1	mz_valid	variant_code	path
+HH2A_01oA1_7_14.m	AT	AT_H2A_can	H2A	TLGSGVAK	8	7	14	1	unmod	1 2 3	851.4621	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_01oA1_7_14.m
+HH2A_02oA1_23_31.m	AT	AT_H2A_can	H2A	AGLQFPVGR	9	23	31	1	unmod	1 2 3	1063.5683	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_02oA1_23_31.m
+HH2A_03oA1_45_73.m	AT	AT_H2A_can	H2A	VGAGAPVYLAAVLEYLAAEVLELAGNAAR	29	45	73	1	unmod	3 4 5	997.5377	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_03oA1_45_73.m
+HH2A_04oA1_84_90.m	AT	AT_H2A_can	H2A	HIQLAVR	7	84	90	1	unmod	1 2	955.5472	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_04oA1_84_90.m
+HH2A_05oA1_91_97.m	AT	AT_H2A_can	H2A	NDEELSK	7	91	97	1	unmod	1 2	953.4211	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_05oA1_91_97.m
+HH2A_06oA1_98_120.m	AT	AT_H2A_can	H2A	LLGDVTIANGGVMPNIHSLLLPK	23	98	120	1	unmod	3 4 5	831.1295	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_06oA1_98_120.m
+HH2A_07oA1_122_132.m	AT	AT_H2A_can	H2A	AGASKPSADED	11	122	132	1	unmod	1 2 3	1211.5254	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_07oA1_122_132.m
+HH2A_01oAX_1_11.m	AT	AT_H2AX	H2A	MSTGAGSGTTK	11	1	11	1	unmod	1 2 3	1116.4990	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_01oAX_1_11.m
+HH2A_02oAX_29_37.m	AT	AT_H2AX	H2A	AGLQFPVGR	9	29	37	1	unmod	1 2 3	1063.5683	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_02oAX_29_37.m
+HH2A_03oAX_51_79.m	AT	AT_H2AX	H2A	VGAGAPVYLSAVLEYLAAEVLELAGNAAR	29	51	79	1	unmod	3 4 5	1002.8693	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_03oAX_51_79.m
+HH2A_04oAX_90_96.m	AT	AT_H2AX	H2A	HIQLAVR	7	90	96	1	unmod	1 2	955.5472	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_04oAX_90_96.m
+HH2A_05oAX_97_103.m	AT	AT_H2AX	H2A	NDEELSK	7	97	103	1	unmod	1 2	953.4211	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_05oAX_97_103.m
+HH2A_06oAX_104_127.m	AT	AT_H2AX	H2A	LLGSVTIANGGVLPNIHQTLLPSK	24	104	127	1	unmod	3 4 5	854.4865	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_06oAX_104_127.m
+HH2A_07oAX_133_142.m	AT	AT_H2AX	H2A	GDIGSASQEF	10	133	142	1	unmod	1 2 3	1129.4796	OK	oAX	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_07oAX_133_142.m
+HH2A_01oAZ_8_19.m	AT	AT_H2AZ	H2A	GLIMGKPSGSDK	12	8	19	2	unmod|K13ac	1 2 3	1353.6910	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_01oAZ_8_19.m
+HH2A_02oAZ_25_29.m	AT	AT_H2AZ	H2A	KPITR	5	25	29	1	unmod	1 2	778.4649	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_02oAZ_25_29.m
+HH2A_03oAZ_33_41.m	AT	AT_H2AZ	H2A	AGLQFPVGR	9	33	41	1	unmod	1 2 3	1063.5683	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_03oAZ_33_41.m
+HH2A_04oAZ_50_55.m	AT	AT_H2AZ	H2A	STAHGR	6	50	55	1	unmod	1 2	747.3533	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_04oAZ_50_55.m
+HH2A_05oAZ_56_84.m	AT	AT_H2AZ	H2A	VGATAAVYTAAILEYLTAEVLELAGNASK	29	56	84	1	unmod	3 4 5	1010.2007	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_05oAZ_56_84.m
+HH2A_06oAZ_102_111.m	AT	AT_H2AZ	H2A	GDEELDTLIK	10	102	111	1	unmod	1 2 3	1251.6103	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_06oAZ_102_111.m
+HH2A_07oAZ_112_125.m	AT	AT_H2AZ	H2A	GTIAGGGVIPHIHK	14	112	125	1	unmod	2 3 4	738.4095	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_07oAZ_112_125.m
+HH2A_08oAZ_126_130.m	AT	AT_H2AZ	H2A	SLINK	5	126	130	1	unmod	1 2	693.3930	OK	oAZ	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_08oAZ_126_130.m
+HH2A_01oAW_1_12.m	AT	AT_H2AW	H2A	MESSQATTKPTR	12	1	12	2	unmod|K9ac	1 2 3	1500.7190	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_01oAW_1_12.m
+HH2A_02oAW_13_17.m	AT	AT_H2AW	H2A	GAGGR	5	13	17	1	unmod	1 2	536.2576	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_02oAW_13_17.m
+HH2A_03oAW_32_40.m	AT	AT_H2AW	H2A	AGLQFPVGR	9	32	40	1	unmod	1 2 3	1063.5683	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_03oAW_32_40.m
+HH2A_04oAW_54_82.m	AT	AT_H2AW	H2A	YGSGAPVYLAAVLEYLAAEVLELAGNAAR	29	54	82	1	unmod	3 4 5	1024.2010	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_04oAW_54_82.m
+HH2A_05oAW_93_99.m	AT	AT_H2AW	H2A	HLCLAIR	7	93	99	1	unmod	1 2	944.5135	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_05oAW_93_99.m
+HH2A_06oAW_100_106.m	AT	AT_H2AW	H2A	NDEELGR	7	100	106	1	unmod	1 2	951.4166	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_06oAW_100_106.m
+HH2A_07oAW_107_129.m	AT	AT_H2AW	H2A	LLHGVTIASGGVLPNINPVLLPK	23	107	129	1	unmod	3 4 5	814.4808	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_07oAW_107_129.m
+HH2A_08oAW_131_140.m	AT	AT_H2AW	H2A	STASSSQAEK	10	131	140	1	unmod	1 2 3	1114.5011	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_08oAW_131_140.m
+HH2A_09oAW_141_145.m	AT	AT_H2AW	H2A	ASATK	5	141	145	1	unmod	1 2	596.3038	OK	oAW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2A\HH2A_09oAW_141_145.m
+HH2B_01oA_8_12.m	AT	AT_H2B_1	H2B	KPAEK	5	8	12	1	unmod	1 2	736.4067	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_01oA_8_12.m
+HH2B_02oA_14_24.m	AT	AT_H2B_1	H2B	TAAERPVEENK	11	14	24	1	unmod	1 2 3	1362.6648	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_02oA_14_24.m
+HH2B_03oA_29_33.m	AT	AT_H2B_1	H2B	APAEK	5	29	33	1	unmod	1 2	634.3195	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_03oA_29_33.m
+HH2B_04oA_45_49.m	AT	AT_H2B_1	H2B	EAGDK	5	45	49	1	unmod	1 2	638.2780	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_04oA_45_49.m
+HH2B_05oA_57_62.m	AT	AT_H2B_1	H2B	NVETYK	6	57	62	1	unmod	1 2	872.4149	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_05oA_57_62.m
+HH2B_06oA_63_67.m	AT	AT_H2B_1	H2B	IYIFK	5	63	67	1	unmod	1 2	802.4498	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_06oA_63_67.m
+HH2B_07oA_71_81.m	AT	AT_H2B_1	H2B	QVHPDIGISSK	11	71	81	1	unmod	1 2 3	1299.6692	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_07oA_71_81.m
+HH2B_08oA_82_96.m	AT	AT_H2B_1	H2B	AMGIMNSFINDIFEK	15	82	96	1	unmod	2 3 4	924.9366	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_08oA_82_96.m
+HH2B_09oA_97_103.m	AT	AT_H2B_1	H2B	LAQESSK	7	97	103	1	unmod	1 2	881.4363	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_09oA_97_103.m
+HH2B_10oA_110_116.m	AT	AT_H2B_1	H2B	KPTITSR	7	110	116	1	unmod	1 2	966.5446	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_10oA_110_116.m
+HH2B_11oA_117_123.m	AT	AT_H2B_1	H2B	EIQTAVR	7	117	123	1	unmod	1 2	935.4945	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_11oA_117_123.m
+HH2B_12oA_124_132.m	AT	AT_H2B_1	H2B	LVLPGELAK	9	124	132	1	unmod	1 2 3	1058.6244	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_12oA_124_132.m
+HH2B_13oA_133_140.m	AT	AT_H2B_1	H2B	HAVSEGTK	8	133	140	1	unmod	1 2 3	947.4581	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_13oA_133_140.m
+HH2B_14oA_8_12.m	AT	AT_H2B_11	H2B	KPAEK	5	8	12	1	unmod	1 2	736.4067	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_14oA_8_12.m
+HH2B_15oA_14_24.m	AT	AT_H2B_11	H2B	TAAERPVEENK	11	14	24	1	unmod	1 2 3	1362.6648	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_15oA_14_24.m
+HH2B_16oA_29_33.m	AT	AT_H2B_11	H2B	APAEK	5	29	33	1	unmod	1 2	634.3195	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_16oA_29_33.m
+HH2B_17oA_45_49.m	AT	AT_H2B_11	H2B	EAGDK	5	45	49	1	unmod	1 2	638.2780	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_17oA_45_49.m
+HH2B_18oA_57_62.m	AT	AT_H2B_11	H2B	NVETYK	6	57	62	1	unmod	1 2	872.4149	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_18oA_57_62.m
+HH2B_19oA_63_67.m	AT	AT_H2B_11	H2B	IYIFK	5	63	67	1	unmod	1 2	802.4498	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_19oA_63_67.m
+HH2B_20oA_71_81.m	AT	AT_H2B_11	H2B	QVHPDIGISSK	11	71	81	1	unmod	1 2 3	1299.6692	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_20oA_71_81.m
+HH2B_21oA_82_96.m	AT	AT_H2B_11	H2B	AMGIMNSFINDIFEK	15	82	96	1	unmod	2 3 4	924.9366	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_21oA_82_96.m
+HH2B_22oA_97_103.m	AT	AT_H2B_11	H2B	LAQESSK	7	97	103	1	unmod	1 2	881.4363	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_22oA_97_103.m
+HH2B_23oA_110_116.m	AT	AT_H2B_11	H2B	KPTITSR	7	110	116	1	unmod	1 2	966.5446	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_23oA_110_116.m
+HH2B_24oA_117_123.m	AT	AT_H2B_11	H2B	EIQTAVR	7	117	123	1	unmod	1 2	935.4945	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_24oA_117_123.m
+HH2B_25oA_124_132.m	AT	AT_H2B_11	H2B	LVLPGELAK	9	124	132	1	unmod	1 2 3	1058.6244	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_25oA_124_132.m
+HH2B_26oA_133_140.m	AT	AT_H2B_11	H2B	HAVSEGTK	8	133	140	1	unmod	1 2 3	947.4581	OK	oA	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H2B\HH2B_26oA_133_140.m
+HH1_01oA1_1_29.m	AT	AT_H1.1	H1	MSEVEIENAATIEGNTAADAPVTDAAVEK	29	1	29	1	unmod	3 4 5	1022.4800	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_01oA1_1_29.m
+HH1_02oA1_30_34.m	AT	AT_H1.1	H1	KPAAK	5	30	34	1	unmod	1 2	678.4012	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_02oA1_30_34.m
+HH1_03oA1_49_55.m	AT	AT_H1.1	H1	TVAAAPK	7	49	55	1	unmod	1 2	776.4301	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_03oA1_49_55.m
+HH1_04oA1_58_70.m	AT	AT_H1.1	H1	TVSSHPTYEEMIK	13	58	70	1	unmod	2 3 4	820.8849	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_04oA1_58_70.m
+HH1_05oA1_71_77.m	AT	AT_H1.1	H1	DAIVTLK	7	71	77	1	unmod	1 2	878.4982	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_05oA1_71_77.m
+HH1_06oA1_80_89.m	AT	AT_H1.1	H1	TGSSQYAIQK	10	80	89	1	unmod	1 2 3	1201.5848	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_06oA1_80_89.m
+HH1_07oA1_90_94.m	AT	AT_H1.1	H1	FIEEK	5	90	94	1	unmod	1 2	784.3876	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_07oA1_90_94.m
+HH1_08oA1_97_103.m	AT	AT_H1.1	H1	ELPPTFR	7	97	103	1	unmod	1 2	978.5043	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_08oA1_97_103.m
+HH1_09oA1_105_111.m	AT	AT_H1.1	H1	LLLLNLK	7	105	111	1	unmod	1 2	945.6131	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_09oA1_105_111.m
+HH1_10oA1_113_118.m	AT	AT_H1.1	H1	LVASGK	6	113	118	1	unmod	1 2	693.3930	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_10oA1_113_118.m
+HH1_11oA1_128_134.m	AT	AT_H1.1	H1	LPSASAK	7	128	134	1	unmod	1 2	792.4250	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_11oA1_128_134.m
+HH1_12oA1_135_139.m	AT	AT_H1.1	H1	ASSPK	5	135	139	1	unmod	1 2	608.3038	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_12oA1_135_139.m
+HH1_13oA1_140_144.m	AT	AT_H1.1	H1	AAAEK	5	140	144	1	unmod	1 2	608.3038	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_13oA1_140_144.m
+HH1_14oA1_145_149.m	AT	AT_H1.1	H1	SAPAK	5	145	149	1	unmod	1 2	592.3089	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_14oA1_145_149.m
+HH1_15oA1_151_159.m	AT	AT_H1.1	H1	KPATVAVTK	9	151	159	1	unmod	1 2 3	1078.6334	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_15oA1_151_159.m
+HH1_16oA1_164_169.m	AT	AT_H1.1	H1	VAAASK	6	164	169	1	unmod	1 2	665.3617	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_16oA1_164_169.m
+HH1_17oA1_173_179.m	AT	AT_H1.1	H1	TIAVKPK	7	173	179	1	unmod	1 2	920.5643	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_17oA1_173_179.m
+HH1_18oA1_180_184.m	AT	AT_H1.1	H1	TAAAK	5	180	184	1	unmod	1 2	580.3089	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_18oA1_180_184.m
+HH1_19oA1_192_197.m	AT	AT_H1.1	H1	AKPVPR	6	192	197	1	unmod	1 2	831.4915	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_19oA1_192_197.m
+HH1_20oA1_198_204.m	AT	AT_H1.1	H1	ATAAATK	7	198	204	1	unmod	1 2	752.3937	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_20oA1_198_204.m
+HH1_21oA1_207_213.m	AT	AT_H1.1	H1	AVDAKPK	7	207	213	1	unmod	1 2	892.4966	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_21oA1_207_213.m
+HH1_22oA1_216_220.m	AT	AT_H1.1	H1	ARPAK	5	216	220	1	unmod	1 2	661.3780	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_22oA1_216_220.m
+HH1_23oA1_227_232.m	AT	AT_H1.1	H1	VTSPAK	6	227	232	1	unmod	1 2	721.3879	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_23oA1_227_232.m
+HH1_24oA1_234_239.m	AT	AT_H1.1	H1	AVAATK	6	234	239	1	unmod	1 2	679.3773	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_24oA1_234_239.m
+HH1_25oA1_241_247.m	AT	AT_H1.1	H1	VATVATK	7	241	247	1	unmod	1 2	808.4563	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_25oA1_241_247.m
+HH1_26oA1_255_259.m	AT	AT_H1.1	H1	VVKPK	5	255	259	1	unmod	1 2	734.4638	OK	oA1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_26oA1_255_259.m
+HH1_01oA2_1_22.m	AT	AT_H1.2	H1	MSIEEENVPTTVDSGAADTTVK	22	1	22	1	unmod	3 4 5	805.0407	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_01oA2_1_22.m
+HH1_02oA2_175_179.m	AT	AT_H1.2	H1	KPAAK	5	175	179	1	unmod	1 2	678.4012	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_02oA2_175_179.m
+HH1_03oA2_38_42.m	AT	AT_H1.2	H1	TTTAK	5	38	42	1	unmod	1 2	640.3301	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_03oA2_38_42.m
+HH1_04oA2_50_55.m	AT	AT_H1.2	H1	AAAPTK	6	50	55	1	unmod	1 2	677.3617	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_04oA2_50_55.m
+HH1_05oA2_58_70.m	AT	AT_H1.2	H1	TTSSHPTYEEMIK	13	58	70	1	unmod	2 3 4	821.8745	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_05oA2_58_70.m
+HH1_06oA2_71_77.m	AT	AT_H1.2	H1	DAIVTLK	7	71	77	1	unmod	1 2	878.4982	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_06oA2_71_77.m
+HH1_07oA2_80_89.m	AT	AT_H1.2	H1	TGSSQYAIQK	10	80	89	1	unmod	1 2 3	1201.5848	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_07oA2_80_89.m
+HH1_08oA2_90_94.m	AT	AT_H1.2	H1	FIEEK	5	90	94	1	unmod	1 2	784.3876	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_08oA2_90_94.m
+HH1_09oA2_97_103.m	AT	AT_H1.2	H1	SLPPTFR	7	97	103	1	unmod	1 2	936.4938	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_09oA2_97_103.m
+HH1_10oA2_105_111.m	AT	AT_H1.2	H1	LLLVNLK	7	105	111	1	unmod	1 2	931.5975	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_10oA2_105_111.m
+HH1_11oA2_113_118.m	AT	AT_H1.2	H1	LVASEK	6	113	118	1	unmod	1 2	765.4141	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_11oA2_113_118.m
+HH1_12oA2_128_132.m	AT	AT_H1.2	H1	IPSAR	5	128	132	1	unmod	1 2	662.3620	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_12oA2_128_132.m
+HH1_13oA2_133_144.m	AT	AT_H1.2	H1	SAATPKPAAPVK	12	133	144	1	unmod	1 2 3	1301.7291	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_13oA2_133_144.m
+HH1_14oA2_147_154.m	AT	AT_H1.2	H1	ATVVAKPK	8	147	154	1	unmod	1 2 3	977.5857	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_14oA2_147_154.m
+HH1_15oA2_157_165.m	AT	AT_H1.2	H1	VAAAVAPAK	9	157	165	1	unmod	1 2 3	916.5250	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_15oA2_157_165.m
+HH1_16oA2_186_191.m	AT	AT_H1.2	H1	VTAKPK	6	186	191	1	unmod	1 2	807.4802	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_16oA2_186_191.m
+HH1_17oA2_194_200.m	AT	AT_H1.2	H1	VTAAKPK	7	194	200	1	unmod	1 2	878.5173	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_17oA2_194_200.m
+HH1_18oA2_203_209.m	AT	AT_H1.2	H1	SVAAVSK	7	203	209	1	unmod	1 2	780.4250	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_18oA2_203_209.m
+HH1_19oA2_212_218.m	AT	AT_H1.2	H1	AVAAKPK	7	212	218	1	unmod	1 2	848.5068	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_19oA2_212_218.m
+HH1_20oA2_221_225.m	AT	AT_H1.2	H1	ERPAK	5	221	225	1	unmod	1 2	719.3835	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_20oA2_221_225.m
+HH1_21oA2_233_237.m	AT	AT_H1.2	H1	TSPGK	5	233	237	1	unmod	1 2	608.3038	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_21oA2_233_237.m
+HH1_22oA2_239_244.m	AT	AT_H1.2	H1	VAAPAK	6	239	244	1	unmod	1 2	675.3824	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_22oA2_239_244.m
+HH1_23oA2_246_250.m	AT	AT_H1.2	H1	VAVTK	5	246	250	1	unmod	1 2	636.3715	OK	oA2	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\AT\H1\HH1_23oA2_246_250.m
+HH2A_01oM1_1_11.m	MP	MP_H2A_can	H2A	MSSAGGSSGGR	11	1	11	1	unmod	1 2 3	1072.4476	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_01oM1_1_11.m
+HH2A_02oM1_26_34.m	MP	MP_H2A_can	H2A	AGLQFPVGR	9	26	34	1	unmod	1 2 3	1063.5683	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_02oM1_26_34.m
+HH2A_03oM1_48_76.m	MP	MP_H2A_can	H2A	VGAGAPVYLAAVMEYLAAEVLELAGNAAR	29	48	76	1	unmod	3 4 5	1003.5232	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_03oM1_48_76.m
+HH2A_04oM1_87_93.m	MP	MP_H2A_can	H2A	HIQLAVR	7	87	93	1	unmod	1 2	955.5472	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_04oM1_87_93.m
+HH2A_05oM1_94_100.m	MP	MP_H2A_can	H2A	NDEELSK	7	94	100	1	unmod	1 2	953.4211	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_05oM1_94_100.m
+HH2A_06oM1_101_123.m	MP	MP_H2A_can	H2A	LLGSVVIASGGVLPNIQSSLLPK	23	101	123	1	unmod	3 4 5	794.4649	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_06oM1_101_123.m
+HH2A_07oM1_130_139.m	MP	MP_H2A_can	H2A	GDIGSMSQEF	10	130	139	1	unmod	1 2 3	1189.4830	OK	oM1	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_07oM1_130_139.m
+HH2A_01oMW_5_11.m	MP	MP_H2A_W	H2A	SGTTAVK	7	5	11	1	unmod	1 2	782.4043	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_01oMW_5_11.m
+HH2A_02oMW_13_17.m	MP	MP_H2A_W	H2A	KPVSK	5	13	17	2	unmod|K13ac	1 2	722.4275	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_02oMW_13_17.m
+HH2A_03oMW_21_29.m	MP	MP_H2A_W	H2A	AGLQFPVGR	9	21	29	1	unmod	1 2 3	1063.5683	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_03oMW_21_29.m
+HH2A_04oMW_43_71.m	MP	MP_H2A_W	H2A	IGAGAPVYLAAVLEYLAAELLELAGNACR	29	43	71	1	unmod	3 4 5	1017.5388	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_04oMW_43_71.m
+HH2A_05oMW_82_88.m	MP	MP_H2A_W	H2A	HIQLAVR	7	82	88	1	unmod	1 2	955.5472	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_05oMW_82_88.m
+HH2A_06oMW_89_95.m	MP	MP_H2A_W	H2A	NDEELSK	7	89	95	1	unmod	1 2	953.4211	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_06oMW_89_95.m
+HH2A_07oMW_96_104.m	MP	MP_H2A_W	H2A	LLAEVTISR	9	96	104	1	unmod	1 2 3	1120.6361	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_07oMW_96_104.m
+HH2A_08oMW_105_118.m	MP	MP_H2A_W	H2A	GGVLPNINPSLLPK	14	105	118	1	unmod	2 3 4	769.4405	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_08oMW_105_118.m
+HH2A_09oMW_127_134.m	MP	MP_H2A_W	H2A	EVAEADDK	8	127	134	1	unmod	1 2 3	995.4316	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_09oMW_127_134.m
+HH2A_10oMW_144_150.m	MP	MP_H2A_W	H2A	ETVTSSK	7	144	150	1	unmod	1 2	870.4203	OK	oMW	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2A\HH2A_10oMW_144_150.m
+HH2B_01oM_5_10.m	MP	MP_H2B	H2B	SPEPEK	6	5	10	1	unmod	1 2	805.3726	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_01oM_5_10.m
+HH2B_02oM_31_38.m	MP	MP_H2B	H2B	KPASASGK	8	31	38	1	unmod	1 2 3	909.4868	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_02oM_31_38.m
+HH2B_03oM_51_56.m	MP	MP_H2B	H2B	GTETYK	6	51	56	1	unmod	1 2	817.3727	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_03oM_51_56.m
+HH2B_04oM_57_61.m	MP	MP_H2B	H2B	IYIYK	5	57	61	1	unmod	1 2	818.4447	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_04oM_57_61.m
+HH2B_05oM_65_75.m	MP	MP_H2B	H2B	QVHHEMGISSK	11	65	75	1	unmod	1 2 3	1371.6474	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_05oM_65_75.m
+HH2B_06oM_76_90.m	MP	MP_H2B	H2B	AMGIMNSFINDIFEK	15	76	90	1	unmod	2 3 4	924.9366	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_06oM_76_90.m
+HH2B_07oM_91_97.m	MP	MP_H2B	H2B	LAQEAAR	7	91	97	1	unmod	1 2	877.4526	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_07oM_91_97.m
+HH2B_08oM_104_110.m	MP	MP_H2B	H2B	KPTITSR	7	104	110	1	unmod	1 2	966.5446	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_08oM_104_110.m
+HH2B_09oM_111_117.m	MP	MP_H2B	H2B	EIQTAVR	7	111	117	1	unmod	1 2	935.4945	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_09oM_111_117.m
+HH2B_10oM_118_126.m	MP	MP_H2B	H2B	LILPGELAK	9	118	126	1	unmod	1 2 3	1072.6401	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_10oM_118_126.m
+HH2B_11oM_127_134.m	MP	MP_H2B	H2B	HAVSEGTK	8	127	134	1	unmod	1 2 3	947.4581	OK	oM	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\MP\H2B\HH2B_11oM_127_134.m
+HH2A_01oC_21_29.m	CR	CR_H2A	H2A	AGLQFPVGR	9	21	29	1	unmod	1 2 3	1063.5683	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_01oC_21_29.m
+HH2A_02oC_43_71.m	CR	CR_H2A	H2A	IGAGAPVYLAAVLEYLTAEVLELAGNAAR	29	43	71	1	unmod	3 4 5	1012.2131	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_02oC_43_71.m
+HH2A_03oC_82_88.m	CR	CR_H2A	H2A	HIQLAIR	7	82	88	1	unmod	1 2	969.5628	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_03oC_82_88.m
+HH2A_04oC_89_95.m	CR	CR_H2A	H2A	NDEELGK	7	89	95	1	unmod	1 2	923.4105	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_04oC_89_95.m
+HH2A_05oC_96_118.m	CR	CR_H2A	H2A	LLGEVTIASGGVLPNIHAVLLPK	23	96	118	1	unmod	3 4 5	810.8088	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_05oC_96_118.m
+HH2A_06oC_125_129.m	CR	CR_H2A	H2A	GEETA	5	125	129	1	unmod	1 2	625.2464	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2A\HH2A_06oC_125_129.m
+HH2B_01oC_6_12.m	CR	CR_H2B	H2B	DEKPATR	7	6	12	1	unmod	1 2	980.4875	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_01oC_6_12.m
+HH2B_02oC_13_25.m	CR	CR_H2B	H2B	AATQEAGVEATAK	13	13	25	1	unmod	2 3 4	683.3359	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_02oC_13_25.m
+HH2B_03oC_26_31.m	CR	CR_H2B	H2B	AEAKPK	6	26	31	1	unmod	1 2	807.4438	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_03oC_26_31.m
+HH2B_04oC_53_57.m	CR	CR_H2B	H2B	GDGEK	5	53	57	1	unmod	1 2	624.2624	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_04oC_53_57.m
+HH2B_05oC_64_70.m	CR	CR_H2B	H2B	SAVETYK	7	64	70	1	unmod	1 2	916.4411	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_05oC_64_70.m
+HH2B_06oC_71_75.m	CR	CR_H2B	H2B	LYIYK	5	71	75	1	unmod	1 2	818.4447	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_06oC_71_75.m
+HH2B_07oC_79_89.m	CR	CR_H2B	H2B	QVHPDTGISSK	11	79	89	1	unmod	1 2 3	1287.6328	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_07oC_79_89.m
+HH2B_08oC_90_104.m	CR	CR_H2B	H2B	AMSIMNSFINDIFEK	15	90	104	1	unmod	2 3 4	939.9419	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_08oC_90_104.m
+HH2B_09oC_105_111.m	CR	CR_H2B	H2B	VATEASK	7	105	111	1	unmod	1 2	824.4148	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_09oC_105_111.m
+HH2B_10oC_118_124.m	CR	CR_H2B	H2B	KPTVTSR	7	118	124	1	unmod	1 2	952.5290	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_10oC_118_124.m
+HH2B_11oC_125_131.m	CR	CR_H2B	H2B	EIQTAVR	7	125	131	1	unmod	1 2	935.4945	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_11oC_125_131.m
+HH2B_12oC_132_140.m	CR	CR_H2B	H2B	LVLPGELAK	9	132	140	1	unmod	1 2 3	1058.6244	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_12oC_132_140.m
+HH2B_13oC_141_148.m	CR	CR_H2B	H2B	HAVSEGTK	8	141	148	1	unmod	1 2 3	947.4581	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H2B\HH2B_13oC_141_148.m
+HH1_01oC_1_11.m	CR	CR_H1	H1	MADVAAPAPAK	11	1	11	1	unmod	1 2 3	1160.5768	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_01oC_1_11.m
+HH1_02oC_12_16.m	CR	CR_H1	H1	SPAAK	5	12	16	1	unmod	1 2	592.3089	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_02oC_12_16.m
+HH1_03oC_24_42.m	CR	CR_H1	H1	VATHPPYITMVSEAILALK	19	24	42	1	unmod	2 3 4	1087.0899	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_03oC_24_42.m
+HH1_04oC_45_53.m	CR	CR_H1	H1	DGSSIPAIK	9	45	53	1	unmod	1 2 3	1006.5204	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_04oC_45_53.m
+HH1_05oC_55_59.m	CR	CR_H1	H1	WIDAK	5	55	59	1	unmod	1 2	751.3773	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_05oC_55_59.m
+HH1_06oC_63_67.m	CR	CR_H1	H1	DIHDK	5	63	67	1	unmod	1 2	746.3468	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_06oC_63_67.m
+HH1_07oC_72_78.m	CR	CR_H1	H1	TLSLTLK	7	72	78	1	unmod	1 2	894.5295	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_07oC_72_78.m
+HH1_08oC_95_100.m	CR	CR_H1	H1	LSEEVK	6	95	100	1	unmod	1 2	823.4196	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_08oC_95_100.m
+HH1_09oC_106_110.m	CR	CR_H1	H1	AATPK	5	106	110	1	unmod	1 2	606.3246	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_09oC_106_110.m
+HH1_10oC_112_116.m	CR	CR_H1	H1	AAAPK	5	112	116	1	unmod	1 2	576.3140	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_10oC_112_116.m
+HH1_11oC_118_122.m	CR	CR_H1	H1	EGAVK	5	118	122	1	unmod	1 2	622.3195	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_11oC_118_122.m
+HH1_12oC_166_171.m	CR	CR_H1	H1	AAKPAK	6	166	171	1	unmod	1 2	749.4384	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_12oC_166_171.m
+HH1_13oC_190_195.m	CR	CR_H1	H1	AAAKPK	6	190	195	1	unmod	1 2	749.4384	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_13oC_190_195.m
+HH1_14oC_202_206.m	CR	CR_H1	H1	AAKPK	5	202	206	1	unmod	1 2	678.4012	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_14oC_202_206.m
+HH1_15oC_213_219.m	CR	CR_H1	H1	AAKPAAK	7	213	219	1	unmod	1 2	820.4755	OK	oC	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\CR\H1\HH1_15oC_213_219.m
+HH2A_01oS_1_11.m	SG	SG_H2A	H2A	MDSTAAGAGGK	11	1	11	1	unmod	1 2 3	1084.4728	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_01oS_1_11.m
+HH2A_02oS_15_19.m	SG	SG_H2A	H2A	GAAGR	5	15	19	1	unmod	1 2	550.2732	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_02oS_15_19.m
+HH2A_03oS_21_25.m	SG	SG_H2A	H2A	AGGPR	5	21	25	1	unmod	1 2	576.2889	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_03oS_21_25.m
+HH2A_04oS_35_43.m	SG	SG_H2A	H2A	AGLQFPVGR	9	35	43	1	unmod	1 2 3	1063.5683	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_04oS_35_43.m
+HH2A_05oS_57_85.m	SG	SG_H2A	H2A	VGTGAPVYLAAVLEYLAAEVLELAGNAAR	29	57	85	1	unmod	3 4 5	1007.5412	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_05oS_57_85.m
+HH2A_06oS_96_102.m	SG	SG_H2A	H2A	HVLLAIR	7	96	102	1	unmod	1 2	940.5727	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_06oS_96_102.m
+HH2A_07oS_103_109.m	SG	SG_H2A	H2A	NDEELGK	7	103	109	1	unmod	1 2	923.4105	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_07oS_103_109.m
+HH2A_08oS_110_132.m	SG	SG_H2A	H2A	LLSGVTIAHGGVLPNINPVLLPK	23	110	132	1	unmod	3 4 5	814.4808	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_08oS_110_132.m
+HH2A_09oS_138_144.m	SG	SG_H2A	H2A	ASTGGSK	7	138	144	1	unmod	1 2	726.3417	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2A\HH2A_09oS_138_144.m
+HH2B_01oS_8_12.m	SG	SG_H2B	H2B	KPAAK	5	8	12	1	unmod	1 2	678.4012	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_01oS_8_12.m
+HH2B_02oS_13_24.m	SG	SG_H2B	H2B	KPAAEEEPAAEK	12	13	24	1	unmod	1 2 3	1433.6986	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_02oS_13_24.m
+HH2B_03oS_25_29.m	SG	SG_H2B	H2B	APAGK	5	25	29	1	unmod	1 2	562.2984	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_03oS_25_29.m
+HH2B_04oS_37_41.m	SG	SG_H2B	H2B	LPAGK	5	37	41	1	unmod	1 2	604.3453	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_04oS_37_41.m
+HH2B_05oS_46_50.m	SG	SG_H2B	H2B	EGGDK	5	46	50	1	unmod	1 2	624.2624	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_05oS_46_50.m
+HH2B_06oS_59_64.m	SG	SG_H2B	H2B	SVETYK	6	59	64	1	unmod	1 2	845.4040	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_06oS_59_64.m
+HH2B_07oS_65_69.m	SG	SG_H2B	H2B	IYIFK	5	65	69	1	unmod	1 2	802.4498	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_07oS_65_69.m
+HH2B_08oS_73_83.m	SG	SG_H2B	H2B	QVHPDIGISSK	11	73	83	1	unmod	1 2 3	1299.6692	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_08oS_73_83.m
+HH2B_09oS_84_98.m	SG	SG_H2B	H2B	AMSIMNSFINDIFEK	15	84	98	1	unmod	2 3 4	939.9419	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_09oS_84_98.m
+HH2B_10oS_99_105.m	SG	SG_H2B	H2B	LAAEAAK	7	99	105	1	unmod	1 2	792.4250	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_10oS_99_105.m
+HH2B_11oS_112_118.m	SG	SG_H2B	H2B	KPTITSR	7	112	118	1	unmod	1 2	966.5446	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_11oS_112_118.m
+HH2B_12oS_119_125.m	SG	SG_H2B	H2B	EIQTSVR	7	119	125	1	unmod	1 2	951.4894	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_12oS_119_125.m
+HH2B_13oS_126_134.m	SG	SG_H2B	H2B	LVLPGELAK	9	126	134	1	unmod	1 2 3	1058.6244	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_13oS_126_134.m
+HH2B_14oS_135_142.m	SG	SG_H2B	H2B	HAVSEGTK	8	135	142	1	unmod	1 2 3	947.4581	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H2B\HH2B_14oS_135_142.m
+HH1_01oS_1_13.m	SG	SG_H1	H1	MPALAKPASRPAK	13	1	13	1	unmod	2 3 4	751.4230	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_01oS_1_13.m
+HH1_02oS_14_28.m	SG	SG_H1	H1	TAAAPKPKPAAAKPK	15	14	28	4	unmod|K26me1|K26me2|K26me3	2 3 4	851.0058	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_02oS_14_28.m
+HH1_03oS_29_44.m	SG	SG_H1	H1	AAAAGASHPPYFEMIK	16	29	44	1	unmod	2 3 4	890.4298	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_03oS_29_44.m
+HH1_04oS_45_51.m	SG	SG_H1	H1	EAISALK	7	45	51	1	unmod	1 2	850.4669	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_04oS_45_51.m
+HH1_05oS_54_63.m	SG	SG_H1	H1	TGSSSHAIAK	10	54	63	1	unmod	1 2 3	1077.5323	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_05oS_54_63.m
+HH1_06oS_64_68.m	SG	SG_H1	H1	YMEDK	5	64	68	1	unmod	1 2	804.3233	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_06oS_64_68.m
+HH1_07oS_69_78.m	SG	SG_H1	H1	HGASLPANFK	10	69	78	1	unmod	1 2 3	1160.5847	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_07oS_69_78.m
+HH1_08oS_80_86.m	SG	SG_H1	H1	MLSIQLR	7	80	86	1	unmod	1 2	979.5393	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_08oS_80_86.m
+HH1_09oS_87_91.m	SG	SG_H1	H1	GFAAK	5	87	91	1	unmod	1 2	612.3140	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_09oS_87_91.m
+HH1_10oS_103_108.m	SG	SG_H1	H1	LSDAAK	6	103	108	1	unmod	1 2	723.3672	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_10oS_103_108.m
+HH1_11oS_110_115.m	SG	SG_H1	H1	AAPKPK	6	110	115	1	unmod	1 2	775.4540	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_11oS_110_115.m
+HH1_12oS_118_122.m	SG	SG_H1	H1	LAAAK	5	118	122	1	unmod	1 2	592.3453	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_12oS_118_122.m
+HH1_13oS_123_130.m	SG	SG_H1	H1	TAAPKPTK	8	123	130	1	unmod	1 2 3	977.5494	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_13oS_123_130.m
+HH1_14oS_132_137.m	SG	SG_H1	H1	DAAKPK	6	132	137	1	unmod	1 2	793.4282	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_14oS_132_137.m
+HH1_15oS_139_146.m	SG	SG_H1	H1	TAAAAKPK	8	139	146	1	unmod	1 2 3	921.5231	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_15oS_139_146.m
+HH1_16oS_148_153.m	SG	SG_H1	H1	AAAGTK	6	148	153	1	unmod	1 2	637.3304	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_16oS_148_153.m
+HH1_17oS_162_167.m	SG	SG_H1	H1	VVAKPK	6	162	167	1	unmod	1 2	805.5010	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_17oS_162_167.m
+HH1_18oS_183_187.m	SG	SG_H1	H1	SPAAK	5	183	187	1	unmod	1 2	592.3089	OK	oS	D:/Antigravity/repos/epiprofile_yuan_ecosistem\audit/generated_modules\SG\H1\HH1_18oS_183_187.m

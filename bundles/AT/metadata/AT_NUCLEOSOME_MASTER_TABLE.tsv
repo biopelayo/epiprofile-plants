@@ -1,0 +1,141 @@
+histone	protein_accession	region	pep_seq	pep_len	module_file	tier	n_peptidoforms	peptidoforms	mod_types	mono_mass_unmod	mz_2plus	mz_3plus	rt_ref	ptm_evidence	notes
+H3.1	Q9C944	3-8	TKQTAR	6	H3_01_3_8.m	TIER1	5	unmod;K4me1;K4me2;K4me3;K4ac	0,pr;2,pr;;0,pr;2,me1;;0,pr;2,me2;;0,pr;2,me3;;0,pr;2,ac;	815.4501	408.7323	272.8240	18.34	Zhang2007;Grau-Bove2022	
+H3.1	Q9C944	9-17	KSTGGKAPR	9	H3_02_9_17.m	TIER1	10	unmod;K9me1;K9me2;K9me3;K9ac;K14ac;K9me1K14ac;K9me2K14ac;K9me3K14ac;K9acK14ac	0,pr;1,pr;6,pr;;0,pr;1,me1;6,pr;;0,pr;1,me2;6,pr;;0,pr;1,me3;6,pr;;0,pr;1,ac;6,pr;;0,pr;1,pr;6,ac;;0,pr;1,me1;6,ac;;0,pr;1,me2;6,ac;;0,pr;1,me3;6,ac;;0,pr;1,ac;6,ac;	1068.5927	535.3036	357.2049	23.2	Zhang2007;Grau-Bove2022;EpiProfile2.0	
+H3.1	Q9C944	9-17	KSTGGKAPR	9	H3_02a_9_17.m	TIER1	10	S10ph;K9me1S10ph;K9me2S10ph;K9me3S10ph;K9acS10ph;S10phK14ac;K9me1S10phK14ac;K9me2S10phK14ac;K9me3S10phK14ac;K9acS10phK14ac	0,pr;1,pr;2,ph;6,pr;;0,pr;1,me1;2,ph;6,pr;;0,pr;1,me2;2,ph;6,pr;;0,pr;1,me3;2,ph;6,pr;;0,pr;1,ac;2,ph;6,pr;;0,pr;1,pr;2,ph;6,ac;;0,pr;1,me1;2,ph;6,ac;;0,pr;1,me2;2,ph;6,ac;;0,pr;1,me3;2,ph;6,ac;;0,pr;1,ac;2,ph;6,ac;	1148.5591	575.2868	383.8603	23.2	EpiProfile2.0	
+H3.1	Q9C944	9-17	KSTGGKAPR	9	H3_02b_9_17.m	TIER1	11	S10ac;S10pr;K9me1S10ac;K9me2S10ac;K9me3S10ac;K9acS10ac;S10acK14ac;S10prK14ac;K9me2S10acK14ac;K9me3S10acK14ac;K9acS10acK14ac	0,pr;1,pr;2,ac;6,pr;;0,pr;1,pr;2,pr;6,pr;;0,pr;1,me1;2,ac;6,pr;;0,pr;1,me2;2,ac;6,pr;;0,pr;1,me3;2,ac;6,pr;;0,pr;1,ac;2,ac;6,pr;;0,pr;1,pr;2,ac;6,ac;;0,pr;1,pr;2,pr;6,ac;;0,pr;1,me2;2,ac;6,ac;;0,pr;1,me3;2,ac;6,ac;;0,pr;1,ac;2,ac;6,ac;	1110.6033	556.3089	371.2084	23.2	EpiProfile2.0	
+H3.1	Q9C944	18-26	KQLATKAAR	9	H3_03_18_26.m	TIER1	10	unmod;K23me1;K18me1;K18me1K23me1;K18ac;K23ac;K18acK23ac;K18acT22pr;T22ac;T22pr	0,pr;1,pr;6,pr;;0,pr;1,pr;6,me1;;0,pr;1,me1;6,pr;;0,pr;1,me1;6,me1;;0,pr;1,ac;6,pr;;0,pr;1,pr;6,ac;;0,pr;1,ac;6,ac;;0,pr;1,ac;5,pr;6,pr;;0,pr;1,pr;5,ac;6,pr;;0,pr;1,pr;5,pr;6,pr;	1153.6819	577.8482	385.5679	0	Zhang2007;Grau-Bove2022;EpiProfile2.0	placeholder (auto-calibrates)
+H3.1	Q9C944	27-40	KSAPATGGVKKPHR	14	H3_04_27_40.m	TIER1	17	unmod;K36me1;K27me1;K27me2;K36me2;K27me3;K36me3;K27me2K36me1;K27me1K36me2;K27me1K36me1;K27me3K36me1;K27me1K36me3;K27me2K36me2;K27me3K36me2;K27me2K36me3;K27me3K36me3;K27ac	0,pr;1,pr;10,pr;11,pr;;0,pr;1,pr;10,me1;11,pr;;0,pr;1,me1;10,pr;11,pr;;0,pr;1,me2;10,pr;11,pr;;0,pr;1,pr;10,me2;11,pr;;0,pr;1,me3;10,pr;11,pr;;0,pr;1,pr;10,me3;11,pr;;0,pr;1,me2;10,me1;11,pr;;0,pr;1,me1;10,me2;11,pr;;0,pr;1,me1;10,me1;11,pr;;0,pr;1,me3;10,me1;11,pr;;0,pr;1,me1;10,me3;11,pr;;0,pr;1,me2;10,me2;11,pr;;0,pr;1,me3;10,me2;11,pr;;0,pr;1,me2;10,me3;11,pr;;0,pr;1,me3;10,me3;11,pr;;0,pr;1,ac;10,pr;11,pr;	1656.9311	829.4728	553.3176	0	Zhang2007;Grau-Bove2022;EpiProfile2.0	placeholder (auto-calibrates)
+H3.1	Q9C944	27-40	KSAPATGGVKKPHR	14	H3_04a_27_40.m	TIER1	11	S28ph;K27me1S28ph;K27me2S28ph;K27me3S28ph;K27me2S28phK36me2;K27me3S28phK36me2;S28ac;S28pr;K27me2S28ac;K27me3S28ac;K27me3S28acK36me1	0,pr;1,pr;2,ph;10,pr;11,pr;;0,pr;1,me1;2,ph;10,pr;11,pr;;0,pr;1,me2;2,ph;10,pr;11,pr;;0,pr;1,me3;2,ph;10,pr;11,pr;;0,pr;1,me2;2,ph;10,me2;11,pr;;0,pr;1,me3;2,ph;10,me2;11,pr;;0,pr;1,pr;2,ac;10,pr;11,pr;;0,pr;1,pr;2,pr;10,pr;11,pr;;0,pr;1,me2;2,ac;10,pr;11,pr;;0,pr;1,me3;2,ac;10,pr;11,pr;;0,pr;1,me3;2,ac;10,me1;11,pr;	1736.8974	869.4560	579.9731	0	EpiProfile2.0	placeholder (auto-calibrates)
+H3.1	Q9C944	41-49	YRPGTVALR	9	H3_05_41_49.m	TIER1	3	unmod;Y41pr;Y41ph	0,pr;;0,pr;1,pr;;0,pr;1,ph;	1087.6138	544.8142	363.5452	31.2	EpiProfile2.0	
+H3.1	Q9C944	53-63	KYQKSTELLIR	11	H3_06_53_63.m	TIER1	5	unmod;K56me1;K56me2;K56me3;K56ac	0,pr;1,pr;4,pr;;0,pr;1,pr;4,me1;;0,pr;1,pr;4,me2;;0,pr;1,pr;4,me3;;0,pr;1,pr;4,ac;	1545.8766	773.9456	516.2995	40.37	Zhang2007;Grau-Bove2022;EpiProfile2.0	
+H3.1	Q9C944	53-63	RYQKSTELLIR	11	H3_06a_53_63.m	TIER1	3	unmod;S57pr;Y54pr	0,pr;4,pr;;0,pr;4,pr;5,pr;;0,pr;2,pr;4,pr;	1517.8566	759.9356	506.9595	37	EpiProfile2.0	
+H3.1	Q9C944	73-83	EIAQDFKTDLR	11	H3_07_73_83.m	TIER1	5	unmod;K79me1;K79me2;K79me3;K79ac	0,pr;7,pr;;0,pr;7,me1;;0,pr;7,me2;;0,pr;7,me3;;0,pr;7,ac;	1446.7354	724.3750	483.2524	40.37	Zhang2007;Grau-Bove2022;EpiProfile2.0	
+H3.1	Q9C944	117-128	VTIMPKDIQLAR	12	H3_08_117_128.m	TIER1	3	unmod;M120ox;K122ac	0,pr;6,pr;;0,pr;4,ox;6,pr;;0,pr;6,ac;	1495.8432	748.9289	499.6217	48.69	EpiProfile2.0	
+H3.1	Q9C944	64-135	KLPFQR	6	H3_09u_64_135.m	TIER1	1	unmod	0,pr;1,pr;	899.5229	450.7687	300.8482	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3 untargeted region; includes KLPFQR, RIRGER, IRGERA
+H4	Q9LHK4	4-17	GKGGKGLGKGGAKR	14	H4_01_4_17.m	TIER1	16	unmod;K5ac;K8ac;K12ac;K16ac;K5acK8ac;K5acK12ac;K5acK16ac;K8acK12ac;K8acK16ac;K12acK16ac;K8acK12acK16ac;K5acK12acK16ac;K5acK8acK16ac;K5acK8acK12ac;K5acK8acK12acK16ac	0,pr;2,pr;5,pr;9,pr;13,pr;;0,pr;2,ac;5,pr;9,pr;13,pr;;0,pr;2,pr;5,ac;9,pr;13,pr;;0,pr;2,pr;5,pr;9,ac;13,pr;;0,pr;2,pr;5,pr;9,pr;13,ac;;0,pr;2,ac;5,ac;9,pr;13,pr;;0,pr;2,ac;5,pr;9,ac;13,pr;;0,pr;2,ac;5,pr;9,pr;13,ac;;0,pr;2,pr;5,ac;9,ac;13,pr;;0,pr;2,pr;5,ac;9,pr;13,ac;;0,pr;2,pr;5,pr;9,ac;13,ac;;0,pr;2,pr;5,ac;9,ac;13,ac;;0,pr;2,ac;5,pr;9,ac;13,ac;;0,pr;2,ac;5,ac;9,pr;13,ac;;0,pr;2,ac;5,ac;9,ac;13,pr;;0,pr;2,ac;5,ac;9,ac;13,ac;	1549.8940	775.9543	517.6386	0	Zhang2007;Grau-Bove2022;EpiProfile2.0	placeholder (auto-calibrates)
+H4	Q9LHK4	20-23	KVLR	4	H4_02_20_23.m	TIER1	5	unmod;K20me1;K20me2;K20me3;K20ac	0,pr;1,pr;;0,pr;1,me1;;0,pr;1,me2;;0,pr;1,me3;;0,pr;1,ac;	626.4115	314.2130	209.8111	29.52	Zhang2007;Grau-Bove2022;EpiProfile2.0	
+H4	Q9LHK4	18-23	HRKVLR	6	H4_02a_18_23.m	TIER1	1	unmod	0,pr;3,pr;	919.5716	460.7931	307.5311	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H4	Q9LHK4	20-35	KVLRDNIQGITKPAIR	16	H4_02b_20_35.m	TIER1	1	unmod	0,pr;1,pr;12,pr;	1989.1735	995.5940	664.0651	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H4	Q9LHK4	20-36	KVLRDNIQGITKPAIRR	17	H4_02c_20_36.m	TIER1	1	unmod	0,pr;1,pr;12,pr;	2145.2746	1073.6446	716.0988	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H4	Q9LHK4	24-35	DNIQGITKPAIR	12	H4_03_24_35.m	TIER1	2	unmod;T30pr	0,pr;8,pr;;0,pr;7,pr;8,pr;	1436.7987	719.4066	479.9402	42.45	EpiProfile2.0	
+H4	Q9LHK4	40-45	RGGVKR	6	H4_04_40_45.m	TIER1	1	unmod	0,pr;5,pr;	783.4715	392.7430	262.1644	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H4	Q9LHK4	68-78	DAVTYTEHAKR	11	H4_05_68_78.m	TIER1	2	unmod;Y72pr	0,pr;10,pr;;0,pr;5,pr;10,pr;	1401.6888	701.8517	468.2369	31.08	EpiProfile2.0	
+H4	Q9LHK4	79-92	KTVTAMDVVYALKR	14	H4_06_79_92.m	TIER1	4	unmod;M84ox;Y88pr;M84oxY88pr	0,pr;1,pr;13,pr;;0,pr;1,pr;6,ox;13,pr;;0,pr;1,pr;10,pr;13,pr;;0,pr;1,pr;6,ox;10,pr;13,pr;	1761.9699	881.9922	588.3306	48.5	EpiProfile2.0	
+H4	Q9LHK4	24-102	DNIQGITKPAIRR	13	H4_07u_24_102.m	TIER1	1	unmod	0,pr;8,pr;	1592.8998	797.4572	531.9739	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H4 untargeted; includes DNIQGITKPAIRR, ISGLIYEETR, GVLKVFLENVIR, TLYGFGG
+H2A_can	Q9LHQ5	1-7	DNKKSR	6	HH2A_01u_1_7.m	TIER3	1	unmod	0,pr;3,pr;4,pr;	914.4821	458.2483	305.8347	0	EpiProfile-PLANTS	placeholder (auto-calibrates); Universal H2A N-term; includes DNKKSR/DNKKTR/DNKKNR + HLLLAIR/HLQLAIR/HLCLAIR/HIQLAVR/HVLLAVR
+H2B.1	Q9LQQ4	104-145	QAVKKPTITSR	11	HH2B_01u_104_145.m	TIER3	1	unmod	0,pr;4,pr;5,pr;	1395.8086	698.9116	466.2768	0	EpiProfile-PLANTS	placeholder (auto-calibrates); Universal H2B C-term; includes QAVKKPTITSR, YNKKPTITSR, EIQTAVR, LVLPGELAKHAVSEGTKAVTKFTSS variants
+H3.3	Q9FJE8	3-8	TKQTAR	6	H3_11_3_8.m	TIER2	3	unmod(TKQTAR);unmod(TKQSAR);unmod(SNQTAR)	0,pr;2,pr;;0,pr;2,pr;;0,pr;	815.4501	408.7323	272.8240	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	9-17	KSTGGKAPR	9	H3_12_9_17.m	TIER2	4	unmod(KSTGGKAPR);unmod(KSTGGKGPR);unmod(KSHGGKAPR);unmod(ISTGGKAPR)	0,pr;1,pr;6,pr;;0,pr;1,pr;6,pr;;0,pr;1,pr;6,pr;;0,pr;6,pr;	1068.5927	535.3036	357.2049	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	18-26	KQLATKAAR	9	H3_13_18_26.m	TIER2	4	unmod(KQLATKAAR);unmod(KELATKAAR);unmod(TLLATKAAR);unmod(KQLAPKAAR)	0,pr;1,pr;6,pr;;0,pr;1,pr;6,pr;;0,pr;6,pr;;0,pr;1,pr;6,pr;	1153.6819	577.8482	385.5679	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	27-40	KSAPATGGVKKPHR	14	H3_14_27_40.m	TIER2	3	unmod(KSAPATGGVKKPHR);unmod(KSAPTTGGVKKPHR);unmod(QSAPATGGVKKPHR)	0,pr;1,pr;10,pr;11,pr;;0,pr;1,pr;10,pr;11,pr;;0,pr;10,pr;11,pr;	1656.9311	829.4728	553.3176	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	53-63	KYQKSTELLIR	11	H3_16_53_63.m	TIER2	2	unmod(KYQKSTELLIR);unmod(KYQKSTELLNR)	0,pr;1,pr;4,pr;;0,pr;1,pr;4,pr;	1545.8766	773.9456	516.2995	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	73-83	EIAQDFKTDLR	11	H3_17_73_83.m	TIER2	2	unmod(EIAQDFKTDLR);unmod(EIAQDYKTDLR)	0,pr;7,pr;;0,pr;7,pr;	1446.7354	724.3750	483.2524	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	117-128	VTIMPKDIQLAR	12	H3_18_117_128.m	TIER2	3	unmod(VTIMPKDIQLAR);unmod(VTIMPKDVQLAR);unmod(VTIMPKEIQLAR)	0,pr;6,pr;;0,pr;6,pr;;0,pr;6,pr;	1495.8432	748.9289	499.6217	0	EpiProfile-PLANTS	placeholder (auto-calibrates); H3.3 variant peptides
+H3.3	Q9FJE8	27-40	KSAPTTGGVKKPHR	14	H3_04v3_27_40.m	TIER2	17	unmod;K36me1;K27me1;K27me2;K36me2;K27me3;K36me3;K27me2K36me1;K27me1K36me2;K27me1K36me1;K27me3K36me1;K27me1K36me3;K27me2K36me2;K27me3K36me2;K27me2K36me3;K27me3K36me3;K27ac	0,pr;1,pr;10,pr;11,pr;;0,pr;1,pr;10,me1;11,pr;;0,pr;1,me1;10,pr;11,pr;;0,pr;1,me2;10,pr;11,pr;;0,pr;1,pr;10,me2;11,pr;;0,pr;1,me3;10,pr;11,pr;;0,pr;1,pr;10,me3;11,pr;;0,pr;1,me2;10,me1;11,pr;;0,pr;1,me1;10,me2;11,pr;;0,pr;1,me1;10,me1;11,pr;;0,pr;1,me3;10,me1;11,pr;;0,pr;1,me1;10,me3;11,pr;;0,pr;1,me2;10,me2;11,pr;;0,pr;1,me3;10,me2;11,pr;;0,pr;1,me2;10,me3;11,pr;;0,pr;1,me3;10,me3;11,pr;;0,pr;1,ac;10,pr;11,pr;	1686.9417	844.4781	563.3212	0	Zhang2007;Grau-Bove2022;EpiProfile2.0	placeholder (auto-calibrates); H3.3 variant
+H3.3	Q9FJE8	27-40	KSAPSTGGVKKPHR	14	H3_04v3a_27_40.m	TIER2	11	S28ph;K27me1S28ph;K27me2S28ph;K27me3S28ph;K27me2S28phK36me2;K27me3S28phK36me2;S28ac;S28pr;K27me2S28ac;K27me3S28ac;K27me3S28acK36me1	0,pr;1,pr;2,ph;10,pr;11,pr;;0,pr;1,me1;2,ph;10,pr;11,pr;;0,pr;1,me2;2,ph;10,pr;11,pr;;0,pr;1,me3;2,ph;10,pr;11,pr;;0,pr;1,me2;2,ph;10,me2;11,pr;;0,pr;1,me3;2,ph;10,me2;11,pr;;0,pr;1,pr;2,ac;10,pr;11,pr;;0,pr;1,pr;2,pr;10,pr;11,pr;;0,pr;1,me2;2,ac;10,pr;11,pr;;0,pr;1,me3;2,ac;10,pr;11,pr;;0,pr;1,me3;2,ac;10,me1;11,pr;	1752.8924	877.4535	585.3047	0	EpiProfile2.0	placeholder (auto-calibrates); H3.3 variant
+H2A_can	Q9LHQ5	7-14	TLGSGVAK	8	HH2A_01oA1_7_14.m	TIER3	1	unmod	0,pr;8,pr;	843.4702	422.7424	282.1640	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	23-31	AGLQFPVGR	9	HH2A_02oA1_23_31.m	TIER3	1	unmod	0,pr;	999.5501	500.7823	334.1907	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	45-73	VGAGAPVYLAAVLEYLAAEVLELAGNAAR	29	HH2A_03oA1_45_73.m	TIER3	1	unmod	0,pr;	2926.5803	1464.2974	976.5340	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	84-90	HIQLAVR	7	HH2A_04oA1_84_90.m	TIER3	1	unmod	0,pr;	891.5290	446.7718	298.1836	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	91-97	NDEELSK	7	HH2A_05oA1_91_97.m	TIER3	1	unmod	0,pr;7,pr;	945.4291	473.7218	316.1503	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	98-120	LLGDVTIANGGVMPNIHSLLLPK	23	HH2A_06oA1_98_120.m	TIER3	1	unmod	0,pr;23,pr;	2483.3821	1242.6983	828.8013	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A_can	Q9LHQ5	122-132	AGASKPSADED	11	HH2A_07oA1_122_132.m	TIER3	2	unmod;K126ac	0,pr;5,pr;	1158.5040	580.2593	387.1753	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2A.X	Q94F49	1-11	MSTGAGSGTTK	11	HH2A_01oAX_1_11.m	TIER3	1	unmod	0,pr;11,pr;	1108.5070	555.2608	370.5096	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	29-37	AGLQFPVGR	9	HH2A_02oAX_29_37.m	TIER3	1	unmod	0,pr;	999.5501	500.7823	334.1907	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	51-79	VGAGAPVYLSAVLEYLAAEVLELAGNAAR	29	HH2A_03oAX_51_79.m	TIER3	1	unmod	0,pr;	2942.5752	1472.2949	981.8657	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	90-96	HIQLAVR	7	HH2A_04oAX_90_96.m	TIER3	1	unmod	0,pr;	891.5290	446.7718	298.1836	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	97-103	NDEELSK	7	HH2A_05oAX_97_103.m	TIER3	1	unmod	0,pr;7,pr;	945.4291	473.7218	316.1503	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	104-127	LLGSVTIANGGVLPNIHQTLLPSK	24	HH2A_06oAX_104_127.m	TIER3	1	unmod	0,pr;24,pr;	2553.4530	1277.7338	852.1583	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.X	Q94F49	133-142	GDIGSASQEF	10	HH2A_07oAX_133_142.m	TIER3	4	unmod;S137ph;S139ph;S137phS139ph	0,pr;	1065.4615	533.7380	356.1611	0	Grau-Bove2022;Zhang2007	placeholder (auto-calibrates)
+H2A.Z	Q9C944	8-19	GLIMGKPSGSDK	12	HH2A_01oAZ_8_19.m	TIER3	2	unmod;K13ac	0,pr;6,pr;12,pr;	1356.6959	679.3552	453.2392	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2A.Z	Q9C944	25-29	KPITR	5	HH2A_02oAZ_25_29.m	TIER3	2	unmod;K25ac	0,pr;1,pr;	725.4436	363.7291	242.8218	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2A.Z	Q9C944	33-41	AGLQFPVGR	9	HH2A_03oAZ_33_41.m	TIER3	1	unmod	0,pr;	999.5501	500.7823	334.1907	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.Z	Q9C944	50-55	STAHGR	6	HH2A_04oAZ_50_55.m	TIER3	1	unmod	0,pr;	683.3351	342.6748	228.7856	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.Z	Q9C944	56-84	VGATAAVYTAAILEYLTAEVLELAGNASK	29	HH2A_05oAZ_56_84.m	TIER3	1	unmod	0,pr;29,pr;	3020.5957	1511.3051	1007.8725	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.Z	Q9C944	102-111	GDEELDTLIK	10	HH2A_06oAZ_102_111.m	TIER3	1	unmod	0,pr;10,pr;	1243.6183	622.8164	415.5467	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.Z	Q9C944	112-125	GTIAGGGVIPHIHK	14	HH2A_07oAZ_112_125.m	TIER3	1	unmod	0,pr;14,pr;	1467.8198	734.9172	490.2805	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.Z	Q9C944	126-130	SLINK	5	HH2A_08oAZ_126_130.m	TIER3	1	unmod	0,pr;5,pr;	685.4010	343.7078	229.4743	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	1-12	MESSQATTKPTR	12	HH2A_01oAW_1_12.m	TIER3	2	unmod;K9ac	0,pr;9,pr;	1447.6977	724.8561	483.5732	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	13-17	GAGGR	5	HH2A_02oAW_13_17.m	TIER3	1	unmod	0,pr;	472.2394	237.1270	158.4204	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	32-40	AGLQFPVGR	9	HH2A_03oAW_32_40.m	TIER3	1	unmod	0,pr;	999.5501	500.7823	334.1907	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	54-82	YGSGAPVYLAAVLEYLAAEVLELAGNAAR	29	HH2A_04oAW_54_82.m	TIER3	1	unmod	0,pr;	3006.5702	1504.2924	1003.1973	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	93-99	HLCLAIR	7	HH2A_05oAW_93_99.m	TIER3	1	unmod	0,pr;	880.4953	441.2549	294.5057	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	100-106	NDEELGR	7	HH2A_06oAW_100_106.m	TIER3	1	unmod	0,pr;	887.3985	444.7065	296.8068	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	107-129	LLHGVTIASGGVLPNINPVLLPK	23	HH2A_07oAW_107_129.m	TIER3	1	unmod	0,pr;23,pr;	2433.4359	1217.7252	812.1526	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	131-140	STASSSQAEK	10	HH2A_08oAW_131_140.m	TIER3	7	unmod;S131ph;S135ph;S136ph;S131phS135ph;S131phS136ph;S135phS136ph	0,pr;10,pr;	1106.5091	554.2618	369.8437	0	Grau-Bove2022;UniProt	placeholder (auto-calibrates)
+H2A.W	Q9FJE8	141-145	ASATK	5	HH2A_09oAW_141_145.m	TIER3	1	unmod	0,pr;5,pr;	588.3119	295.1632	197.1112	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	8-12	KPAEK	5	HH2B_01oA_8_12.m	TIER3	2	unmod;K8ac	0,pr;1,pr;5,pr;	739.4116	370.7131	247.4778	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	14-24	TAAERPVEENK	11	HH2B_02oA_14_24.m	TIER3	1	unmod	0,pr;11,pr;	1354.6728	678.3437	452.5649	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	29-33	APAEK	5	HH2B_03oA_29_33.m	TIER3	1	unmod	0,pr;5,pr;	626.3275	314.1710	209.7831	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	45-49	EAGDK	5	HH2B_04oA_45_49.m	TIER3	1	unmod	0,pr;5,pr;	630.2861	316.1503	211.1026	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	57-62	NVETYK	6	HH2B_05oA_57_62.m	TIER3	1	unmod	0,pr;6,pr;	864.4229	433.2187	289.1482	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	63-67	IYIFK	5	HH2B_06oA_63_67.m	TIER3	1	unmod	0,pr;5,pr;	794.4578	398.2362	265.8265	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	71-81	QVHPDIGISSK	11	HH2B_07oA_71_81.m	TIER3	1	unmod	0,pr;11,pr;	1291.6772	646.8459	431.5663	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	82-96	AMGIMNSFINDIFEK	15	HH2B_08oA_82_96.m	TIER3	1	unmod	0,pr;15,pr;	1840.8739	921.4442	614.6319	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	97-103	LAQESSK	7	HH2B_09oA_97_103.m	TIER3	1	unmod	0,pr;7,pr;	873.4444	437.7295	292.1554	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	110-116	KPTITSR	7	HH2B_10oA_110_116.m	TIER3	2	unmod;K110ac	0,pr;1,pr;	913.5233	457.7689	305.5150	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	117-123	EIQTAVR	7	HH2B_11oA_117_123.m	TIER3	1	unmod	0,pr;	871.4763	436.7454	291.4994	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	124-132	LVLPGELAK	9	HH2B_12oA_124_132.m	TIER3	1	unmod	0,pr;9,pr;	1050.6325	526.3235	351.2181	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.1	Q9LQQ4	133-140	HAVSEGTK	8	HH2B_13oA_133_140.m	TIER3	1	unmod	0,pr;8,pr;	939.4661	470.7403	314.1627	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	8-12	KPAEK	5	HH2B_14oA_8_12.m	TIER3	2	unmod;K8ac	0,pr;1,pr;5,pr;	739.4116	370.7131	247.4778	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2B.11	P40283	14-24	TAAERPVEENK	11	HH2B_15oA_14_24.m	TIER3	1	unmod	0,pr;11,pr;	1354.6728	678.3437	452.5649	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	29-33	APAEK	5	HH2B_16oA_29_33.m	TIER3	1	unmod	0,pr;5,pr;	626.3275	314.1710	209.7831	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	45-49	EAGDK	5	HH2B_17oA_45_49.m	TIER3	1	unmod	0,pr;5,pr;	630.2861	316.1503	211.1026	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	57-62	NVETYK	6	HH2B_18oA_57_62.m	TIER3	1	unmod	0,pr;6,pr;	864.4229	433.2187	289.1482	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	63-67	IYIFK	5	HH2B_19oA_63_67.m	TIER3	1	unmod	0,pr;5,pr;	794.4578	398.2362	265.8265	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	71-81	QVHPDIGISSK	11	HH2B_20oA_71_81.m	TIER3	1	unmod	0,pr;11,pr;	1291.6772	646.8459	431.5663	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	82-96	AMGIMNSFINDIFEK	15	HH2B_21oA_82_96.m	TIER3	1	unmod	0,pr;15,pr;	1840.8739	921.4442	614.6319	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	97-103	LAQESSK	7	HH2B_22oA_97_103.m	TIER3	1	unmod	0,pr;7,pr;	873.4444	437.7295	292.1554	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	110-116	KPTITSR	7	HH2B_23oA_110_116.m	TIER3	2	unmod;K110ac	0,pr;1,pr;	913.5233	457.7689	305.5150	0	Grau-Bove2022	placeholder (auto-calibrates)
+H2B.11	P40283	117-123	EIQTAVR	7	HH2B_24oA_117_123.m	TIER3	1	unmod	0,pr;	871.4763	436.7454	291.4994	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	124-132	LVLPGELAK	9	HH2B_25oA_124_132.m	TIER3	1	unmod	0,pr;9,pr;	1050.6325	526.3235	351.2181	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H2B.11	P40283	133-140	HAVSEGTK	8	HH2B_26oA_133_140.m	TIER3	1	unmod	0,pr;8,pr;	939.4661	470.7403	314.1627	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	1-29	MSEVEIENAATIEGNTAADAPVTDAAVEK	29	HH1_01oA1_1_29.m	TIER3	2	unmod;S2ph	0,pr;29,pr;	3057.4335	1529.7240	1020.1518	0	UniProt:P26568	placeholder (auto-calibrates)
+H1.1	P26568	30-34	KPAAK	5	HH1_02oA1_30_34.m	TIER3	2	unmod;K30ac	0,pr;1,pr;5,pr;	681.4061	341.7103	228.1426	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	49-55	TVAAAPK	7	HH1_03oA1_49_55.m	TIER3	1	unmod	0,pr;7,pr;	768.4381	385.2263	257.1533	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	58-70	TVSSHPTYEEMIK	13	HH1_04oA1_58_70.m	TIER3	1	unmod	0,pr;13,pr;	1632.7705	817.3925	545.2641	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	71-77	DAIVTLK	7	HH1_05oA1_71_77.m	TIER3	1	unmod	0,pr;7,pr;	870.5062	436.2604	291.1760	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	80-89	TGSSQYAIQK	10	HH1_06oA1_80_89.m	TIER3	1	unmod	0,pr;10,pr;	1193.5928	597.8037	398.8715	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	90-94	FIEEK	5	HH1_07oA1_90_94.m	TIER3	1	unmod	0,pr;5,pr;	776.3956	389.2051	259.8058	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	97-103	ELPPTFR	7	HH1_08oA1_97_103.m	TIER3	1	unmod	0,pr;	914.4862	458.2504	305.8360	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	105-111	LLLLNLK	7	HH1_09oA1_105_111.m	TIER3	1	unmod	0,pr;7,pr;	937.6212	469.8179	313.5477	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	113-118	LVASGK	6	HH1_10oA1_113_118.m	TIER3	1	unmod	0,pr;6,pr;	685.4010	343.7078	229.4743	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	128-134	LPSASAK	7	HH1_11oA1_128_134.m	TIER3	1	unmod	0,pr;7,pr;	784.4331	393.2238	262.4850	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	135-139	ASSPK	5	HH1_12oA1_135_139.m	TIER3	1	unmod	0,pr;5,pr;	600.3119	301.1632	201.1112	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	140-144	AAAEK	5	HH1_13oA1_140_144.m	TIER3	1	unmod	0,pr;5,pr;	600.3119	301.1632	201.1112	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	145-149	SAPAK	5	HH1_14oA1_145_149.m	TIER3	1	unmod	0,pr;5,pr;	584.3170	293.1658	195.7796	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	151-159	KPATVAVTK	9	HH1_15oA1_151_159.m	TIER3	2	unmod;K151ac	0,pr;1,pr;9,pr;	1081.6383	541.8264	361.5534	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	164-169	VAAASK	6	HH1_16oA1_164_169.m	TIER3	1	unmod	0,pr;6,pr;	657.3697	329.6921	220.1305	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	173-179	TIAVKPK	7	HH1_17oA1_173_179.m	TIER3	2	unmod;K177ac	0,pr;5,pr;7,pr;	923.5692	462.7919	308.8637	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	180-184	TAAAK	5	HH1_18oA1_180_184.m	TIER3	1	unmod	0,pr;5,pr;	572.3170	287.1658	191.7796	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	192-197	AKPVPR	6	HH1_19oA1_192_197.m	TIER3	2	unmod;K193ac	0,pr;2,pr;	778.4701	390.2423	260.4973	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	198-204	ATAAATK	7	HH1_20oA1_198_204.m	TIER3	1	unmod	0,pr;7,pr;	744.4018	373.2082	249.1412	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	207-213	AVDAKPK	7	HH1_21oA1_207_213.m	TIER3	2	unmod;K211ac	0,pr;5,pr;7,pr;	895.5015	448.7580	299.5078	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	216-220	ARPAK	5	HH1_22oA1_216_220.m	TIER3	1	unmod	0,pr;5,pr;	653.3860	327.7003	218.8026	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	227-232	VTSPAK	6	HH1_23oA1_227_232.m	TIER3	1	unmod	0,pr;6,pr;	713.3959	357.7052	238.8059	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	234-239	AVAATK	6	HH1_24oA1_234_239.m	TIER3	1	unmod	0,pr;6,pr;	671.3854	336.7000	224.8024	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	241-247	VATVATK	7	HH1_25oA1_241_247.m	TIER3	1	unmod	0,pr;7,pr;	800.4644	401.2395	267.8287	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.1	P26568	255-259	VVKPK	5	HH1_26oA1_255_259.m	TIER3	2	unmod;K257ac	0,pr;3,pr;5,pr;	737.4687	369.7416	246.8302	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	1-22	MSIEEENVPTTVDSGAADTTVK	22	HH1_01oA2_1_22.m	TIER3	4	unmod;S2ph;T10ph;S2phT10ph	0,pr;22,pr;	2405.1155	1203.5650	802.7125	0	UniProt:P26569	placeholder (auto-calibrates)
+H1.2	P26569	175-179	KPAAK	5	HH1_02oA2_175_179.m	TIER3	2	unmod;K175ac	0,pr;1,pr;5,pr;	681.4061	341.7103	228.1426	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	38-42	TTTAK	5	HH1_03oA2_38_42.m	TIER3	1	unmod	0,pr;5,pr;	632.3381	317.1763	211.7866	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	50-55	AAAPTK	6	HH1_04oA2_50_55.m	TIER3	1	unmod	0,pr;6,pr;	669.3697	335.6921	224.1305	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	58-70	TTSSHPTYEEMIK	13	HH1_05oA2_58_70.m	TIER3	1	unmod	0,pr;13,pr;	1634.7498	818.3822	545.9239	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	71-77	DAIVTLK	7	HH1_06oA2_71_77.m	TIER3	1	unmod	0,pr;7,pr;	870.5062	436.2604	291.1760	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	80-89	TGSSQYAIQK	10	HH1_07oA2_80_89.m	TIER3	1	unmod	0,pr;10,pr;	1193.5928	597.8037	398.8715	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	90-94	FIEEK	5	HH1_08oA2_90_94.m	TIER3	1	unmod	0,pr;5,pr;	776.3956	389.2051	259.8058	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	97-103	SLPPTFR	7	HH1_09oA2_97_103.m	TIER3	1	unmod	0,pr;	872.4756	437.2451	291.8325	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	105-111	LLLVNLK	7	HH1_10oA2_105_111.m	TIER3	1	unmod	0,pr;7,pr;	923.6055	462.8100	308.8758	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	113-118	LVASEK	6	HH1_11oA2_113_118.m	TIER3	1	unmod	0,pr;6,pr;	757.4222	379.7184	253.4813	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	128-132	IPSAR	5	HH1_12oA2_128_132.m	TIER3	1	unmod	0,pr;	598.3439	300.1792	200.4552	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	133-144	SAATPKPAAPVK	12	HH1_13oA2_133_144.m	TIER3	2	unmod;K138ac	0,pr;6,pr;12,pr;	1304.7340	653.3743	435.9186	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	147-154	ATVVAKPK	8	HH1_14oA2_147_154.m	TIER3	2	unmod;K152ac	0,pr;6,pr;8,pr;	980.5906	491.3026	327.8708	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	157-165	VAAAVAPAK	9	HH1_15oA2_157_165.m	TIER3	1	unmod	0,pr;9,pr;	908.5331	455.2738	303.8516	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	186-191	VTAKPK	6	HH1_16oA2_186_191.m	TIER3	2	unmod;K189ac	0,pr;4,pr;6,pr;	810.4851	406.2498	271.1690	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	194-200	VTAAKPK	7	HH1_17oA2_194_200.m	TIER3	2	unmod;K198ac	0,pr;5,pr;7,pr;	881.5222	441.7684	294.8480	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	203-209	SVAAVSK	7	HH1_18oA2_203_209.m	TIER3	1	unmod	0,pr;7,pr;	772.4331	387.2238	258.4850	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	212-218	AVAAKPK	7	HH1_19oA2_212_218.m	TIER3	2	unmod;K216ac	0,pr;5,pr;7,pr;	851.5116	426.7631	284.8445	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	221-225	ERPAK	5	HH1_20oA2_221_225.m	TIER3	1	unmod	0,pr;5,pr;	711.3915	356.7030	238.1378	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	233-237	TSPGK	5	HH1_21oA2_233_237.m	TIER3	1	unmod	0,pr;5,pr;	600.3119	301.1632	201.1112	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	239-244	VAAPAK	6	HH1_22oA2_239_244.m	TIER3	1	unmod	0,pr;6,pr;	667.3905	334.7025	223.4708	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
+H1.2	P26569	246-250	VAVTK	5	HH1_23oA2_246_250.m	TIER3	1	unmod	0,pr;5,pr;	628.3796	315.1971	210.4671	0	EpiProfile-PLANTS	placeholder (auto-calibrates)
