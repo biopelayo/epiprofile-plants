@@ -502,6 +502,40 @@ His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
 new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
 His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
 
+%------------------H2B------------------
+% Core H2B peptides (Arg-C-like, propionylated)
+% CR has 4 H2B variants (H2B1-H2B4_CHLRE from SwissProt)
+% Sequences confirmed from sp|P50565|, sp|P54345|, sp|P54346|, sp|P54347|
+% NOTE: CR has PTVTSR (V) not PTITSR (I) as in AT
+% All 4 CR variants full-length → Arg-C produces QAVKKPTVTSR
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'QAVKKPTVTSR';
+His.mod_type{no,1} = '0,pr;4,pr;5,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'EIQTAVR';
+His.mod_type{no,1} = '0,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LVLPGELAKHAVSEGTKAVTKFTSG';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
 %------------------------------------
 function pep_mz = calculate_pepmz0(His,hno,special)
 %%

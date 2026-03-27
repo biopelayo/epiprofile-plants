@@ -197,8 +197,8 @@ The user runs the pipeline by calling `EpiProfile.m` from `TIER2/`, which:
 
 Each bundle is validated against a reference LC-MS/MS dataset:
 
-- **AT (Arabidopsis)**: PRIDE PXD014739 — acid-extracted histones, DDA
-  acquisition on Q Exactive.
+- **AT (Arabidopsis)**: PRIDE PXD014739 (Lochmanová et al. 2019, *IJMS* 20:5093) — acid-extracted histones, DDA
+  acquisition on LTQ Orbitrap Elite. Study of genetic/chemical HDAC downregulation in *A. thaliana*.
 - **MP (Marchantia)** and **CR (Chlamydomonas)**: pending validation datasets.
 
 Validation checks:

@@ -140,6 +140,12 @@ for i=1:length(raw_names)
     H4_06_79_92(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
     H4_07u_24_102(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
 
+    %% ---- TIER2: Plant H2A unmod diagnostic peptides ----
+    HH2A_01u_1_7(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
+    %% ---- TIER2: Plant H2B unmod diagnostic peptides ----
+    HH2B_01u_104_145(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special);
+
     %% ---- TIER3: Plant H3 Snapshot (aggregator) ----
     H3_Snapshot(cur_outpath);
     H4_Snapshot(cur_outpath);

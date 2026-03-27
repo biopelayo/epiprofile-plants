@@ -511,6 +511,65 @@ His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
 new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
 His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
 
+%------------------H2B------------------
+% Core H2B peptides (Arg-C-like, propionylated)
+% Conserved across 10/10 canonical AT H2B variants (H2B.1–H2B.11, excl. divergent H2B.2)
+% Positions referenced to H2B.10 (At5g22880), 0-based
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'QAVKKPTITSR';
+His.mod_type{no,1} = '0,pr;4,pr;5,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'YNKKPTITSR';
+His.mod_type{no,1} = '0,pr;3,pr;4,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'EIQTAVR';
+His.mod_type{no,1} = '0,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LVLPGELAKHAVSEGTKAVTKFTSS';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LVLPGELAKHAVSEGTKAVTKFTS';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LVLPGELSKHAVSEGTKAVTKFTSS';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
 %------------------------------------
 function pep_mz = calculate_pepmz0(His,hno,special)
 %%

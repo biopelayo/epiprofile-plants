@@ -511,6 +511,85 @@ His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
 new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
 His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
 
+%------------------H2B------------------
+% Core H2B peptides (Arg-C-like, propionylated)
+% MP has 6 H2B variants confirmed from UniProt (A0A2R6WE74, X600, WW37, W005, XU55, VZV6)
+% All full-length: Arg-C produces QAVKKPT*SR (not YNKKPT*SR)
+% Core: QAVKKPTITSR (MpH2B.1,6), QAVKKPTIASR (MpH2B.2,3,4)
+% C-term: LILP/LTLP/LSLP (not LVLP as AT), endings FTSA/FTSV/FTSG
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'QAVKKPTITSR';
+His.mod_type{no,1} = '0,pr;4,pr;5,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'QAVKKPTIASR';
+His.mod_type{no,1} = '0,pr;4,pr;5,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'EIQTAVR';
+His.mod_type{no,1} = '0,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'EIQSAVR';
+His.mod_type{no,1} = '0,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LILPGELAKHAVSEGTKAVTKFTSA';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LTLPGELAKHAVSEGTKAVTKFTSA';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LTLPGELAKHAVSEGTKAVTKFTSV';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
+no = no + 1;
+His.out_filename{no,1} = 'HH2B_01u_104_145';
+His.pep_seq{no,1} = 'LSLPGELAKHAVSEGTKAVTKFTSG';
+His.mod_type{no,1} = '0,pr;9,pr;17,pr;21,pr;';
+His.pep_ch(no,1) = 2;
+His.pep_mz(no,1) = calculate_pepmz0(His,no,special);
+new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+
 %------------------------------------
 function pep_mz = calculate_pepmz0(His,hno,special)
 %%
