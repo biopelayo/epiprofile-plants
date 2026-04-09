@@ -211,3 +211,9 @@ This repository can include (or you can generate) ready-to-use templates:
 - `CITATION.cff` (GitHub citation UI compatible)
 - `metadata/audit_master.tsv` scaffold (T1–T4 audit baseline)
 - dataset manifest template (conversion parameters, extraction params, bundle hash/version, layouts used, RT reference mode/settings, output paths)
+
+---
+
+## Acknowledgements
+
+EpiProfile_PLANTS builds upon the foundational work of **Dr. Zuo-Fei Yuan** and the **Garcia Lab** (University of Pennsylvania), who created [EpiProfile 2.0](https://github.com/zfyuan/EpiProfile2.0_Family) (Yuan et al., *J. Proteome Res.* 2018, 17, 2533--2541; [DOI: 10.1021/acs.jproteome.8b00133](https://doi.org/10.1021/acs.jproteome.8b00133)). We gratefully acknowledge Dr. Yuan's guidance during the development of the plant-specific extensions.

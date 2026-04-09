@@ -55,4 +55,9 @@ references:
       - family-names: "Yuan"
         given-names: "Zuo-Fei"
     year: 2018
-    # doi: ""   # puedes rellenarlo cuando quieras
+    doi: "10.1021/acs.jproteome.8b00133"
+    journal: "Journal of Proteome Research"
+    volume: 17
+    issue: 7
+    start: 2533
+    end: 2541
