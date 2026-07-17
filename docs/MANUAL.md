@@ -3501,7 +3501,7 @@ Portability gate
 
 ---
 
-### 79.4.8 H3_07_73_83 (H3K79 core panel)
+### 79.4.8 H3_07_73_83 (H3 73–83 region panel)
 Panel ID
 - `H3_07_73_83.m`
 
@@ -3954,7 +3954,7 @@ Positions below are 1-based positions in the full protein sequence from the bund
 | KSAPSTGGVKKPHR | no | no | no | no | yes (28) | Marchantia 27–40 |
 | KTPATGGVKKPHR | yes (28) | no | no | no | no | Chlamydomonas 27–40 |
 | KTRRPYRGGVKRAHR | no | no | no | yes (28) | no | AT_MGH3-specific 27–40 family (gamete H3) |
-| EIAQDFKTDLR | yes (73) | yes (74) | yes (74) | no | no | H3K79 panel peptide (AT/Chlamy) |
+| EIAQDFKTDLR | yes (73) | yes (74) | yes (74) | no | no | H3 73–83 panel peptide (AT/Chlamy) |
 | EIAQDFKSDLR | no | no | no | no | yes (74) | Marchantia variant (S instead of T) |
 | EIAQDFKVDLR | no | no | no | yes (75) | no | AT_MGH3 variant (V instead of T) |
 | VTIMPKDIQLAR | yes (117) | yes (118) | yes (118) | no | no | H3 C-term panel peptide (AT/Chlamy) |
