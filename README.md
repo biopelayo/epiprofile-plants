@@ -5,60 +5,90 @@ This document summarizes the recommended preprocessing pipeline (“gold-standar
 ---
 <img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/8b96045b-2299-4b97-a733-eba23f62410c" />
 
-## ⚙️ Preprocessing pipeline (gold-standard artifact generation)
+## ⚙️ Preprocessing pipeline (what the MATLAB core reads)
 
-### 🧱 Stage 1 — Conversion (RAW/WIFF → mzML)
+The MATLAB core does not read RAW, WIFF or mzML. It reads two text files per run,
+placed in two subfolders of the data folder (`raw_path`):
 
-Tool: **ProteoWizard `msconvert`** (recommended via **Docker**)
+```
+<raw_path>/<run>.raw        run list only (0-byte placeholders are fine, or omit them
+                            and the run list is taken from MS1/)
+<raw_path>/MS1/<run>.MS1    centroided MS1 scans, pFind/RawToMS1 text layout
+<raw_path>/MS2/<run>.ms2    MS2 scans, xtract text layout
+```
 
-Required settings (typical, recommended):
-- **Vendor peak-picking: ON**
-- **64-bit**
-- **zlib compression** (stable + portable)
+`GetMS1ScanNo.m` / `GetMS2ScanNo.m` parse that layout literally
+(`H\tDataType`, `S`, `I\tRetTime`, then `I\tIonInjectionTime` and `I\tInstrumentType`
+lines, then `m/z intensity` pairs). Files written by other tools must reproduce it;
+ProteoWizard's `--ms1/--ms2` writers do not (different `I` keys), so a converter is
+needed for that route.
 
-Script:
-- `workflows/00_convert_raw_or_wiff_to_mzml.*`
+### Stage 1 — RAW → MS1/MS2 with the upstream extractors (validated route)
 
-Common pitfall:
-- Forgetting **vendor peak-picking** can produce mzML that later yields **empty / near-empty MS1/MS2**, leading to near-zero identifications downstream.
+`Raw2MS.m` calls **`RawToMS1.exe`** (MS1) and **`xtract.exe`** (MS2) on Thermo `.RAW`
+files. Both executables ship with the upstream EpiProfile 2.0 distribution and are
+**not redistributed here** (their licence does not allow it): copy them into the folder
+you run MATLAB from (`pwd`), and `EpiProfile` converts any run whose MS1/MS2 files are
+missing. If the MS1/MS2 files already exist, the executables are not needed at all.
 
----
+### Stage 2 — Other vendors (WIFF, .d) and mzML
 
-### 🧩 Stage 2 — Extraction (mzML → MS1/MS2)
+Convert with ProteoWizard `msconvert` (vendor peak-picking ON, 64-bit, zlib) and then
+write MS1/MS2 files in the layout above. There is no converter in this repository yet
+(the earlier README pointed at `workflows/00_convert_*` and `workflows/01_extract_*`,
+which were never added). Until one exists, use the extractor that produced your MS1/MS2
+files and check the header keys against `GetMS1ScanNo.m`.
 
-Tool: **`xtract_xml.exe`** (external dependency)
-
-Script:
-- `workflows/01_extract_ms1_ms2_from_mzml.*`
-
-Licensing note:
-- `xtract_xml.exe` is treated as an **external dependency** and is **not redistributed** unless explicitly permitted.
-- Treat it like a system tool:
-  - available in `PATH`, **or**
-  - referenced via configuration.
+Common pitfall: mzML produced without vendor peak-picking yields profile spectra, and
+`GetMS1ScanNo` stops with `MS1 is profile mode, convert to centroid mode first!`.
 
 ---
 
 ## ⚡ Quickstart (MATLAB, deterministic)
 
-Deterministic execution requires the MATLAB path to include **exactly one** species bundle.
+Requirements: MATLAB R2019b or newer (tested with R2023a on Windows 10, 2026-08-18),
+Statistics and Machine Learning Toolbox (`boxplot`, `zscore`, `pca`), and Bioinformatics
+Toolbox (`HeatMap`, `clustergram`) for the QC figures. Without the toolboxes set
+`nfigure = 0` in `check_otherparas.m`; the ratio tables do not need them.
 
-```matlab
-% 1) Clean environment
-restoredefaultpath;
+1. Lay out the data as shown above and write a `paras.txt` (template:
+   [`paras.example.txt`](paras.example.txt) at the repository root):
 
-% 2) Load a single bundle (example: Arabidopsis)
-addpath(genpath("bundles/AT/src"));
+   ```
+   [EpiProfile]
+   raw_path=C:\data\MS1_MS2
+   norganism=1
+   nsource=1
+   nsubtype=0
+   ```
 
-% 3) Sanity check: MUST return EXACTLY one path
-which EpiProfile -all
+2. In MATLAB, from the repository root, with **exactly one** species bundle on the path:
 
-% 4) Launch
-EpiProfile;
-```
+   ```matlab
+   restoredefaultpath;                       % clean environment
+   addpath(genpath("bundles/AT/src"));       % ONE bundle (AT, CR or MP)
+   which EpiProfile -all                     % MUST return exactly one path
+   EpiProfile("C:\data\MS1_MS2\paras.txt");  % or plain EpiProfile with paras.txt in pwd
+   ```
+
+3. Outputs land next to the data:
+   - `<raw_path>/histone_ratios.xls`: cohort table (TSV inside), one block per hDP with
+     Ratio / Area / RT(min) columns per run;
+   - `<raw_path>/histone_layouts/histone_ratios_single_PTMs.xls`: site-level marginals;
+   - `<raw_path>/histone_layouts/NN_<run>/detail/`: per-module `.mat` and XIC PDFs;
+   - `<raw_path>/histone_layouts/0_ref_info.mat`: the RT reference (dataset-scoped);
+   - `<raw_path>/histone_logs.txt`: the run diary.
+
+Reference timing (laptop, R2023a, 2026-08-18): 5 *Arabidopsis* runs (SCIEX ZenoTOF 7600,
+DDA, 100-130 MB MS1 and 100-180 MB MS2 text files) take about 20 min of MS1/MS2 parsing on
+the first run (cached as `.mat` afterwards) plus 14.5 min of quantification for the full AT
+panel (H3, H4, H2A, H2B, H1 modules), 306-line `histone_ratios.xls`.
+
+To run the three bundles on the same dataset one after another, with outputs kept apart,
+use `python workflows/run_multispecies.py --raw-path <raw_path>`.
 
 # Operational rule
-If `which EpiProfile -all` returns more than one entry, your MATLAB path is contaminated → results become non-deterministic.
+If `which EpiProfile -all` returns more than one entry, your MATLAB path is contaminated → results become non-deterministic. `nsource` other than 1 (SILAC, C13, N15, 13CD3) is refused: those upstream runners were not ported.
 
 # 🧬 Data model (what you actually quantify)
 EpiProfile_PLANTS uses three explicit layers:

@@ -1,0 +1,25 @@
+[EpiProfile]
+% Copy this file next to your data (or anywhere) as paras.txt and edit raw_path.
+% Then, in MATLAB, with exactly ONE bundle on the path:
+%   restoredefaultpath; addpath(genpath('bundles/AT/src')); EpiProfile('C:\data\MS1_MS2\paras.txt')
+%
+% raw_path must contain:
+%   <run>.raw           one per LC-MS/MS run; only the NAMES are read when MS1/MS2 exist,
+%                       so 0-byte placeholders are fine (or omit them: the run list then
+%                       comes from MS1/*.MS1)
+%   MS1/<run>.MS1       centroided MS1 text file (RawToMS1.exe format; .ms1 also accepted)
+%   MS2/<run>.ms2       MS2 text file (xtract format; .MS2 also accepted)
+% Outputs: <raw_path>/histone_ratios.xls (cohort table), <raw_path>/histone_layouts/ (per-run
+% detail, histone_ratios_single_PTMs.xls, 0_ref_info.mat) and <raw_path>/histone_logs.txt.
+% One dataset per raw_path: histone_layouts/0_ref_info.mat is an RT reference reused
+% by later runs in the same folder (see README, "RT reference system").
+raw_path=C:\data\MS1_MS2
+
+% organism index inside the bundle; every PLANTS bundle uses 1
+norganism=1
+
+% 1: histone_normal (the only mode ported to PLANTS; 2..5 are refused with a message)
+nsource=1
+
+% only read by nsource=4 (N15); keep 0
+nsubtype=0

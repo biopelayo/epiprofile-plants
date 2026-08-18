@@ -6,38 +6,15 @@ cur_rts = zeros([1,ncharge]);
 cur_intens = zeros([1,ncharge]);
 
 delta = 0.5;
-rtref = His.rt_ref(hno);
-if ~isfinite(rtref) || rtref <= 0
-    % No hay RT asignado: devolver vacío/ceros, y que el caller lo ignore
-    [~, ncharge] = size(His.pep_mz);
-    cur_rts = rtref * ones(1,ncharge);
-    cur_intens = zeros(1,ncharge);
-    cur_mono_isointens = zeros(size(MS1_index,1),1); % o []
-    return;
-end
-
-% primer intento
-rtref = His.rt_ref(hno);
-if hno==9
-    fprintf('rt_ref(1:20)= %s\n', mat2str(His.rt_ref(1:min(20,end))'));
-    fprintf('n rt_ref==0: %d de %d\n', sum(His.rt_ref==0), numel(His.rt_ref));
-end
-if hno==9
-    fprintf('pep_mz(hno,:)= %s\n', mat2str(His.pep_mz(hno,:)));
-    fprintf('pep_ch(hno,:)= %s\n', mat2str(His.pep_ch(hno,:)));
-end
-
-fprintf('hno=%d rt_ref=%g delta=%g\n', hno, rtref, delta);
-fprintf('MS1 RT range: [%g, %g]  (n=%d)\n', min(MS1_index(:,2)), max(MS1_index(:,2)), size(MS1_index,1));
-
-if isnan(rtref)
-    error('rt_ref(hno) es NaN para hno=%d', hno);
-end
-
+num_MS1 = size(MS1_index,1);
+cur_mono_isointens = zeros([num_MS1,1]);
+if His.rt_ref(hno)<=0; return; end;
 p = find( MS1_index(:,2)>=His.rt_ref(hno)-delta );
+if isempty(p); return; end;
 rt_i1 = p(1);
 pp = find( MS1_index(:,2)<=His.rt_ref(hno)+delta );
-rt_i2 = pp(end); % aqui da error 
+if isempty(pp); return; end;
+rt_i2 = pp(end);
 
 if ptol==100
     ptol = 10;

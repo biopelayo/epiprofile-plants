@@ -13,39 +13,13 @@ end;
 % get MS1 profile
 c_mz = His.pep_mz(hno,1);
 c_ch = His.pep_ch(hno,1);
-% 2º error del codigo lo mismopara rts
-% p = find( MS1_index(:,2)>=t1 );
-% rt_i1 = p(1);
-% pp = find( MS1_index(:,2)<=t2 );
-% rt_i2 = pp(end);
-rtcol = MS1_index(:,2);
 
-p  = find(rtcol >= t1);
-pp = find(rtcol <= t2);
-
-if isempty(p) || isempty(pp)
-    rts = [];
-    top1_rt = [];
-    inten_sum = [];
-    top1_inten_sum = [];
-    return;
-end
-
+p = find( MS1_index(:,2)>=t1 );
+if isempty(p); rts=[]; top1_rt=[]; inten_sum=[]; top1_inten_sum=[]; return; end;
 rt_i1 = p(1);
+pp = find( MS1_index(:,2)<=t2 );
+if isempty(pp); rts=[]; top1_rt=[]; inten_sum=[]; top1_inten_sum=[]; return; end;
 rt_i2 = pp(end);
-if isempty(p) || isempty(pp)
-    fprintf('get_rts window empty: hno=%d t1=%g t2=%g  RT=[%g,%g]\n', ...
-        hno, t1, t2, min(rtcol), max(rtcol));
-    return;
-end
-
-if rt_i2 < rt_i1
-    rts = [];
-    top1_rt = [];
-    inten_sum = [];
-    top1_inten_sum = [];
-    return;
-end
 
 c_ref_isomzs = [c_mz-unitdiff/c_ch c_mz c_mz+unitdiff/c_ch c_mz+2*unitdiff/c_ch];
 if ptol==100

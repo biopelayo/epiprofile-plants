@@ -26,10 +26,15 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
-# ── Paths ──────────────────────────────────────────────────────────────────
-MANIFEST_PATH = Path(r"D:/Antigravity/repos/epiprofile_yuan_ecosistem/audit/plant_module_manifest.tsv")
-GRAUBOVE_PATH = Path(r"D:/Antigravity/TESIS_PHD/docs_fuente/hPTMs_GrauBove_AT_PP_CR.tsv")
-TIER3_DIR = Path(r"D:/Antigravity/revision_tesis/epiprofile_plants_expanded/bundles/AT/src/TIER3")
+# ── Paths (repo-relative; this file lives in bundles/AT/scripts/) ──────────
+# This is a GENERATOR: it (re)writes TIER3 module files. Defaults now point
+# inside the repository and the output goes to a scratch folder unless
+# --in-place is given, so a casual run cannot overwrite curated modules.
+BUNDLE_DIR = Path(__file__).resolve().parents[1]          # bundles/AT
+MANIFEST_PATH = BUNDLE_DIR / "metadata" / "plant_module_manifest.tsv"
+GRAUBOVE_PATH = None   # external reference table (hPTMs_GrauBove_AT_PP_CR.tsv), pass --graubove
+TIER3_DIR = BUNDLE_DIR / "src" / "TIER3"
+DEFAULT_OUT_DIR = BUNDLE_DIR / "scripts" / "_generated_TIER3"
 
 
 # ── Known PTM sites from Grau-Bove + literature ───────────────────────────
@@ -526,13 +531,28 @@ nsplit = 1;
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Generate TIER3 H2A/H2B/H1 MATLAB modules with PTM peptidoforms")
+    parser.add_argument("--manifest", type=Path, default=MANIFEST_PATH,
+                        help="plant_module_manifest.tsv (default: bundles/AT/metadata/)")
+    parser.add_argument("--graubove", type=Path, default=GRAUBOVE_PATH, required=GRAUBOVE_PATH is None,
+                        help="Grau-Bove et al. hPTM reference table (TSV), external input")
+    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR,
+                        help=f"where to write the generated .m files (default: {DEFAULT_OUT_DIR})")
+    parser.add_argument("--in-place", action="store_true",
+                        help="write directly into bundles/AT/src/TIER3 (OVERWRITES curated modules)")
+    args = parser.parse_args()
+    out_dir = TIER3_DIR if args.in_place else args.out_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     print("=" * 70)
     print("EpiProfile-PLANTS Module Expander: H2A/H2B/H1 PTM Peptidoforms")
     print("=" * 70)
 
     # Parse Grau-Bove PTM reference
     print("\n[1/4] Parsing Grau-Bove PTM reference table...")
-    graubove_ptms = parse_graubove_ptms(GRAUBOVE_PATH)
+    graubove_ptms = parse_graubove_ptms(args.graubove)
     print(f"  Found {len(graubove_ptms)} unique (histone, position) PTM entries")
 
     # Show summary
@@ -546,7 +566,7 @@ def main():
 
     # Parse manifest
     print("\n[2/4] Parsing plant module manifest...")
-    modules = parse_manifest(MANIFEST_PATH)
+    modules = parse_manifest(args.manifest)
     print(f"  Found {len(modules)} AT H2A/H2B/H1 modules")
 
     # Process each module
@@ -576,11 +596,11 @@ def main():
           f"{stats['total_peptidoforms']} total peptidoforms")
 
     # Write MATLAB modules
-    print(f"\n[4/4] Writing MATLAB modules to {TIER3_DIR}...")
+    print(f"\n[4/4] Writing MATLAB modules to {out_dir}...")
     for mod, peptidoforms in module_results:
         matlab_code = generate_matlab_module(mod, peptidoforms)
 
-        output_path = TIER3_DIR / mod['file_name']
+        output_path = out_dir / mod['file_name']
         with open(output_path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(matlab_code)
 

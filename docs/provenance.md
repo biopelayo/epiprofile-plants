@@ -8,16 +8,20 @@
 
 ## PLANTS family bundles
 - `bundles/<SPECIES_CODE>/src/` contains **standalone executable bundles**, one per species.
-- Each bundle is organized in three tiers under `src/`:
+- Each bundle is organized in four tiers under `src/` (one folder per tier, so the folder
+  layout and the T1-T4 arithmetic of `docs/tiers.md` coincide):
   - `TIER1/` — upstream functions reused unchanged (T1)
   - `TIER2/` — upstream functions modified for plant workflows (T2)
-  - `TIER3/` — new functions specific to plant sequence variants (T3)
+  - `TIER3/` — new functions specific to plants (T3)
+  - `TIER4/` — present but not invoked (T4; precedence over T1-T3). In AT this holds the
+    108 generated H1/H2A/H2B catalogue modules (`rt_ref = 0`), a few unused helpers and
+    legacy upstream modules, and drafts.
 - Each bundle must run independently without depending on other species folders.
 
 ## Species codes
-- AT: *Arabidopsis thaliana* (active)
-- MP: *Marchantia polymorpha* (planned)
-- CR: *Chlamydomonas reinhardtii* (planned)
+- AT: *Arabidopsis thaliana* (active, validated on data)
+- MP: *Marchantia polymorpha* (assembled, not yet validated on data)
+- CR: *Chlamydomonas reinhardtii* (assembled, not yet validated on data)
 - PP: *Physcomitrella patens* (if/when included)
 
 Current status is tracked in `metadata/species.tsv`.
@@ -28,7 +32,11 @@ For every file/function we classify:
 - Short description
 - Provenance note (where it came from and why changes were introduced)
 
-Source of truth: `metadata/audit_master.tsv`
+Source of truth: `metadata/audit_master.tsv`, regenerated with
+`python tools/build_audit_master.py --upstream <EpiProfile2.0_1Basic>` (which calls
+`tools/tier_audit.py` per bundle: normalised-content comparison against upstream for T1/T2/T3,
+invocation search ignoring comments and strings for T4). Per-bundle detail:
+`bundles/<XX>/metadata/tier_audit_<XX>.tsv`.
 
 Audit comparisons are primarily:
 - A (upstream): the original EpiProfile 2.0 basic function

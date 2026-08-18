@@ -67,17 +67,22 @@ except ImportError:
     HAS_PANDAS = False
 
 
-# ── Paths ────────────────────────────────────────────────────────────────────
-BASE_DIR = Path(r"D:/Antigravity/revision_tesis/epiprofile_plants_expanded")
-MANIFEST_PATH = BASE_DIR / "metadata" / "plant_module_manifest.tsv"
-OUTPUT_DIR = BASE_DIR / "metadata"
+# ── Paths (repo-relative; this file lives in bundles/AT/scripts/) ────────────
+# Overridable with --manifest / --output-dir / --ms1-dir. Earlier versions
+# pointed at absolute paths of the author's workstation.
+BUNDLE_DIR = Path(__file__).resolve().parents[1]          # bundles/AT
+BASE_DIR = BUNDLE_DIR
+MANIFEST_PATH = BUNDLE_DIR / "metadata" / "plant_module_manifest.tsv"
+OUTPUT_DIR = BUNDLE_DIR / "metadata"
 
-MS1_DIR = Path(r"E:/EpiProfile_Proyecto/EpiProfile_20_AT/RawData/MS1")
+# No sensible default for raw data: pass --ms1-dir explicitly.
+MS1_DIR = None
 
 # MATLAB module locations
 MODULE_DIRS = [
-    Path(r"D:/Antigravity/repos/epiprofile_yuan_ecosistem/audit/generated_modules/AT"),
-    Path(r"E:/EpiProfile_Proyecto/EpiProfile_20_AT/EpiProfile_PLANTS_resources/src"),
+    BUNDLE_DIR / "src" / "TIER3",
+    BUNDLE_DIR / "src" / "TIER2",
+    BUNDLE_DIR / "src" / "TIER1",
 ]
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -868,6 +873,11 @@ def write_matlab_update_snippet(consensus: List[Dict], filepath: Path):
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main():
+    # 'global' must precede any use of the name inside the function
+    # (Python >= 3.6 raises SyntaxError otherwise; the old placement after
+    # the argparse defaults made the whole script fail to compile).
+    global PPM_TOLERANCE
+
     parser = argparse.ArgumentParser(
         description="Extract empirical RTs from .ms1 files for EpiProfile-PLANTS peptides"
     )
@@ -891,7 +901,6 @@ def main():
                         help="Print progress information")
     args = parser.parse_args()
 
-    global PPM_TOLERANCE
     PPM_TOLERANCE = args.ppm
 
     print("=" * 70)
@@ -924,6 +933,9 @@ def main():
         print(f"    {ht}: {count}")
 
     # --- 3. Find ms1 files ---
+    if args.ms1_dir is None:
+        parser.error("--ms1-dir is required (folder with the .ms1 files, "
+                     "e.g. <raw_path>/MS1)")
     print(f"\n[3/5] Finding .ms1 files in: {args.ms1_dir}")
     if args.use_mat:
         mat_files = sorted(args.ms1_dir.glob("*_MS1peaks.mat"))

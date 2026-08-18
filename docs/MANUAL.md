@@ -176,34 +176,37 @@ This means the order of `raw_names` matters. Keep it stable if you want reproduc
 
 ### 10.3 Minimal MATLAB “smoke test” (1–2 runs)
 
-In MATLAB:
-
-1) Add the EpiProfile_PLANTS MATLAB code to the path.
-2) Define `raw_path`, `raw_names`, and a mass tolerance `ptol`.
-3) Run the driver function.
-
-Example:
+Go through `EpiProfile.m`, the entry point. It reads `paras.txt`, builds the run list,
+parses the MS1/MS2 files into `.mat` caches, builds the RT reference (`DrawISOProfile0`)
+and only then calls the quantification loop (`DrawISOProfile1`) with a fully populated
+`special` struct. Calling `DrawISOProfile1` by hand with `special = 0`, as an earlier
+version of this section suggested, fails: `special` must be a struct with the fields
+`raw_path, nsource, nsubtype, norganism, soutput, nfigure, ndebug, nhmass`, and the
+`.mat` caches must already exist.
 
 ```matlab
-% 1) Point MATLAB to the EpiProfile_PLANTS MATLAB code
-addpath(genpath('/path/to/EpiProfile_PLANTS/matlab'));
+% 1) ONE bundle on a clean path
+restoredefaultpath;
+addpath(genpath('/path/to/epiprofile-plants/bundles/AT/src'));
+which EpiProfile -all          % exactly one hit
 
-% 2) Define the dataset folder (contains MS1/MS2 extracted files)
-raw_path  = '/path/to/PX_DATA/PXDxxxxxx/MS1_MS2';
+% 2) paras.txt (copy paras.example.txt from the repository root and edit raw_path)
+%    raw_path=/path/to/PX_DATA/PXDxxxxxx/MS1_MS2
+%    norganism=1
+%    nsource=1
+%    nsubtype=0
 
-% 3) Basenames of runs (must match your extracted file naming)
-raw_names = {'Run_001','Run_002'};
-
-% 4) Mass tolerance (units depend on your build; commonly ppm)
-ptol    = 10;
-
-% 5) Special mode flag (keep 0 unless you know you need it)
-special = 0;
-
-% 6) Run
-DrawISOProfile1(raw_path, raw_names, ptol, special);
+% 3) Run
+EpiProfile('/path/to/PX_DATA/PXDxxxxxx/MS1_MS2/paras.txt');
 ```
-If your naming is correct, you should see the `histone_layouts/` folder appear and populate during the run.
+
+The run list (`raw_names`) is not typed in: it is the list of `<run>.raw` files in
+`raw_path`, or, when there is none, the basenames of `raw_path/MS1/*.MS1`. Mass tolerance
+(`def_ptol = 10` ppm), figure output (`nfigure`) and the RT-reference mode (`ndebug`) are
+set in `check_otherparas.m`.
+
+If the layout is right you should see `MS1 scans: ...` / `MS2 scans: ...` counters, then
+`get a reference...`, then one block per run, and the `histone_layouts/` folder populating.
 
 ## 10.4 What files to look at first after a run
 
@@ -274,37 +277,28 @@ Pick a basename that identifies the run (no extension). Examples:
 
 Then make sure both the MS1 and MS2 extracted files for that run contain that basename in their filename.
 
-In MATLAB you will pass:
-
-- `raw_path` = folder that contains the extracted MS1/MS2 files
-- `raw_names` = a list of basenames (one per run)
+In `paras.txt` you set `raw_path`; the run list is derived from it (see 13.7).
 
 ### 13.2 File pairing requirement
 
-For each entry `raw_name` in `raw_names`, you must have:
+For each run you must have exactly one MS1 file and exactly one MS2 file, both named
+after the run basename. The code looks for fixed names, so there is no room for suffix
+variants:
 
-- exactly one MS1 file for that run
-- exactly one MS2 file for that run
+```
+<raw_path>/MS1/<raw_name>.MS1     (.ms1 also accepted)
+<raw_path>/MS2/<raw_name>.ms2     (.MS2 also accepted)
+```
 
-If you have multiple MS1/MS2 files that match the same basename, you will get ambiguity (best case: wrong pairing; worst case: empty outputs).
+### 13.3 Naming convention (fixed by the code)
 
-### 13.3 Recommended naming convention
+`EpiProfile.m` builds the file names as `fullfile(raw_path,'MS1',[raw_name,'.MS1'])` and
+`fullfile(raw_path,'MS2',[raw_name,'.ms2'])`. This is what `RawToMS1.exe` and
+`xtract.exe` produce through `Raw2MS.m`. Other patterns that earlier versions of this
+manual listed as options (`<raw_name>_MS1.txt`, `<raw_name>_MS1.tsv`, MS1 and MS2 in the
+same folder) are **not** found by the code. Rename or move such files first.
 
-Use one of these simple patterns and keep it consistent across all runs:
-
-Option A (explicit suffix, easiest to read)
-- `<raw_name>_MS1.txt`
-- `<raw_name>_MS2.txt`
-
-Option B (short extensions)
-- `<raw_name>.ms1`
-- `<raw_name>.ms2`
-
-Option C (extractor-style text)
-- `<raw_name>_MS1.tsv`
-- `<raw_name>_MS2.tsv`
-
-Whatever you choose, keep the basename identical between the MS1 and MS2 pair.
+Keep the basename identical between the MS1 and MS2 pair.
 
 ### 13.4 Allowed characters (practical rule)
 
@@ -317,42 +311,49 @@ To avoid issues across Windows/WSL/Linux and MATLAB string handling:
 
 ### 13.5 Where the files should live
 
-Keep all MS1/MS2 extracted files for a dataset in a single folder and point `raw_path` to it, for example:
+One dataset per `raw_path`, with the two subfolders the code expects:
 
-- `.../PX_DATA/PXDxxxxxx/MS1_MS2/`
-
-Do not split MS1 and MS2 into different folders unless your MATLAB code is explicitly written to do that.
+```
+.../PX_DATA/PXDxxxxxx/MS1_MS2/          <- raw_path (paras.txt lives here too, conveniently)
+    <run>.raw                           <- run list (0-byte placeholders are enough)
+    MS1/<run>.MS1
+    MS2/<run>.ms2
+    histone_layouts/                    <- created by the run
+```
 
 ### 13.6 Quick sanity check before running MATLAB
 
 From a terminal:
 
 ```bash
-ls -1 /path/to/MS1_MS2 | head
+ls -1 /path/to/MS1_MS2/MS1 | head
+ls -1 /path/to/MS1_MS2/MS2 | head
 ```
 
-You should be able to visually confirm that for each run you have one MS1-like file and one MS2-like file sharing the same basename.
+Every basename in `MS1/` must have its twin in `MS2/`.
 
 
-## 13.7 Building `raw_names` from filenames (MATLAB helper)
+## 13.7 How `raw_names` is built (no typing needed)
 
-If your MS1/MS2 folder is clean and uses a consistent suffix, you can derive `raw_names` automatically. Example for Option A:
+`check_otherparas.m` derives the run list automatically, in this order:
+
+1. the basenames of `<raw_path>/*.raw` (upstream behaviour; the `.raw` files can be
+   empty placeholders when MS1/MS2 already exist);
+2. if there is no `.raw`, the basenames of `<raw_path>/MS1/*.MS1` (or `*.ms1`).
+
+Runs are numbered in alphabetical order of basename (`01_`, `02_`, ...). To check the
+pairing before a long run:
 
 ```matlab
 raw_path = '/path/to/MS1_MS2';
-
-ms1_files = dir(fullfile(raw_path, '*_MS1.*'));
-raw_names = erase({ms1_files.name}, '_MS1.txt');   % adjust extension if needed
-
-% Optional: verify each raw_name has a matching MS2 file
-for i = 1:numel(raw_names)
-    ms2_match = dir(fullfile(raw_path, [raw_names{i}, '_MS2.*']));
-    if isempty(ms2_match)
-        fprintf('Missing MS2 for: %s\n', raw_names{i});
+ms1 = dir(fullfile(raw_path,'MS1','*.MS1'));
+for i = 1:numel(ms1)
+    [~,b] = fileparts(ms1(i).name);
+    if ~exist(fullfile(raw_path,'MS2',[b,'.ms2']),'file')
+        fprintf('Missing MS2 for: %s\n', b);
     end
 end
 ```
-Adjust the erase() string to match your real suffix/extension.
 
 ### 13.8 If your extractor produces different names
 

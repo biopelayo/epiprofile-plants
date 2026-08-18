@@ -186,10 +186,12 @@ A complete bundle for species XX is a self-contained MATLAB directory:
 
 ```
 bundles/XX/src/
-  TIER1/    72 files (unchanged upstream)
-  TIER2/    ~10 files (modified)
-  TIER3/    variable (one per variant peptide region + snapshot aggregator)
+  TIER1/    unchanged upstream (T1)
+  TIER2/    modified for plants (T2)
+  TIER3/    new: variant peptide regions, species modules, snapshot aggregators (T3)
+  TIER4/    present but not invoked (T4)
 ```
+Counts per bundle live in `metadata/audit_master.tsv` (AT, 2026-08-18: 46 / 30 / 32 / 122).
 
 The user runs the pipeline by calling `EpiProfile.m` from `TIER2/`, which:
 1. Calls `init_histone0.m` to register the species-specific peptide catalog.
@@ -331,11 +333,12 @@ The pipeline includes several QC layers:
 ```
 epiprofile-plants-main/
   bundles/
-    AT/src/TIER1/       72 files — upstream unchanged (T1)
-    AT/src/TIER2/       10 files — modified for plants (T2)
-    AT/src/TIER3/        9 files — new for AT variants (T3)
-    MP/                  planned
-    CR/                  planned
+    AT/src/TIER1/       46 files — upstream unchanged (T1)
+    AT/src/TIER2/       30 files — modified for plants (T2)
+    AT/src/TIER3/       32 files — new for AT (T3)
+    AT/src/TIER4/      122 files — present but not invoked (T4)
+    MP/                  assembled, not validated on data
+    CR/                  assembled, not validated on data
   docs/
     MANUAL.md            end-to-end usage guide
     SURVEY.md            structured run-report template
