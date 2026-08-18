@@ -58,30 +58,15 @@ for ino=1:nplot
     hold on;
     xlim([st tm]);
     %ylim([0 1.05*maxinten]);
-
-    % --- Robustez (tercer error): mapear [st, tm] a índices de isorts sin fallar ---
-    tmp_maxinten = maxinten; % valor por defecto seguro si no podemos recalcular
-
-    p1 = find(isorts <= st);
-    p2 = find(isorts <= tm);
-
-    if isempty(p1) || isempty(p2)
-        % Si st < min(isorts) o tm NaN/fuera de rango, evitamos p1(end)/p2(end)
-        fprintf('draw_layout: rango vacío st=%g tm=%g RT=[%g,%g]\n', st, tm, min(isorts), max(isorts));
-    else
-        i1 = p1(end);
-        i2 = p2(end);
-        if i2 >= i1
-            IX = i1:i2;
-            tmp_maxinten = max(mono_isointens(IX,cno));
-            if tmp_maxinten > 0
-                ylim([0 1.05*tmp_maxinten]);
-            end
-        else
-            fprintf('draw_layout: rango invertido st=%g tm=%g i1=%d i2=%d\n', st, tm, i1, i2);
-        end
-    end
-    % --- fin robustez ---
+    p1 = find(isorts<=st);
+    p2 = find(isorts<=tm);
+    if isempty(p1); p1 = 1; else; p1 = p1(end); end;
+    if isempty(p2); p2 = length(isorts); else; p2 = p2(end); end;
+    IX = p1:p2;
+    tmp_maxinten = max(mono_isointens(IX,cno));
+    if tmp_maxinten>0
+        ylim([0 1.05*tmp_maxinten]);
+    end;
 
     % localmax
     plot(localmax_rt(ino),localmax_inten(ino),'color','m','linestyle','-','linewidth',1);
@@ -138,7 +123,13 @@ end;
 set(gca,'xtickMode', 'auto');
 xlabel('Time (min)');
 ylabel('Abundance');
-print('-dpdf',out_file1);
+% F4 2026-06-17: print -dpdf falla en MATLAB -batch sin display.
+% try/catch para no abortar la corrida; el .xls si se genera.
+try
+    print('-dpdf',out_file1);
+catch e_pdf
+    fprintf(1,'[draw_layout] print PDF skip: %s\n', e_pdf.message);
+end
 close();
 
 function [ms2pos,ms2rts,ms2intens,posn,posc,ActiveType] = MatchMS2(MS2_index,MS2_peaks,Mods,His,hno,rt1,rt2,nhmass)
