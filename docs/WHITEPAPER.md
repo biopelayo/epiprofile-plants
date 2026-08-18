@@ -58,7 +58,11 @@ codebase, every file in a species bundle is assigned a provenance tier:
 | **T1** | Identical to upstream — copied without modification | `Getaamass.m`, `find_pair.m`, `H3_01_3_8.m` |
 | **T2** | Copied from upstream and modified | `init_histone0.m`, `get_rts.m`, `DrawISOProfile1.m` |
 | **T3** | New — created specifically for plants | `H3_11_3_8.m`, `H3_14_27_40.m`, `H3_Snapshot.m` |
-| **T4** | Upstream-only — not ported (out of scope) | `Extract_SILAC.m`, `GetaamassH.m`, `DrawISOProfile3.m` |
+| **T4** | Ships in the bundle but is never invoked (kept for reference) | `HH2A_07v_1_88.m`, `HH2B_02v_1_29.m`, `check_layout.m` |
+
+Upstream functions that were **not ported** (SILAC, C13/N15 runners, heavy-mass helpers) are simply
+out of the bundle — they are not a tier. See `docs/tiers.md` for the definitions and the precedence
+rule.
 
 This classification is recorded in `metadata/audit_master.tsv` and described
 in `docs/tiers.md`. The tier assignment is the primary mechanism by which a

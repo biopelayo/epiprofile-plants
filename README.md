@@ -106,7 +106,10 @@ All MATLAB functions are tracked under a four‑tier provenance model:
 - **T1 (Reused):** Upstream functions used unchanged.  
 - **T2 (Modified):** Upstream code adapted for plant workflows.  
 - **T3 (New):** Newly implemented modules (e.g., species initializers such as `init_histone0_AT.m`).  
-- **T4 (Excluded):** Intentionally removed / unused modules (e.g., SILAC/C13 modes, if not supported).
+- **T4 (Not invoked):** Modules that ship in the bundle but no other file calls, kept for reference or future work.
+
+Upstream functions that were never ported (SILAC, C13/N15 runners) are out of the bundle, not a tier.
+T4 takes precedence over T1–T3, so the four tiers add up to the bundle. See `docs/tiers.md`.
 
 **Source of truth:** `metadata/audit_master.tsv`
 

@@ -1,9 +1,32 @@
-function HH2A_05oAZ_56_84(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special)
+function H3_05b_41_49(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,cur_outpath,special)
 %%
+% ============================ DRAFT — NOT REGISTERED ============================
+% H3.1 sibling of H3_05_41_49 (which encodes the H3.3 form YRPGTVALR).
+%
+% AT H3.1 carries F41 (UniProt P59226, genes HTR1/2/3/9/13) -> peptide FRPGTVALR.
+% Position 41 is the canonical plant H3.1/H3.3 discriminator (F in H3.1, Y in
+% H3.3). F41 has NO PTM site (no Tyr-OH, no Lys), so this peptide is unmod-only
+% and serves only as a normaliser / to capture the H3.1 pool at 41-49.
+%
+% This module is a scaffold. Before enabling it:
+%   1. Confirm with a PSM check that FRPGTVALR is actually present in the data.
+%   2. Calibrate His.rt_ref (the value below is a placeholder copied from the
+%      Y41 unmod RT; F is slightly more hydrophobic than Y so expect a small
+%      shift).
+%   3. Register it in TIER2/init_histone0.m by adding, after the H3_05 block:
+%         no = no + 1;
+%         His.out_filename{no,1} = 'H3_05b_41_49';
+%         His.pep_seq{no,1}      = 'FRPGTVALR';
+%         His.mod_type{no,1}     = '0,pr;';
+%         His.pep_ch(no,1)       = 2;
+%         His.pep_mz(no,1)       = calculate_pepmz0(His,no,special);
+%         new_seq = [His.pep_seq{no,1},His.mod_type{no,1}];
+%         His.seq_godel(no,1) = sum((new_seq-'0'+49).*log(2:1+length(new_seq)));
+% ===============================================================================
 
 % check
-out_filename = 'HH2A_05oAZ_56_84';
-fprintf(1,'%s..',out_filename(2:end));
+out_filename = 'H3_05b_41_49';
+fprintf(1,'%s..',out_filename);
 out_file0 = fullfile(cur_outpath,[out_filename,'.mat']);
 if 0~=exist(out_file0,'file')
     return;
@@ -32,13 +55,13 @@ end;
 function His = init_histone()
 %%
 
-His.pep_seq = 'VGATAAAVYTAAILEYLTAEVLELAGNASK';% fix 2026-07-12: +A to match H2A.Z / HTA9 (UniProt Q9C944); prior VGATAA-VYT dropped one Ala. Real span is 56-85; filename kept as stable identifier.
+His.pep_seq = 'FRPGTVALR';% AT H3.1: F41 (vs H3.3 YRPGTVALR). UniProt P59226
 His.mod_short = {'unmod'};
-His.mod_type = {'0,pr;'};
+His.mod_type = {'0,pr;'};% N-term propionyl only; F41 carries no PTM site
 
-His.pep_ch = repmat([3 4 5],length(His.mod_type),1);
+His.pep_ch = repmat([1 2 3],length(His.mod_type),1);
 His.pep_mz = calculate_pepmz(His);
-His.rt_ref = [0];
+His.rt_ref = 31.2;% PLACEHOLDER (copied from Y41 unmod) — CALIBRATE before use
 His.display = ones(length(His.mod_type),1);
 
 % main ch
@@ -64,7 +87,7 @@ pep_rts = zeros([npep,ncharge]);
 pep_intens = zeros([npep,ncharge]);
 mono_isointens = zeros([num_MS1,npep]);
 
-% unmod
+% unmod (only entry — FRPGTVALR has no PTM site)
 His.rt_unmod_orig = His.rt_ref(1);
 if 1~=special.ndebug
     if 2~=special.nDAmode
@@ -94,41 +117,7 @@ hno = 1;
 % calibrate the rt_ref
 if cur_rts(1)>0
     His.rt_ref(1) = cur_rts(1);
-    delta = cur_rts(1)-His.rt_unmod_orig;
-    His.rt_ref(2:end) = His.rt_ref(2:end) + delta;
     pep_rts(hno,1:ncharge) = cur_rts;
     pep_intens(hno,1:ncharge) = cur_intens;
     mono_isointens(1:num_MS1,hno) = cur_mono_isointens;
 end;
-if 1==special.ndebug
-    His = relocateD(MS1_index,MS1_peaks,ptol,unitdiff,His);
-else
-    if 2~=special.nDAmode
-        His = relocate(MS1_index,MS1_peaks,ptol,unitdiff,His);
-    else
-        His = relocate2(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,unitdiff,His,nhmass);
-    end;
-end;
-
-for hno=2:1
-    [cur_rts,cur_intens,cur_mono_isointens] = get_histone1(MS1_index,MS1_peaks,ptol,unitdiff,His,hno);
-    if cur_rts(1)>0
-        pep_rts(hno,1:ncharge) = cur_rts;
-        pep_intens(hno,1:ncharge) = cur_intens;
-        mono_isointens(1:num_MS1,hno) = cur_mono_isointens;
-    end;
-end;
-
-function His = relocate(MS1_index,MS1_peaks,ptol,unitdiff,His)
-%%
-
-delta = 0.1;
-nsplit = 1;
-
-
-function His = relocate2(MS1_index,MS1_peaks,MS2_index,MS2_peaks,ptol,unitdiff,His,nhmass)
-%%
-
-delta = 0.1;
-nsplit = 1;
-

@@ -8,7 +8,8 @@
 | Organism | *Arabidopsis thaliana* (Col-0) |
 | Sample | Acid-extracted histones, propionylated |
 | Acquisition | DDA (data-dependent) |
-| Instrument | Q Exactive (Thermo) |
+| Instrument | LTQ Orbitrap Elite hybrid (Thermo Fisher Scientific) |
+| Injections | 114 (genetic arm: 6 plants x 3 injections per genotype; chemical arm: NaB and TSA) |
 
 ## Files in this directory
 
@@ -35,3 +36,39 @@ EpiProfile
 - Mass tolerance: 10 ppm (default, set in `check_otherparas.m`)
 - Debug mode: off (`ndebug = 0`)
 - Figures: enabled (`nfigure = 1`)
+
+## Provenance and validation (2026-08-15)
+
+`histone_ratios_PXD014739.xls` holds 114 sample columns and 115 data rows (87 map to the
+peptidoform catalogue, 21 are sequence variants). SHA-256 starts with `793b83a60bb5df3b`.
+Intensity profile: areas from 413 to 2.33e10, none above 1e12, 72.1 % of ratios positive,
+median RT 36.97 min. This is the copy the Chapter 4 atlas ingests.
+
+Cross-checked against a re-extraction of 11 *hda6-6* runs produced with `RawToMS1.exe` on
+2026-08-15: Pearson r = 0.9999 over 935 positive ratio pairs, median |delta ratio| 0.0001,
+median RT difference 0.000 min, detection 0.741 vs 0.742. The quantification in this file is
+sound.
+
+**Do not confuse this file with the quantification under `E:\epiprofile_data\PXD014739\`**, now
+renamed `histone_ratios_CORRUPTO_xtract_NO_USAR.xls`. That one was produced from `.MS1` files
+generated with `xtract` 3.0.0 instead of `RawToMS1.exe`, which overflows the areas (median
+1.43e38, maximum 8.40e61) and drops detection to 10.2 %. See
+`crosstool_h3h4_bench_AT\docs\HALLAZGO_MS1_ELITE.md` for the full diagnosis.
+
+## When this file was produced
+
+Upper bound: it was already in the initial commit of this repository, `5f0085f`, dated
+2026-02-20 14:02. The XIC gallery in this same directory is a ReportLab render of the per-region
+PDFs of that run, and its metadata gives **2026-02-05 10:03:21 UTC**, so the run predates that
+date. The module set also fits: 11 H3 and H4 modules, no H1, H2A or H2B, and the expanded bundle
+only landed on 2026-03-27 (`1aef69f`, `3307eba`).
+
+The run predates the extractor failure. `D:\epiprofile_data\convert_and_extract.py`, dated
+2026-02-19 19:43, is what routed `.ms1` extraction through `xtract_xml.exe`
+(`D:\EpiProfile2.1_1Basic_Running_version\`, product version **3.0.0.0**), and the broken `.MS1`
+files carry a timestamp of 2026-02-19 21:56, two hours later and two weeks after the gallery.
+
+Open caveat: no artefact of the original run survives. No `histone_layouts` directory, no
+`histone_logs.txt`, no `paras.txt`, no intermediate `.mat` for this cohort predates 2026-02-20
+anywhere on `D:` or `E:`. Four byte-identical copies of the `.xls` exist and none carries an
+execution log. The numbers are validated, the provenance is not.

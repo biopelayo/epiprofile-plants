@@ -43,17 +43,17 @@ MOD_MASS = {
 
 # UniProt accessions for AT histones
 UNIPROT = {
-    'H3.1':   'Q9C944',   # placeholder - AT H3.1
-    'H3.3':   'Q9FJE8',   # placeholder - AT H3.3
-    'H4':     'Q9LHK4',
-    'H2A_can':'Q9LHQ5',
-    'H2A.X':  'Q94F49',
-    'H2A.Z':  'Q9C944',
-    'H2A.W':  'Q9FJE8',
-    'H2B.1':  'Q9LQQ4',
+    'H3.1':   'P59226',   # AT H3.1 (HTR1/2/3/9/13), F41/K53/A90/A96 (was Q9C944 placeholder = H2A.Z)
+    'H3.3':   'P59169',   # AT H3.3 (HTR4/5/8), T31/Y41/H87/L90 (was Q9FJE8 placeholder = H2A.W)
+    'H4':     'P59259',   # AT H4, V60I/K77R vs human (was Q9LHK4; H4 is invariant across AT loci)
+    'H2A_can':'Q9LHQ5',   # HTA13 - verified 7/7 module peptides exact
+    'H2A.X':  'O04848',   # HTA5 (At1g08880) - verified 7/7; resolved by peptide search on GDIGSASQEF (was Q94F49, which is H2A.W)
+    'H2A.Z':  'Q9C944',   # HTA9 - verified 7/8 (56-84 differs by 1 residue)
+    'H2A.W':  'Q94F49',   # HTA7 - verified 9/9 module peptides exact (was Q9FJE8/HTA6, which does not match)
+    'H2B.1':  'Q9LQQ4',   # HTB1 - verified 13/13 module peptides exact
     'H2B.11': 'P40283',
-    'H1.1':   'P26568',
-    'H1.2':   'P26569',
+    'H1.1':   'P26568',   # His1.1 - verified 25/26 (58-70 differs)
+    'H1.2':   'P26569',   # His1.2 - verified 23/23 module peptides exact
 }
 
 
@@ -482,7 +482,7 @@ TIER3_MODULES_DATA = [
     ('HH2A_02oAZ_25_29', 'H2A.Z', '25-29', 'KPITR', '0,pr;1,pr;', 1, ['unmod', 'K25ac'], 'Grau-Bove2022'),
     ('HH2A_03oAZ_33_41', 'H2A.Z', '33-41', 'AGLQFPVGR', '0,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
     ('HH2A_04oAZ_50_55', 'H2A.Z', '50-55', 'STAHGR', '0,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
-    ('HH2A_05oAZ_56_84', 'H2A.Z', '56-84', 'VGATAAVYTAAILEYLTAEVLELAGNASK', '0,pr;29,pr;', 3, ['unmod'], 'EpiProfile-PLANTS'),
+    ('HH2A_05oAZ_56_84', 'H2A.Z', '56-85', 'VGATAAAVYTAAILEYLTAEVLELAGNASK', '0,pr;30,pr;', 3, ['unmod'], 'EpiProfile-PLANTS'),  # +A fix -> HTA9 Q9C944
     ('HH2A_06oAZ_102_111', 'H2A.Z', '102-111', 'GDEELDTLIK', '0,pr;10,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
     ('HH2A_07oAZ_112_125', 'H2A.Z', '112-125', 'GTIAGGGVIPHIHK', '0,pr;14,pr;', 2, ['unmod'], 'EpiProfile-PLANTS'),
     ('HH2A_08oAZ_126_130', 'H2A.Z', '126-130', 'SLINK', '0,pr;5,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
@@ -533,7 +533,7 @@ TIER3_MODULES_DATA = [
     ('HH1_01oA1_1_29', 'H1.1', '1-29', 'MSEVEIENAATIEGNTAADAPVTDAAVEK', '0,pr;29,pr;', 3, ['unmod', 'S2ph'], 'UniProt:P26568'),
     ('HH1_02oA1_30_34', 'H1.1', '30-34', 'KPAAK', '0,pr;1,pr;5,pr;', 1, ['unmod', 'K30ac'], 'EpiProfile-PLANTS'),
     ('HH1_03oA1_49_55', 'H1.1', '49-55', 'TVAAAPK', '0,pr;7,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
-    ('HH1_04oA1_58_70', 'H1.1', '58-70', 'TVSSHPTYEEMIK', '0,pr;13,pr;', 2, ['unmod'], 'EpiProfile-PLANTS'),
+    ('HH1_04oA1_58_70', 'H1.1', '58-71', 'TVSHSHPTYEEMIK', '0,pr;14,pr;', 2, ['unmod'], 'EpiProfile-PLANTS'),  # +H fix -> His1.1 P26568
     ('HH1_05oA1_71_77', 'H1.1', '71-77', 'DAIVTLK', '0,pr;7,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
     ('HH1_06oA1_80_89', 'H1.1', '80-89', 'TGSSQYAIQK', '0,pr;10,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),
     ('HH1_07oA1_90_94', 'H1.1', '90-94', 'FIEEK', '0,pr;5,pr;', 1, ['unmod'], 'EpiProfile-PLANTS'),

@@ -32,7 +32,7 @@ end;
 function His = init_histone()
 %%
 
-His.pep_seq = 'TVSSHPTYEEMIK';
+His.pep_seq = 'TVSHSHPTYEEMIK';% fix 2026-07-12: +H to match H1.1 / His1.1 (UniProt P26568); prior TVSS dropped one His (real TVSHSH). Real span is 58-71; filename kept as stable identifier.
 His.mod_short = {'unmod'};
 His.mod_type = {'0,pr;'};
 

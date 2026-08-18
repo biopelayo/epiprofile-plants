@@ -34,10 +34,20 @@ Audit comparisons are primarily:
 - A (upstream): the original EpiProfile 2.0 basic function
 - C (bundle): `bundles/<XX>/src/TIER<N>/<file>`
 
-## T4 — Excluded modules
-Functions that exist in upstream but are **not ported** to the PLANTS family:
+## T4 — Present but not invoked
+Functions that **ship in the bundle** but no other file calls, so `DrawISOProfile1.m` never reaches
+them. They are kept as reference or for future development — for example upstream quantification
+modules the plant workflow stopped calling (`HH2A_07v_1_88.m`, `HH2B_02v_1_29.m`) and helpers
+superseded by a plant-specific variant (`check_layout.m`, `get_main_ch.m`, `output_histone2.m`).
+
+## Upstream functions that were not ported
+These exist in upstream but were **left out** of the bundle, so they are **not a tier** — they are
+simply out of scope:
 - SILAC modules (`Extract_SILAC.m`, `Extract_SILAC_1.m`)
 - C13/N15/13CD3 runners (`DrawISOProfile3-5.m`)
 - Heavy amino acid masses (`GetaamassH.m`)
 
-These are documented as T4 entries in `audit_master.tsv`.
+These six are tagged **`NOT_PORTED`** in `audit_master.tsv` (both copies: `metadata/` and
+`bundles/AT/metadata/`). They used to be tagged `T4` under the previous definition; re-tagged
+2026-07-21 so that `T4` keeps its new meaning of "present but not invoked". Backups:
+`.bak_tier_20260721`.

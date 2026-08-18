@@ -89,9 +89,9 @@ H3_16_53_63.m	AT	T3	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQK
 H3_17_73_83.m	AT	T3	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR
 H3_18_117_128.m	AT	T3	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR
 H3_Snapshot.m	AT	T3	histone_module	Aggregate H3 PTM positions (TIER3 version for plant variants)
-Extract_SILAC.m	AT	T4	runner	SILAC extraction (not ported — upstream only)
-Extract_SILAC_1.m	AT	T4	runner	SILAC extraction variant (not ported — upstream only)
-GetaamassH.m	AT	T4	core_quant	Heavy amino acid masses for N15 (not ported)
-DrawISOProfile3.m	AT	T4	runner	C13 mode runner (not ported)
-DrawISOProfile4.m	AT	T4	runner	N15 mode runner (not ported)
-DrawISOProfile5.m	AT	T4	runner	13CD3 mode runner (not ported)
+Extract_SILAC.m	AT	NOT_PORTED	runner	SILAC extraction — exists upstream, not included in the bundle
+Extract_SILAC_1.m	AT	NOT_PORTED	runner	SILAC extraction variant — exists upstream, not included in the bundle
+GetaamassH.m	AT	NOT_PORTED	core_quant	Heavy amino acid masses for N15 — exists upstream, not included in the bundle
+DrawISOProfile3.m	AT	NOT_PORTED	runner	C13 mode runner — exists upstream, not included in the bundle
+DrawISOProfile4.m	AT	NOT_PORTED	runner	N15 mode runner — exists upstream, not included in the bundle
+DrawISOProfile5.m	AT	NOT_PORTED	runner	13CD3 mode runner — exists upstream, not included in the bundle
