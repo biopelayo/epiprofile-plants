@@ -46,6 +46,8 @@ full report (not versioned).
   `matlab.codetools.requiredFilesAndProducts`, MS1/MS2 format as parsed, Thermo and SCIEX
   conversion routes, commented `paras.txt`, run-time switches, outputs, and which code
   reproduces the thesis matrices.
+- Orphan branch `tesis/v1.1` and tag `v1.1-tesis`: the as-run AT bundle cited by the thesis
+  (119 `.m`, generic `paras.txt`, SHA-256 manifest; no data, logs or executables).
 - `paras.example.txt` at the root; `paras.txt` was undocumented.
 - `tools/tier_audit.py`: provenance (T1/T2/T3 vs upstream) and invocation (T4) audit of a
   bundle, implementing `docs/tiers.md`.
