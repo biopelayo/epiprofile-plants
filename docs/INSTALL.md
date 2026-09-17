@@ -40,10 +40,13 @@ first run writes next to them (SCIEX ZenoTOF 7600 DDA), plus a few MB per run un
 introduced after R2016b. The command lines in these documents use double-quoted strings (R2017a or
 later) and `matlab -batch` (R2019a or later). Nothing older than R2023a has been run.
 
-**Note 2, extractors.** Both executables come with upstream EpiProfile 2.0. The thesis used
-`RawToMS1.exe` 1.0.0.1 (MD5 `a0bd03d9302643f3437463be5fbcfffe`) and `xtract.exe` pXtract 2.1.0
-(MD5 `d229889469c16db4bad48343a0d88baf`). Different files with the same name and version string
-circulate, so compare the MD5, not the name. The upstream manual adds two warnings that were not
+**Note 2, extractors.** Both executables ship inside the upstream packages published at
+<https://github.com/zfyuan/EpiProfile2.0_Family>. The thesis used `RawToMS1.exe` 1.0.0.1 (MD5
+`a0bd03d9302643f3437463be5fbcfffe`) and `xtract.exe` pXtract 2.1.0 (MD5
+`d229889469c16db4bad48343a0d88baf`). Unpacked copies of `EpiProfile2.1_1Basic.zip` and
+`EpiProfile2.2.zip` from that repository carry both files with those MD5. `EpiProfile2.0_1Basic.zip`
+carries the same `RawToMS1.exe` but an older `xtract.exe` (MD5 `76c740a176fb19be4c1c507c0a9419e4`),
+so compare the MD5, not the name. The upstream manual adds two warnings that were not
 re-tested here: Thermo MSFileReader may be needed for `.raw` access, and `xtract.exe` stops working
 at the end of each year until it is replaced by a newer copy.
 
