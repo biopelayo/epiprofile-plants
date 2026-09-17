@@ -776,7 +776,8 @@ for entry in TIER3_MODULES_DATA:
 # WRITE TSV
 # ============================================================
 
-TSV_PATH = r'D:\Antigravity\revision_tesis\epiprofile_plants_expanded\metadata\AT_NUCLEOSOME_MASTER_TABLE.tsv'
+# written next to this script (bundles/AT/metadata/)
+TSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'AT_NUCLEOSOME_MASTER_TABLE.tsv')
 
 columns = ['histone', 'protein_accession', 'region', 'pep_seq', 'pep_len',
            'module_file', 'tier', 'n_peptidoforms', 'peptidoforms', 'mod_types',
@@ -832,7 +833,7 @@ HUMAN_MODULES = {
 # WRITE MARKDOWN SUMMARY
 # ============================================================
 
-MD_PATH = r'D:\Antigravity\revision_tesis\epiprofile_plants_expanded\metadata\AT_NUCLEOSOME_SUMMARY.md'
+MD_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'AT_NUCLEOSOME_SUMMARY.md')
 
 # Order histones for display
 HISTONE_ORDER = ['H3.1', 'H3.3', 'H4', 'H2A_can', 'H2A.X', 'H2A.Z', 'H2A.W', 'H2B.1', 'H2B.11', 'H1.1', 'H1.2']

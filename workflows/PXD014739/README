@@ -49,11 +49,10 @@ Cross-checked against a re-extraction of 11 *hda6-6* runs produced with `RawToMS
 median RT difference 0.000 min, detection 0.741 vs 0.742. The quantification in this file is
 sound.
 
-**Do not confuse this file with the quantification under `E:\epiprofile_data\PXD014739\`**, now
-renamed `histone_ratios_CORRUPTO_xtract_NO_USAR.xls`. That one was produced from `.MS1` files
+**Do not confuse this file with a later local re-quantification of the same dataset** (not in
+this repository, renamed `histone_ratios_CORRUPTO_xtract_NO_USAR.xls` by the author). That one was produced from `.MS1` files
 generated with `xtract` 3.0.0 instead of `RawToMS1.exe`, which overflows the areas (median
-1.43e38, maximum 8.40e61) and drops detection to 10.2 %. See
-`crosstool_h3h4_bench_AT\docs\HALLAZGO_MS1_ELITE.md` for the full diagnosis.
+1.43e38, maximum 8.40e61) and drops detection to 10.2 %.
 
 ## When this file was produced
 
@@ -63,9 +62,9 @@ PDFs of that run, and its metadata gives **2026-02-05 10:03:21 UTC**, so the run
 date. The module set also fits: 11 H3 and H4 modules, no H1, H2A or H2B, and the expanded bundle
 only landed on 2026-03-27 (`1aef69f`, `3307eba`).
 
-The run predates the extractor failure. `D:\epiprofile_data\convert_and_extract.py`, dated
-2026-02-19 19:43, is what routed `.ms1` extraction through `xtract_xml.exe`
-(`D:\EpiProfile2.1_1Basic_Running_version\`, product version **3.0.0.0**), and the broken `.MS1`
+The run predates the extractor failure. A local conversion script (`convert_and_extract.py`, not
+in this repository), dated 2026-02-19 19:43, is what routed `.ms1` extraction through
+`xtract_xml.exe` (from an EpiProfile 2.1 working copy, product version **3.0.0.0**), and the broken `.MS1`
 files carry a timestamp of 2026-02-19 21:56, two hours later and two weeks after the gallery.
 
 Open caveat: no artefact of the original run survives. No `histone_layouts` directory, no

@@ -110,7 +110,8 @@ def main():
         h = hashlib.sha256(norm(read(f)).encode()).hexdigest()[:12]
         if n in upstream:
             prov = "T1" if norm(read(upstream[n])) == norm(read(f)) else "T2"
-            up = str(upstream[n])
+            # relative to --upstream, so the TSV carries no workstation path
+            up = str(upstream[n].relative_to(args.upstream)).replace("\\", "/")
         else:
             prov = "T3"
             up = ""

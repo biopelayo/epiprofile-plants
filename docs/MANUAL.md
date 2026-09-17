@@ -2272,10 +2272,10 @@ There are two different “roots” hard-coded / defaulted in these scripts:
 
 2) Local conversion root (Shiny Converter defaults)
 - The Shiny UI defaults to a *Windows* project folder, e.g.:
-  - `project_root = "C:/Users/geope/Desktop/EpiProfile_PLANTS_ATLAS"`
-  - `raw_wiff_dir = "C:/Users/geope/Desktop/EpiProfile_PLANTS_ATLAS/raw_wiff"`
-  - `mzml_dir = "C:/Users/geope/Desktop/EpiProfile_PLANTS_ATLAS/mzML"`
-  - `ms1ms2_dir = "C:/Users/geope/Desktop/EpiProfile_PLANTS_ATLAS/MS1_MS2"`:contentReference[oaicite:9]{index=9}
+  - `project_root = "C:/Users/<user>/Desktop/EpiProfile_PLANTS_ATLAS"`
+  - `raw_wiff_dir = "C:/Users/<user>/Desktop/EpiProfile_PLANTS_ATLAS/raw_wiff"`
+  - `mzml_dir = "C:/Users/<user>/Desktop/EpiProfile_PLANTS_ATLAS/mzML"`
+  - `ms1ms2_dir = "C:/Users/<user>/Desktop/EpiProfile_PLANTS_ATLAS/MS1_MS2"`:contentReference[oaicite:9]{index=9}
 
 Important: these are *two different workflows*. Decide which one you are using per dataset, and keep it consistent.
 
