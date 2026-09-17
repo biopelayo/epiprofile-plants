@@ -34,10 +34,10 @@ missing. If the MS1/MS2 files already exist, the executables are not needed at a
 ### Stage 2 — Other vendors (WIFF, .d) and mzML
 
 Convert with ProteoWizard `msconvert` (vendor peak-picking ON, 64-bit, zlib) and then
-write MS1/MS2 files in the layout above. There is no converter in this repository yet
-(the earlier README pointed at `workflows/00_convert_*` and `workflows/01_extract_*`,
-which were never added). Until one exists, use the extractor that produced your MS1/MS2
-files and check the header keys against `GetMS1ScanNo.m`.
+write MS1/MS2 files in the layout above. This repository ships no converter (the earlier
+README pointed at `workflows/00_convert_*` and `workflows/01_extract_*`, which were never
+added). The route used for the SCIEX data of the thesis (`msconvert`, then pFind
+`xtract_xml.exe`) and its caveats are in [`docs/RUNNING.md`](docs/RUNNING.md), section 3.
 
 Common pitfall: mzML produced without vendor peak-picking yields profile spectra, and
 `GetMS1ScanNo` stops with `MS1 is profile mode, convert to centroid mode first!`.
@@ -46,10 +46,15 @@ Common pitfall: mzML produced without vendor peak-picking yields profile spectra
 
 ## ⚡ Quickstart (MATLAB, deterministic)
 
-Requirements: MATLAB R2019b or newer (tested with R2023a on Windows 10, 2026-08-18),
-Statistics and Machine Learning Toolbox (`boxplot`, `zscore`, `pca`), and Bioinformatics
-Toolbox (`HeatMap`, `clustergram`) for the QC figures. Without the toolboxes set
-`nfigure = 0` in `check_otherparas.m`; the ratio tables do not need them.
+Full instructions: [`docs/INSTALL.md`](docs/INSTALL.md) (requirements, installation checks) and
+[`docs/RUNNING.md`](docs/RUNNING.md) (data layout, MS1/MS2 format, `paras.txt`, run-time
+switches, outputs, and which code reproduces the thesis).
+
+Requirements: MATLAB R2019b or newer (tested only with R2023a, on Windows 10) and the
+**Curve Fitting Toolbox**, which every run needs (`smooth` in `get_area.m` and the RT
+functions). The Statistics and Machine Learning Toolbox (`zscore`, `boxplot`, `pca`,
+`kmeans`) and the Bioinformatics Toolbox (`HeatMap`, `clustergram`) are needed only for the
+QC figures (`nfigure = 1` in `check_otherparas.m`; the bundle default is 0).
 
 1. Lay out the data as shown above and write a `paras.txt` (template:
    [`paras.example.txt`](paras.example.txt) at the repository root):
@@ -162,7 +167,7 @@ If you mix instruments/columns/batches in the same folder, an RT reference learn
 **Conservative operational recommendations (no code changes):**  
 - One folder = one homogeneous group (same instrument/column/method family).  
 - When reusing a folder for a new dataset, delete `0_ref_info.mat` (or regenerate cleanly).  
-- If you want to run each RAW independently without applying a stored reference, use a “no-reference” mode (commonly `ndebug=2`, depending on your bundle conventions).
+- If you want to run each RAW independently without applying a stored reference, upstream EpiProfile offers `ndebug=2`. In the PLANTS bundles that mode, and folders with 100 runs or more, currently stop after parsing because the RT reference is not written (see `docs/RUNNING.md`, section 5).
 
 **Additional subtle contamination layer:**  
 Some regions (notably `H3_27_40`-style layouts) may read RT anchors from region-specific files in the output path (e.g., `H3_04_27_40.xls` inside `His.outpath`). Reusing an outpath across runs can propagate RT assumptions.

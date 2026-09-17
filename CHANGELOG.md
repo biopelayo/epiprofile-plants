@@ -34,8 +34,18 @@ full report (not versioned).
   same `histone_layouts/`; it now runs them one after another and moves each species' outputs
   to `<runs_root>/<SP>/`.
 - `.gitignore`: `*.xls` no longer hides the reference tables under `workflows/`.
+- README requirements (2026-09-17): the Curve Fitting Toolbox is required for every run
+  (`smooth`); the Statistics and Machine Learning and Bioinformatics toolboxes only for the QC
+  figures. The earlier text said no toolbox was needed without figures.
+- Workstation paths removed from `tier_audit_<XX>.tsv` (`tools/tier_audit.py` now writes
+  `upstream_file` relative to `--upstream`), `plant_module_manifest.tsv`,
+  `build_AT_nucleosome_master.py`, MANUAL §55.2 and `workflows/PXD014739/README`.
 
 ### Added
+- `docs/INSTALL.md` and `docs/RUNNING.md` (2026-09-17): requirements checked with
+  `matlab.codetools.requiredFilesAndProducts`, MS1/MS2 format as parsed, Thermo and SCIEX
+  conversion routes, commented `paras.txt`, run-time switches, outputs, and which code
+  reproduces the thesis matrices.
 - `paras.example.txt` at the root; `paras.txt` was undocumented.
 - `tools/tier_audit.py`: provenance (T1/T2/T3 vs upstream) and invocation (T4) audit of a
   bundle, implementing `docs/tiers.md`.
@@ -53,6 +63,9 @@ full report (not versioned).
   `assets/sequences/`, H2A/H2B/H1 catalogues, `tiers.md` T4 definition, PXD014739 provenance).
 
 ### Known gaps (not fixed here)
+- `EpiProfile.m` aborts when `0_ref_info.mat` is missing, but `DrawISOProfile0.m` does not write
+  it with `ndebug` other than 0 or with 100 runs or more in one folder, so those cases stop after
+  parsing (`docs/RUNNING.md`, section 5).
 - No converter from mzML to the MS1/MS2 text layout ships in the repository yet; the
   README no longer points at the non-existent `workflows/00_convert_*` / `01_extract_*`.
 - `metadata/audit_master.tsv` predates the AT bundle expansion; regenerate it with
