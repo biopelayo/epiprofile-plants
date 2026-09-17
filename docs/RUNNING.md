@@ -201,3 +201,31 @@ All under `raw_path` (names checked against a complete run):
 A failed run usually shows in `histone_logs.txt` (a run block without its module list, or no
 `elapsed time` line) before it shows in the table.
 
+## 8. Which code reproduces the thesis
+
+The ratio matrices of the doctoral thesis were **not** produced with `bundles/AT/src` of this
+repository. They come from the as-run AT bundle (119 `.m` files, `RawToMS1.exe`, `xtract.exe` and
+the `paras.txt` of the run), which the author keeps with a SHA-256 manifest and three tags:
+
+| Tag | Change | Effect |
+|---|---|---|
+| `v1.0-tesis-asrun` | code as it ran on 2026-04-16 | reference matrix |
+| `v1.1-tesis` | guard in `check_ref.m` against `rt_ref = 0` from the calibration | same matrix for the reference cohort; recovers `H4_20_23` in datasets where the calibration returned 0 |
+| `v1.2-tesis` | `DrawISOProfile0.m` threshold raised from 100 to 10000 runs | identical to `v1.1-tesis` below 100 runs; calibrates datasets with 100 runs or more |
+
+Those tags live in a separate archival repository that is not published yet. Until it is, results
+from this repository should not be expected to match the thesis tables.
+
+How this tree differs from `v1.2-tesis` (file contents compared after normalising line endings,
+2026-09-17):
+
+- 117 files have the same name in both; 102 are identical and 15 differ: `DrawISOProfile0`,
+  `DrawISOProfile1`, `EpiProfile`, `GetBenchmark`, `H3_07_73_83`, `HH2A_AT_Snapshot`,
+  `HH2B_AT_Snapshot`, `OutputFigures`, `OutputSinglePTMs`, `OutputTogether`, `check_otherparas`,
+  `draw_layout`, `init_histone0`, `output_histone`, `output_histone2`.
+- `v1.2-tesis` also runs `HH2A_AT09_can_36_42` and `HH2B_AT08_shared_80_86`, which this tree leaves
+  out (retired on 2026-05-24).
+- This tree adds 113 files: 112 in `TIER4/` (the 108 generated H1/H2A/H2B catalogue modules and
+  snapshots, plus `H3_04v3a_27_40`, `H3_05b_41_49`, `H4_03_24_35` and `HH2B_01u_104_145`, none of
+  them called) and `TIER3/run_calibrate.m`.
+- Defaults: the as-run bundle writes the QC figures (`nfigure = 1`); this tree does not.
