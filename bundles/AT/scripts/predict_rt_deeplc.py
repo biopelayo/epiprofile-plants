@@ -38,17 +38,21 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-# ── Paths ────────────────────────────────────────────────────────────────────
-BASE_DIR = Path(r"D:/Antigravity/revision_tesis/epiprofile_plants_expanded")
-MANIFEST_PATH = BASE_DIR / "metadata" / "plant_module_manifest.tsv"
-RT_COMPARISON_PATH = BASE_DIR / "metadata" / "RT_COMPARISON.tsv"
-OUTPUT_DIR = BASE_DIR / "metadata"
-SCRIPTS_DIR = BASE_DIR / "scripts"
+# ── Paths (repo-relative; this file lives in bundles/AT/scripts/) ────────────
+# Overridable with --manifest / --output-dir. Earlier versions pointed at
+# absolute paths of the author's workstation and could not run elsewhere.
+BUNDLE_DIR = Path(__file__).resolve().parents[1]          # bundles/AT
+BASE_DIR = BUNDLE_DIR
+MANIFEST_PATH = BUNDLE_DIR / "metadata" / "plant_module_manifest.tsv"
+RT_COMPARISON_PATH = BUNDLE_DIR / "metadata" / "RT_COMPARISON.tsv"
+OUTPUT_DIR = BUNDLE_DIR / "metadata"
+SCRIPTS_DIR = BUNDLE_DIR / "scripts"
 
 # Module directories (for reading mod_type from MATLAB files)
 MODULE_DIRS = [
-    Path(r"D:/Antigravity/repos/epiprofile_yuan_ecosistem/audit/generated_modules/AT"),
-    Path(r"E:/EpiProfile_Proyecto/EpiProfile_20_AT/EpiProfile_PLANTS_resources/src"),
+    BUNDLE_DIR / "src" / "TIER3",
+    BUNDLE_DIR / "src" / "TIER2",
+    BUNDLE_DIR / "src" / "TIER1",
 ]
 
 # ── Modification Mass Deltas (from GetMods.m) ───────────────────────────────

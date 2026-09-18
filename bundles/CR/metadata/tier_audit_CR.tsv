@@ -1,0 +1,92 @@
+file_name	bundle_id	tier	provenance	invoked	invoked_by	rel_path	sha256_12	upstream_file	notes
+calculate_pepmz.m	CR	T1	T1	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER1/calculate_pepmz.m	19056e6268f2	calculate_pepmz.m	
+check_layout.m	CR	T4	T1	no		TIER1/check_layout.m	42e4ce15228a	check_layout.m	
+DrawISOProfile0.m	CR	T1	T1	yes	EpiProfile	TIER1/DrawISOProfile0.m	8185dec8d5b8	DrawISOProfile0.m	
+DrawISOProfile2.m	CR	T1	T1	yes	EpiProfile	TIER1/DrawISOProfile2.m	469a8121d694	DrawISOProfile2.m	
+find_pair.m	CR	T1	T1	yes	H3_01_3_8,H3_04a_27_40,H3_04v3a_27_40,H3_06_53_63,H3_07_73_83,H4_02_20_23,H4_02a_18_23,H4_02b_20_35	TIER1/find_pair.m	d0a09f725056	find_pair.m	
+find_pair_new.m	CR	T1	T1	yes	H3_02_9_17,H3_02a_9_17,H3_02b_9_17	TIER1/find_pair_new.m	909b2899471d	find_pair_new.m	
+find_triple.m	CR	T1	T1	yes	H3_04_27_40,H3_04v3_27_40	TIER1/find_triple.m	6bce872ff746	find_triple.m	
+get_area.m	CR	T1	T1	yes	get_histone0,get_histone1,get_histone10,get_histone11,get_histone12,get_histone13	TIER1/get_area.m	2529f388dc2d	get_area.m	
+get_histone4.m	CR	T1	T1	yes	H4_01_4_17	TIER1/get_histone4.m	b320e957b9e3	get_histone4.m	
+get_histone6.m	CR	T1	T1	yes	H4_01_4_17	TIER1/get_histone6.m	800eebb8730b	get_histone6.m	
+get_key_ions.m	CR	T1	T1	yes	get_histone2,get_histone22,get_histone4,get_histone6	TIER1/get_key_ions.m	b84c24bf9690	get_key_ions.m	
+get_key_ions1.m	CR	T1	T1	yes	draw_layout,get_rts2,get_rts22	TIER1/get_key_ions1.m	2f6595e28a6b	get_key_ions1.m	
+get_key_ions2.m	CR	T1	T1	yes	get_histone6	TIER1/get_key_ions2.m	06e30b676400	get_key_ions2.m	
+get_main_ch.m	CR	T4	T1	no		TIER1/get_main_ch.m	10ead7a2be28	get_main_ch.m	
+get_mod_mass.m	CR	T1	T1	yes	calculate_pepmz,get_theo_mz,init_histone0	TIER1/get_mod_mass.m	b7e561ddfa82	get_mod_mass.m	
+get_mod_postype.m	CR	T1	T1	yes	get_key_ions,get_key_ions1,get_key_ions2	TIER1/get_mod_postype.m	88e9cfaa9326	get_mod_postype.m	
+get_theo_mz.m	CR	T1	T1	yes	get_key_ions,get_key_ions1,get_key_ions2	TIER1/get_theo_mz.m	1e175ab94a29	get_theo_mz.m	
+Getaamass.m	CR	T1	T1	yes	calculate_pepmz,get_theo_mz,init_histone0	TIER1/Getaamass.m	8f710d88f627	Getaamass.m	
+GetIPV.m	CR	T1	T1	yes	GetProfiles,get_area	TIER1/GetIPV.m	8dc6a1f71da7	GetIPV.m	
+GetLocal.m	CR	T1	T1	yes	GetPSM,GetPSM2,draw_layout	TIER1/GetLocal.m	633a0db769be	GetLocal.m	
+GetMods.m	CR	T1	T1	yes	GetPSM,GetPSM2,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_06_53_63,H3_06a_53_63,H4_01_4_17,calculate_pepmz,draw_layout,get_rts2,get_rts22,init_histone0	TIER1/GetMods.m	b379e98e39f5	GetMods.m	
+GetProfiles.m	CR	T1	T1	yes	get_area,get_histone0,get_histone1,get_histone10,get_histone11,get_histone12,get_histone13,get_histone2,get_histone22,get_histone4,get_histone6,get_rts,get_rts0,get_rts2,get_rts22	TIER1/GetProfiles.m	6f273e1b04ce	GetProfiles.m	
+GetPSM.m	CR	T1	T1	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92	TIER1/GetPSM.m	1881ee9d25c6	GetPSM.m	
+GetPSM2.m	CR	T1	T1	yes	H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER1/GetPSM2.m	8eba92fbb81b	GetPSM2.m	
+GetTopBottom.m	CR	T1	T1	yes	GetPSM,GetPSM2,get_histone0,get_histone12,get_histone13,get_rts,get_rts0	TIER1/GetTopBottom.m	0aca084f34b4	GetTopBottom.m	
+GetTopBottom11.m	CR	T1	T1	yes	draw_layout,get_histone1,get_histone10,get_histone11,get_histone2,get_histone22,get_rts,get_rts2,get_rts22	TIER1/GetTopBottom11.m	048d3d3ab006	GetTopBottom11.m	
+H3_01_3_8.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_01_3_8.m	969130e32961	H3_01_3_8.m	
+H3_02_9_17.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_02_9_17.m	b51f956e1f11	H3_02_9_17.m	
+H3_02a_9_17.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_02a_9_17.m	95e649035845	H3_02a_9_17.m	
+H3_02b_9_17.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_02b_9_17.m	3e3a1af6038e	H3_02b_9_17.m	
+H3_03_18_26.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_03_18_26.m	d96b0380ff83	H3_03_18_26.m	
+H3_04_27_40.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_04_27_40.m	f8ff9510588e	H3_04_27_40.m	
+H3_04a_27_40.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_04a_27_40.m	33256220f12f	H3_04a_27_40.m	
+H3_04v3a_27_40.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_04v3a_27_40.m	011db25a1ddd	H3_04v3a_27_40.m	
+H3_05_41_49.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_05_41_49.m	ad08e3c555d5	H3_05_41_49.m	
+H3_06_53_63.m	CR	T3	T3	yes	DrawISOProfile1	TIER1/H3_06_53_63.m	122600e596cd		
+H3_06a_53_63.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_06a_53_63.m	9bf6cf26336b	H3_06a_53_63.m	
+H3_07_73_83.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_07_73_83.m	d080283c9bf2	H3_07_73_83.m	
+H3_08_117_128.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_08_117_128.m	a5267363ec06	H3_08_117_128.m	
+H3_09u_64_135.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H3_09u_64_135.m	e9c6c1083842	H3_09u_64_135.m	
+H4_01_4_17.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_01_4_17.m	ed6437c5811b	H4_01_4_17.m	
+H4_02_20_23.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_02_20_23.m	f07d6f8b111d	H4_02_20_23.m	
+H4_02a_18_23.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_02a_18_23.m	bf3103c1d562	H4_02a_18_23.m	
+H4_02b_20_35.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_02b_20_35.m	bb0822421fe9	H4_02b_20_35.m	
+H4_03_24_35.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_03_24_35.m	7db14e14b636	H4_03_24_35.m	
+H4_04_40_45.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_04_40_45.m	f97983b9e59c	H4_04_40_45.m	
+H4_05_68_78.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_05_68_78.m	006ba1d0ad10	H4_05_68_78.m	
+H4_06_79_92.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_06_79_92.m	cfda483eb3ec	H4_06_79_92.m	
+H4_07u_24_102.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_07u_24_102.m	c6464e2e4f03	H4_07u_24_102.m	
+H4_Snapshot.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/H4_Snapshot.m	72d238c67be7	H4_Snapshot.m	
+JudgeLocalmaxmin.m	CR	T1	T1	yes	GetLocal,GetTopBottom,GetTopBottom11	TIER1/JudgeLocalmaxmin.m	45fb2bcb425c	JudgeLocalmaxmin.m	
+OutputSinglePTMs.m	CR	T1	T1	yes	DrawISOProfile1	TIER1/OutputSinglePTMs.m	9e1e8052d98a	OutputSinglePTMs.m	
+ReadInput.m	CR	T1	T1	yes	EpiProfile,check_layout	TIER1/ReadInput.m	35914d32aa44	ReadInput.m	
+relocateD.m	CR	T1	T1	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92	TIER1/relocateD.m	98a2b69937a8	relocateD.m	
+check_otherparas.m	CR	T2	T2	yes	EpiProfile	TIER2/check_otherparas.m	895a0c9084d4	check_otherparas.m	
+check_ref.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER2/check_ref.m	cebddc158e4e	check_ref.m	
+draw_layout.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER2/draw_layout.m	e7627a2b196d	draw_layout.m	
+DrawISOProfile1.m	CR	T2	T2	yes	EpiProfile	TIER2/DrawISOProfile1.m	d91cf638aa3f	DrawISOProfile1.m	
+EpiProfile.m	CR	T2	T2	yes		TIER2/EpiProfile.m	d0231ef06800	EpiProfile.m	entry point
+get_histone0.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04v3_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER2/get_histone0.m	b082fd69034a	get_histone0.m	
+get_histone1.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04v3_27_40,H3_05_41_49,H3_06_53_63,H3_07_73_83,H3_08_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,get_histone2,get_histone4,get_histone6	TIER2/get_histone1.m	391e3d90fdd5	get_histone1.m	
+get_histone10.m	CR	T2	T2	yes	H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04v3_27_40,H3_06a_53_63	TIER2/get_histone10.m	b6d746ce17f5	get_histone10.m	
+get_histone11.m	CR	T2	T2	yes	H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_04_27_40,H3_04v3_27_40,get_histone22	TIER2/get_histone11.m	2c116e81a139	get_histone11.m	
+get_histone12.m	CR	T2	T2	yes	H3_04a_27_40,H3_04v3a_27_40	TIER2/get_histone12.m	cb37b9e0cd1f	get_histone12.m	
+get_histone13.m	CR	T4	T2	no		TIER2/get_histone13.m	1788605c70f4	get_histone13.m	
+get_histone2.m	CR	T2	T2	yes	H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04v3_27_40,H3_06a_53_63	TIER2/get_histone2.m	c4ed2e6e17cd	get_histone2.m	
+get_histone22.m	CR	T4	T2	no		TIER2/get_histone22.m	da39fcd279db	get_histone22.m	
+get_rts.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,relocateD	TIER2/get_rts.m	45756b3dc84c	get_rts.m	
+get_rts0.m	CR	T2	T2	yes	DrawISOProfile0	TIER2/get_rts0.m	2b7de2cdcd46	get_rts0.m	
+get_rts2.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER2/get_rts2.m	344f6a5f8537	get_rts2.m	
+get_rts22.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_04_27_40,H3_04v3_27_40,H3_07_73_83	TIER2/get_rts22.m	78138bd943d3	get_rts22.m	
+GetBenchmark.m	CR	T4	T2	no		TIER2/GetBenchmark.m	13b22b69756a	GetBenchmark.m	
+GetMS1ScanNo.m	CR	T2	T2	yes	EpiProfile	TIER2/GetMS1ScanNo.m	9ffe5092c8ad	GetMS1ScanNo.m	
+GetMS2ScanNo.m	CR	T2	T2	yes	EpiProfile	TIER2/GetMS2ScanNo.m	c560d3fd1f8f	GetMS2ScanNo.m	
+H3_04v3_27_40.m	CR	T2	T2	yes	DrawISOProfile1	TIER2/H3_04v3_27_40.m	c2b8c3fc753c	H3_04v3_27_40.m	
+H3_Snapshot.m	CR	T2	T2	yes	DrawISOProfile1	TIER2/H3_Snapshot.m	a4ffac66159b	H3_Snapshot.m	
+HH2A_01u_1_7.m	CR	T3	T3	yes	DrawISOProfile1	TIER2/HH2A_01u_1_7.m	03c939f45d36		
+HH2B_01u_104_145.m	CR	T3	T3	yes	DrawISOProfile1	TIER2/HH2B_01u_104_145.m	727bf0b506e4		
+init_histone0.m	CR	T2	T2	yes	DrawISOProfile0	TIER2/init_histone0.m	519c7bf3060f	init_histone0.m	
+output_histone.m	CR	T2	T2	yes	H3_01_3_8,H3_02_9_17,H3_02a_9_17,H3_02b_9_17,H3_03_18_26,H3_04_27_40,H3_04a_27_40,H3_04v3_27_40,H3_04v3a_27_40,H3_05_41_49,H3_06_53_63,H3_06a_53_63,H3_07_73_83,H3_08_117_128,H3_09u_64_135,H3_11_3_8,H3_12_9_17,H3_13_18_26,H3_14_27_40,H3_16_53_63,H3_17_73_83,H3_18_117_128,H4_01_4_17,H4_02_20_23,H4_02a_18_23,H4_02b_20_35,H4_03_24_35,H4_04_40_45,H4_05_68_78,H4_06_79_92,H4_07u_24_102,HH2A_01u_1_7,HH2B_01u_104_145	TIER2/output_histone.m	2e15e95778bd	output_histone.m	
+output_histone2.m	CR	T4	T2	no		TIER2/output_histone2.m	3aaf644f0df8	output_histone2.m	
+OutputFigures.m	CR	T2	T2	yes	DrawISOProfile1	TIER2/OutputFigures.m	38c4f2ee60a9	OutputFigures.m	
+OutputTogether.m	CR	T2	T2	yes	DrawISOProfile1,DrawISOProfile2	TIER2/OutputTogether.m	8502c11a4f30	OutputTogether.m	
+Raw2MS.m	CR	T2	T2	yes	EpiProfile	TIER2/Raw2MS.m	223d964223b3	Raw2MS.m	
+H3_11_3_8.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_11_3_8.m	cc06af660d18		
+H3_12_9_17.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_12_9_17.m	e9892c172329		
+H3_13_18_26.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_13_18_26.m	44129d05e09c		
+H3_14_27_40.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_14_27_40.m	9ae3e3c5c2ac		
+H3_16_53_63.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_16_53_63.m	10a0297de508		
+H3_17_73_83.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_17_73_83.m	621ba76bb419		
+H3_18_117_128.m	CR	T3	T3	yes	DrawISOProfile1	TIER3/H3_18_117_128.m	9e1ae2504a53		

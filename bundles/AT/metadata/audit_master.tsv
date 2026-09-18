@@ -1,97 +1,420 @@
-file_name	bundle_id	tier	module_block	role_1line
-calculate_pepmz.m	CORE	T1	core_quant	Compute peptide theoretical m/z from sequence, mods and charge
-check_layout.m	CORE	T1	qc_audit	Interactive layout inspector (breakpoint-based)
-check_ref.m	CORE	T1	core_quant	Look up RT reference from 0_ref_info.mat by seq_godel hash
-find_pair.m	CORE	T1	core_quant	Select best co-eluting pair (me2/me3) by intensity and RT proximity
-find_pair_new.m	CORE	T1	core_quant	Select best pair with directional RT constraint
-find_triple.m	CORE	T1	core_quant	Select best co-eluting triple by intensity and RT proximity
-get_area.m	CORE	T1	core_quant	Compute peptide AUC from XIC with overlap deconvolution
-get_mod_mass.m	CORE	T1	core_quant	Calculate modification mass delta vector for a peptide
-get_mod_postype.m	CORE	T1	core_quant	Parse modification position and type from mod_type string
-get_theo_mz.m	CORE	T1	core_quant	Compute theoretical m/z from peptide and mods (standalone)
-Getaamass.m	AT	T1	core_quant	Amino acid monoisotopic and average mass table (26 entries)
-GetMods.m	AT	T1	core_quant	Modification mass table (pr, ac, me1-3, ph, cr, ub, ox, etc.)
-GetIPV.m	AT	T1	core_quant	Isotope pattern vector lookup table
-GetProfiles.m	AT	T1	core_quant	Extract XIC profiles from MS1 scans for a set of m/z values
-GetTopBottom.m	AT	T1	core_quant	Peak detection: find local maxima and boundaries in XIC
-GetTopBottom11.m	AT	T1	core_quant	Peak detection variant with narrower window for relocated peaks
-GetLocal.m	AT	T1	core_quant	Local maxima/minima detection helper
-JudgeLocalmaxmin.m	AT	T1	core_quant	Judge whether a point is local max or min
-get_rts0.m	AT	T1	core_quant	Get RT and intensity for a single peptide (reference building)
-get_rts2.m	AT	T1	core_quant	Get RT using MS2 confirmation (DIA mode)
-get_rts22.m	AT	T1	core_quant	Get RT using MS2 with mass offset support
-get_key_ions.m	AT	T1	core_quant	Extract diagnostic fragment ions for peptide ID
-get_key_ions1.m	AT	T1	core_quant	Extract key ions variant 1
-get_key_ions2.m	AT	T1	core_quant	Extract key ions with advanced filtering
-get_main_ch.m	AT	T1	core_quant	Reorder charge states putting main charge first
-get_histone1.m	AT	T1	histone_quant	Quantify a single modified peptideform (relocated RT)
-get_histone2.m	AT	T1	histone_quant	Quantify peptideform variant 2
-get_histone4.m	AT	T1	histone_quant	Quantify peptideform variant 4
-get_histone6.m	AT	T1	histone_quant	Quantify peptideform variant 6
-get_histone10.m	AT	T1	histone_quant	Quantify peptideform variant 10
-get_histone12.m	AT	T1	histone_quant	Quantify peptideform variant 12
-get_histone13.m	AT	T1	histone_quant	Quantify peptideform variant 13
-get_histone22.m	AT	T1	histone_quant	Quantify peptideform variant 22
-ReadInput.m	AT	T1	io_control	Parse paras.txt for raw_path, organism, source, subtype
-Raw2MS.m	AT	T1	io_control	Convert RAW files to MS1/MS2 .mat format
-relocateD.m	AT	T1	core_quant	Debug-mode RT relocation (narrow +/-1 min window per peptide)
-GetPSM.m	AT	T1	io_output	Extract peptide-spectrum matches from MS2 (DDA)
-GetPSM2.m	AT	T1	io_output	Extract PSMs for sequence-variant modules
-GetBenchmark.m	AT	T1	qc_audit	Generate identification benchmark metrics
-DrawISOProfile0.m	AT	T1	runner	Build RT reference (0_ref_info.mat) from top-3 runs
-DrawISOProfile2.m	AT	T1	runner	Runner for SILAC mode (calls Extract_SILAC)
-output_histone.m	AT	T1	io_output	Save per-region .mat with His struct and auc matrix
-output_histone2.m	AT	T1	io_output	Save per-region .mat variant 2
-OutputTogether.m	AT	T1	io_output	Aggregate all runs into histone_ratios.xls (cohort export)
-OutputSinglePTMs.m	AT	T1	io_output	Compute single-PTM marginal ratios across peptideforms
-H3_01_3_8.m	AT	T1	histone_module	H3 K4 region (TKQTAR): unmod, K4me1/2/3, K4ac
-H3_02_9_17.m	AT	T1	histone_module	H3 K9/K14 region (KSTGGKAPR): K9/K14 me/ac combos
-H3_02a_9_17.m	AT	T1	histone_module	H3 K9/K14 with S10ph
-H3_02b_9_17.m	AT	T1	histone_module	H3 K9/K14 with K9ac
-H3_03_18_26.m	AT	T1	histone_module	H3 K18/K23 region (KQLATKAAR): me/ac combos
-H3_04_27_40.m	AT	T1	histone_module	H3 K27/K36 region (KSAPATGGVKKPHR): me/ac combos (17 states)
-H3_04a_27_40.m	AT	T1	histone_module	H3 K27/K36 phospho/acetyl panel (S28ph combos)
-H3_04v3a_27_40.m	AT	T1	histone_module	H3.3 variant (KSAPSTGGVKKPHR): phospho/acetyl panel
-H3_05_41_49.m	AT	T1	histone_module	H3 41-49 region (YRPGTVALR)
-H3_06_53_63.m	AT	T1	histone_module	H3 K56 region (KYQKSTELLIR): K56me1/2/3, K56ac
-H3_06a_53_63.m	AT	T1	histone_module	H3 K56 variant (RYQKSTELLIR)
-H3_07_73_83.m	AT	T1	histone_module	H3 K79 region (EIAQDFKTDLR): K79me1/2/3, K79ac
-H3_08_117_128.m	AT	T1	histone_module	H3 K122 region (VTIMPKDIQLAR): K122ac
-H3_09u_64_135.m	AT	T1	histone_module	H3 misc peptides (KLPFQR, RIRGER, IRGERA)
-H3_Snapshot.m	AT	T1	histone_module	Aggregate H3 PTM positions across all regions
-H4_01_4_17.m	AT	T1	histone_module	H4 K5/K8/K12/K16 region (GKGGKGLGKGGAKR): 16 ac combos
-H4_02_20_23.m	AT	T1	histone_module	H4 K20 region (KVLR): K20me1/2/3, K20ac
-H4_02a_18_23.m	AT	T1	histone_module	H4 18-23 region (HRKVLR)
-H4_02b_20_35.m	AT	T1	histone_module	H4 20-35 long peptide (KVLRDNIQGITKPAIR)
-H4_03_24_35.m	AT	T1	histone_module	H4 24-35 region (DNIQGITKPAIR)
-H4_04_40_45.m	AT	T1	histone_module	H4 K44 region (RGGVKR)
-H4_05_68_78.m	AT	T1	histone_module	H4 68-78 region (DAVTYTEHAKR)
-H4_06_79_92.m	AT	T1	histone_module	H4 79-92 region (KTVTAMDVVYALKR)
-H4_07u_24_102.m	AT	T1	histone_module	H4 misc peptides (DNIQGITKPAIRR, ISGLIYEETR, etc.)
-H4_Snapshot.m	AT	T1	histone_module	Aggregate H4 PTM positions across all regions
-draw_layout.m	AT	T1	visualization	Draw XIC layout with peak boundaries (TIER1 version)
-EpiProfile.m	AT	T2	runner	Main entry point: read params, convert RAW, dispatch runners
-DrawISOProfile1.m	AT	T2	runner	Main runner for histone_normal mode (per-run quant + aggregation)
-init_histone0.m	AT	T2	histone_module	Master peptide catalog for AT (56 entries incl. plant variants + H2A)
-get_rts.m	AT	T2	core_quant	Get RT within window with robustness guards for empty ranges
-get_histone0.m	AT	T2	histone_quant	Quantify unmod reference peptide with gradient-aware logic
-get_histone11.m	AT	T2	histone_quant	Quantify peptideform with GetTopBottom11 and diagnostic fprintf
-draw_layout.m	AT	T2	visualization	Draw XIC layout with robustness fixes for edge cases
-H3_04v3_27_40.m	AT	T2	histone_module	H3.3 variant (KSAPTTGGVKKPHR): 17 PTM states (plant-adapted)
-OutputFigures.m	AT	T2	io_output	QC figures: bar, boxplot, PCA, heatmaps, clustergram
-check_otherparas.m	AT	T2	io_control	Default parameters (ptol=10, ndebug=0) and RAW file discovery
-H3_06_53_63.m	AT	T3	histone_module	H3 53-63 KYQKSTELLIR with full PTM panel (plant new)
-H3_11_3_8.m	AT	T3	histone_module	H3 3-8 sequence variants: TKQTAR, TKQSAR, SNQTAR
-H3_12_9_17.m	AT	T3	histone_module	H3 9-17 sequence variants: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR
-H3_13_18_26.m	AT	T3	histone_module	H3 18-26 sequence variants: KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR
-H3_14_27_40.m	AT	T3	histone_module	H3 27-40 sequence variants: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR
-H3_16_53_63.m	AT	T3	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQKSTELLNR
-H3_17_73_83.m	AT	T3	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR
-H3_18_117_128.m	AT	T3	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR
-H3_Snapshot.m	AT	T3	histone_module	Aggregate H3 PTM positions (TIER3 version for plant variants)
-Extract_SILAC.m	AT	T4	runner	SILAC extraction (not ported — upstream only)
-Extract_SILAC_1.m	AT	T4	runner	SILAC extraction variant (not ported — upstream only)
-GetaamassH.m	AT	T4	core_quant	Heavy amino acid masses for N15 (not ported)
-DrawISOProfile3.m	AT	T4	runner	C13 mode runner (not ported)
-DrawISOProfile4.m	AT	T4	runner	N15 mode runner (not ported)
-DrawISOProfile5.m	AT	T4	runner	13CD3 mode runner (not ported)
+file_name	bundle_id	tier	provenance	invoked	module_block	role_1line	rel_path
+calculate_pepmz.m	AT	T1	T1	yes	core_quant	Compute peptide theoretical m/z from sequence, mods and charge	TIER1/calculate_pepmz.m
+DrawISOProfile0.m	AT	T1	T1	yes	runner	Build RT reference (0_ref_info.mat) from top-3 runs	TIER1/DrawISOProfile0.m
+find_pair.m	AT	T1	T1	yes	core_quant	Select best co-eluting pair (me2/me3) by intensity and RT proximity	TIER1/find_pair.m
+find_pair_new.m	AT	T1	T1	yes	core_quant	Select best pair with directional RT constraint	TIER1/find_pair_new.m
+find_triple.m	AT	T1	T1	yes	core_quant	Select best co-eluting triple by intensity and RT proximity	TIER1/find_triple.m
+get_area.m	AT	T1	T1	yes	core_quant	Compute peptide AUC from XIC with overlap deconvolution	TIER1/get_area.m
+get_histone4.m	AT	T1	T1	yes	histone_quant	Quantify peptideform variant 4	TIER1/get_histone4.m
+get_histone6.m	AT	T1	T1	yes	histone_quant	Quantify peptideform variant 6	TIER1/get_histone6.m
+get_key_ions.m	AT	T1	T1	yes	core_quant	Extract diagnostic fragment ions for peptide ID	TIER1/get_key_ions.m
+get_key_ions1.m	AT	T1	T1	yes	core_quant	Extract key ions variant 1	TIER1/get_key_ions1.m
+get_key_ions2.m	AT	T1	T1	yes	core_quant	Extract key ions with advanced filtering	TIER1/get_key_ions2.m
+get_mod_mass.m	AT	T1	T1	yes	core_quant	Calculate modification mass delta vector for a peptide	TIER1/get_mod_mass.m
+get_mod_postype.m	AT	T1	T1	yes	core_quant	Parse modification position and type from mod_type string	TIER1/get_mod_postype.m
+get_theo_mz.m	AT	T1	T1	yes	core_quant	Compute theoretical m/z from peptide and mods (standalone)	TIER1/get_theo_mz.m
+Getaamass.m	AT	T1	T1	yes	core_quant	Amino acid monoisotopic and average mass table (26 entries)	TIER1/Getaamass.m
+GetIPV.m	AT	T1	T1	yes	core_quant	Isotope pattern vector lookup table	TIER1/GetIPV.m
+GetLocal.m	AT	T1	T1	yes	core_quant	Local maxima/minima detection helper	TIER1/GetLocal.m
+GetMods.m	AT	T1	T1	yes	core_quant	Modification mass table (pr, ac, me1-3, ph, cr, ub, ox, etc.)	TIER1/GetMods.m
+GetProfiles.m	AT	T1	T1	yes	core_quant	Extract XIC profiles from MS1 scans for a set of m/z values	TIER1/GetProfiles.m
+GetPSM.m	AT	T1	T1	yes	io_output	Extract peptide-spectrum matches from MS2 (DDA)	TIER1/GetPSM.m
+GetPSM2.m	AT	T1	T1	yes	io_output	Extract PSMs for sequence-variant modules	TIER1/GetPSM2.m
+GetTopBottom.m	AT	T1	T1	yes	core_quant	Peak detection: find local maxima and boundaries in XIC	TIER1/GetTopBottom.m
+GetTopBottom11.m	AT	T1	T1	yes	core_quant	Peak detection variant with narrower window for relocated peaks	TIER1/GetTopBottom11.m
+H3_01_3_8.m	AT	T1	T1	yes	histone_module	H3 K4 region (TKQTAR): unmod, K4me1/2/3, K4ac	TIER1/H3_01_3_8.m
+H3_02_9_17.m	AT	T1	T1	yes	histone_module	H3 K9/K14 region (KSTGGKAPR): K9/K14 me/ac combos	TIER1/H3_02_9_17.m
+H3_02a_9_17.m	AT	T1	T1	yes	histone_module	H3 K9/K14 with S10ph	TIER1/H3_02a_9_17.m
+H3_02b_9_17.m	AT	T1	T1	yes	histone_module	H3 K9/K14 with K9ac	TIER1/H3_02b_9_17.m
+H3_03_18_26.m	AT	T1	T1	yes	histone_module	H3 K18/K23 region (KQLATKAAR): me/ac combos	TIER1/H3_03_18_26.m
+H3_04_27_40.m	AT	T1	T1	yes	histone_module	H3 K27/K36 region (KSAPATGGVKKPHR): me/ac combos (17 states)	TIER1/H3_04_27_40.m
+H3_04a_27_40.m	AT	T1	T1	yes	histone_module	H3 K27/K36 phospho/acetyl panel (S28ph combos)	TIER1/H3_04a_27_40.m
+H3_05_41_49.m	AT	T1	T1	yes	histone_module	H3 41-49 region (YRPGTVALR)	TIER1/H3_05_41_49.m
+H3_06a_53_63.m	AT	T1	T1	yes	histone_module	H3 K56 variant (RYQKSTELLIR)	TIER1/H3_06a_53_63.m
+H3_08_117_128.m	AT	T1	T1	yes	histone_module	H3 K122 region (VTIMPKDIQLAR): K122ac	TIER1/H3_08_117_128.m
+H3_09u_64_135.m	AT	T1	T1	yes	histone_module	H3 misc peptides (KLPFQR, RIRGER, IRGERA)	TIER1/H3_09u_64_135.m
+H4_01_4_17.m	AT	T1	T1	yes	histone_module	H4 K5/K8/K12/K16 region (GKGGKGLGKGGAKR): 16 ac combos	TIER1/H4_01_4_17.m
+H4_02_20_23.m	AT	T1	T1	yes	histone_module	H4 K20 region (KVLR): K20me1/2/3, K20ac	TIER1/H4_02_20_23.m
+H4_02a_18_23.m	AT	T1	T1	yes	histone_module	H4 18-23 region (HRKVLR)	TIER1/H4_02a_18_23.m
+H4_02b_20_35.m	AT	T1	T1	yes	histone_module	H4 20-35 long peptide (KVLRDNIQGITKPAIR)	TIER1/H4_02b_20_35.m
+H4_02c_20_36.m	AT	T1	T1	yes	histone_module	check	TIER1/H4_02c_20_36.m
+H4_04_40_45.m	AT	T1	T1	yes	histone_module	H4 K44 region (RGGVKR)	TIER1/H4_04_40_45.m
+H4_06_79_92.m	AT	T1	T1	yes	histone_module	H4 79-92 region (KTVTAMDVVYALKR)	TIER1/H4_06_79_92.m
+HH2A_06m1_72_77.m	AT	T1	T1	yes	histone_module	check	TIER1/HH2A_06m1_72_77.m
+HH2BMo_03u_1_100.m	AT	T1	T1	yes	histone_module	check	TIER1/HH2BMo_03u_1_100.m
+JudgeLocalmaxmin.m	AT	T1	T1	yes	core_quant	Judge whether a point is local max or min	TIER1/JudgeLocalmaxmin.m
+ReadInput.m	AT	T1	T1	yes	io_control	Parse paras.txt for raw_path, organism, source, subtype	TIER1/ReadInput.m
+relocateD.m	AT	T1	T1	yes	core_quant	Debug-mode RT relocation (narrow +/-1 min window per peptide)	TIER1/relocateD.m
+check_otherparas.m	AT	T2	T2	yes	io_control	Default parameters (ptol=10, ndebug=0) and RAW file discovery	TIER2/check_otherparas.m
+check_ref.m	AT	T2	T2	yes	core_quant	Look up RT reference from 0_ref_info.mat by seq_godel hash	TIER2/check_ref.m
+draw_layout.m	AT	T2	T2	yes	visualization	Draw XIC layout with peak boundaries (TIER1 version)	TIER2/draw_layout.m
+DrawISOProfile1.m	AT	T2	T2	yes	runner	Main runner for histone_normal mode (per-run quant + aggregation)	TIER2/DrawISOProfile1.m
+EpiProfile.m	AT	T2	T2	yes	runner	Main entry point: read params, convert RAW, dispatch runners	TIER2/EpiProfile.m
+get_histone0.m	AT	T2	T2	yes	histone_quant	Quantify unmod reference peptide with gradient-aware logic	TIER2/get_histone0.m
+get_histone1.m	AT	T2	T2	yes	histone_quant	Quantify a single modified peptideform (relocated RT)	TIER2/get_histone1.m
+get_histone10.m	AT	T2	T2	yes	histone_quant	Quantify peptideform variant 10	TIER2/get_histone10.m
+get_histone11.m	AT	T2	T2	yes	histone_quant	Quantify peptideform with GetTopBottom11 and diagnostic fprintf	TIER2/get_histone11.m
+get_histone12.m	AT	T2	T2	yes	histone_quant	Quantify peptideform variant 12	TIER2/get_histone12.m
+get_histone2.m	AT	T2	T2	yes	histone_quant	Quantify peptideform variant 2	TIER2/get_histone2.m
+get_rts.m	AT	T2	T2	yes	core_quant	Get RT within window with robustness guards for empty ranges	TIER2/get_rts.m
+get_rts0.m	AT	T2	T2	yes	core_quant	Get RT and intensity for a single peptide (reference building)	TIER2/get_rts0.m
+get_rts2.m	AT	T2	T2	yes	core_quant	Get RT using MS2 confirmation (DIA mode)	TIER2/get_rts2.m
+get_rts22.m	AT	T2	T2	yes	core_quant	Get RT using MS2 with mass offset support	TIER2/get_rts22.m
+GetBenchmark.m	AT	T2	T2	yes	qc_audit	Generate identification benchmark metrics	TIER2/GetBenchmark.m
+GetMS1ScanNo.m	AT	T2	T2	yes	io_input	GetMS1ScanNo	TIER2/GetMS1ScanNo.m
+GetMS2ScanNo.m	AT	T2	T2	yes	io_input	GetMS2ScanNo	TIER2/GetMS2ScanNo.m
+H3_04v3_27_40.m	AT	T2	T2	yes	histone_module	H3.3 variant (KSAPTTGGVKKPHR): 17 PTM states (plant-adapted)	TIER2/H3_04v3_27_40.m
+H3_07_73_83.m	AT	T2	T2	yes	histone_module	H3 K79 region (EIAQDFKTDLR); rt_ref 38.95 measured on AT (was 40.37, copy of K56)	TIER2/H3_07_73_83.m
+H3_Snapshot.m	AT	T2	T2	yes	histone_module	Aggregate H3 PTM positions across all regions (out_filename fixed: H3_06_53_63)	TIER2/H3_Snapshot.m
+H4_05_68_78.m	AT	T2	T2	yes	histone_module	H4 68-78 region, AT sequence DAVTYTEHAR (R77; upstream human DAVTYTEHAKR)	TIER2/H4_05_68_78.m
+H4_07u_24_102.m	AT	T2	T2	yes	histone_module	H4 24-102 unmodified long peptide, AT sequence with I61 (upstream V61)	TIER2/H4_07u_24_102.m
+H4_Snapshot.m	AT	T2	T2	yes	histone_module	Aggregate H4 PTM positions across all regions (AT sequence: I61, R77)	TIER2/H4_Snapshot.m
+init_histone0.m	AT	T2	T2	yes	histone_module	Master peptide catalog for AT (56 entries incl. plant variants + H2A)	TIER2/init_histone0.m
+output_histone.m	AT	T2	T2	yes	io_output	Save per-region .mat with His struct and auc matrix	TIER2/output_histone.m
+OutputFigures.m	AT	T2	T2	yes	io_output	QC figures: bar, boxplot, PCA, heatmaps, clustergram	TIER2/OutputFigures.m
+OutputSinglePTMs.m	AT	T2	T2	yes	io_output	Compute single-PTM marginal ratios across peptideforms	TIER2/OutputSinglePTMs.m
+OutputTogether.m	AT	T2	T2	yes	io_output	Aggregate all runs into histone_ratios.xls (cohort export)	TIER2/OutputTogether.m
+Raw2MS.m	AT	T2	T2	yes	io_control	Convert RAW files to MS1/MS2 .mat format	TIER2/Raw2MS.m
+H3_06_53_63.m	AT	T3	T3	yes	histone_module	H3 K56 region (KYQKSTELLIR): K56me1/2/3, K56ac	TIER3/H3_06_53_63.m
+H3_11_3_8.m	AT	T3	T3	yes	histone_module	H3 3-8 sequence variants: TKQTAR, TKQSAR, SNQTAR	TIER3/H3_11_3_8.m
+H3_12_9_17.m	AT	T3	T3	yes	histone_module	H3 9-17 sequence variants: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR	TIER3/H3_12_9_17.m
+H3_13_18_26.m	AT	T3	T3	yes	histone_module	H3 18-26 sequence variants: KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR	TIER3/H3_13_18_26.m
+H3_14_27_40.m	AT	T3	T3	yes	histone_module	H3 27-40 sequence variants: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR	TIER3/H3_14_27_40.m
+H3_16_53_63.m	AT	T3	T3	yes	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQKSTELLNR	TIER3/H3_16_53_63.m
+H3_17_73_83.m	AT	T3	T3	yes	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR	TIER3/H3_17_73_83.m
+H3_18_117_128.m	AT	T3	T3	yes	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR	TIER3/H3_18_117_128.m
+HH1_AT01_H11_104_112.m	AT	T3	T3	yes	histone_module	check	TIER3/HH1_AT01_H11_104_112.m
+HH1_AT02_H11_80_95.m	AT	T3	T3	yes	histone_module	check	TIER3/HH1_AT02_H11_80_95.m
+HH1_AT03_H12_104_112.m	AT	T3	T3	yes	histone_module	check	TIER3/HH1_AT03_H12_104_112.m
+HH1_AT04_H12_80_103.m	AT	T3	T3	yes	histone_module	check	TIER3/HH1_AT04_H12_80_103.m
+HH1_AT_Snapshot.m	AT	T3	T3	yes	histone_module	H1.1 (P26568, 274 aa, without M)	TIER3/HH1_AT_Snapshot.m
+HH2A_01u_1_7.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2A_01u_1_7.m
+HH2A_AT01_can_20_31.m	AT	T3	T3	yes	histone_module	H2A canonical+X peptide SSKAGLQFPVGR (residues 20-31)	TIER3/HH2A_AT01_can_20_31.m
+HH2A_AT02_can1_5_19.m	AT	T3	T3	yes	histone_module	H2A.can1 peptide GKTLGSGSAKKATTR (residues 5-19)	TIER3/HH2A_AT02_can1_5_19.m
+HH2A_AT03_Z_33_41.m	AT	T3	T3	yes	histone_module	H2A.Z.11+Z.8 peptide AGIQFPVGR (residues 33-41)	TIER3/HH2A_AT03_Z_33_41.m
+HH2A_AT04_X_15_25.m	AT	T3	T3	yes	histone_module	H2A.X peptide GKPKATKSVSR (residues 15-25)	TIER3/HH2A_AT04_X_15_25.m
+HH2A_AT05_Xa_41_50.m	AT	T3	T3	yes	histone_module	H2A.Xa peptide FLKSGKYAER (residues 41-50)	TIER3/HH2A_AT05_Xa_41_50.m
+HH2A_AT06_W12_16_27.m	AT	T3	T3	yes	histone_module	H2A.W.12 peptide SGGGPKKKPVSR (residues 16-27)	TIER3/HH2A_AT06_W12_16_27.m
+HH2A_AT07_W12_28_39.m	AT	T3	T3	yes	histone_module	H2A.W.12 peptide SVKSGLQFPVGR (residues 28-39)	TIER3/HH2A_AT07_W12_28_39.m
+HH2A_AT08_W6_1_14.m	AT	T3	T3	yes	histone_module	H2A.W.6 peptide MESTGKVKKAFGGR (residues 1-14)	TIER3/HH2A_AT08_W6_1_14.m
+HH2A_AT_Snapshot.m	AT	T3	T3	yes	histone_module	H2A AT Snapshot — aggregates all AT H2A modules	TIER3/HH2A_AT_Snapshot.m
+HH2B_AT01_shared_94_100.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT01_shared_94_100.m
+HH2B_AT02_shared_108_117.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT02_shared_108_117.m
+HH2B_AT03_shared_118_134.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT03_shared_118_134.m
+HH2B_AT04_67_disc.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT04_67_disc.m
+HH2B_AT05_14_disc.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT05_14_disc.m
+HH2B_AT06_10_disc.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT06_10_disc.m
+HH2B_AT07_311_disc.m	AT	T3	T3	yes	histone_module	check	TIER3/HH2B_AT07_311_disc.m
+HH2B_AT_Snapshot.m	AT	T3	T3	yes	histone_module	H2B AT Snapshot — aggregates all AT H2B modules	TIER3/HH2B_AT_Snapshot.m
+run_calibrate.m	AT	T3	T3	yes	runner	Script minimo: ejecuta solo DrawISOProfile0 para generar histone_layouts/0_ref_info.mat	TIER3/run_calibrate.m
+check_layout.m	AT	T4	T1	no	qc_audit	Interactive layout inspector (breakpoint-based) [not invoked by the bundle]	TIER4/check_layout.m
+get_histone13.m	AT	T4	T2	no	histone_quant	Quantify peptideform variant 13 [not invoked by the bundle]	TIER4/get_histone13.m
+get_histone22.m	AT	T4	T2	no	histone_quant	Quantify peptideform variant 22 [not invoked by the bundle]	TIER4/get_histone22.m
+get_main_ch.m	AT	T4	T1	no	core_quant	Reorder charge states putting main charge first [not invoked by the bundle]	TIER4/get_main_ch.m
+H2A_Snapshot.m	AT	T4	T3	no	histone_module	Snapshot for the generated H2A/H2B catalogue [not invoked by the bundle]	TIER4/H2A_Snapshot.m
+H2B_Snapshot.m	AT	T4	T3	no	histone_module	Snapshot for the generated H2A/H2B catalogue [not invoked by the bundle]	TIER4/H2B_Snapshot.m
+H3_04v3a_27_40.m	AT	T4	T1	no	histone_module	H3.3 27-40 variant KSAPSTGGVKKPHR, commented out in DrawISOProfile1 [not invoked by the bundle]	TIER4/H3_04v3a_27_40.m
+H3_05b_41_49.m	AT	T4	T3	no	histone_module	============================ DRAFT — NOT REGISTERED ============================ [not invoked by the bundle]	TIER4/H3_05b_41_49.m
+H4_03_24_35.m	AT	T4	T1	no	histone_module	H4 24-35 region (DNIQGITKPAIR); retired from DrawISOProfile1 in the 2026-05 clean-up [not invoked by the bundle]	TIER4/H4_03_24_35.m
+HH1_01oA1_1_29.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_01oA1_1_29.m
+HH1_01oA2_1_22.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_01oA2_1_22.m
+HH1_02oA1_30_34.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_02oA1_30_34.m
+HH1_02oA2_175_179.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_02oA2_175_179.m
+HH1_03oA1_49_55.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_03oA1_49_55.m
+HH1_03oA2_38_42.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_03oA2_38_42.m
+HH1_04oA1_58_70.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_04oA1_58_70.m
+HH1_04oA2_50_55.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_04oA2_50_55.m
+HH1_05oA1_71_77.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_05oA1_71_77.m
+HH1_05oA2_58_70.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_05oA2_58_70.m
+HH1_06oA1_80_89.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_06oA1_80_89.m
+HH1_06oA2_71_77.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_06oA2_71_77.m
+HH1_07oA1_90_94.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_07oA1_90_94.m
+HH1_07oA2_80_89.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_07oA2_80_89.m
+HH1_08oA1_97_103.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_08oA1_97_103.m
+HH1_08oA2_90_94.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_08oA2_90_94.m
+HH1_09oA1_105_111.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_09oA1_105_111.m
+HH1_09oA2_97_103.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_09oA2_97_103.m
+HH1_10oA1_113_118.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_10oA1_113_118.m
+HH1_10oA2_105_111.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_10oA2_105_111.m
+HH1_11oA1_128_134.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_11oA1_128_134.m
+HH1_11oA2_113_118.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_11oA2_113_118.m
+HH1_12oA1_135_139.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_12oA1_135_139.m
+HH1_12oA2_128_132.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_12oA2_128_132.m
+HH1_13oA1_140_144.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_13oA1_140_144.m
+HH1_13oA2_133_144.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_13oA2_133_144.m
+HH1_14oA1_145_149.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_14oA1_145_149.m
+HH1_14oA2_147_154.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_14oA2_147_154.m
+HH1_15oA1_151_159.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_15oA1_151_159.m
+HH1_15oA2_157_165.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_15oA2_157_165.m
+HH1_16oA1_164_169.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_16oA1_164_169.m
+HH1_16oA2_186_191.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_16oA2_186_191.m
+HH1_17oA1_173_179.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_17oA1_173_179.m
+HH1_17oA2_194_200.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_17oA2_194_200.m
+HH1_18oA1_180_184.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_18oA1_180_184.m
+HH1_18oA2_203_209.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_18oA2_203_209.m
+HH1_19oA1_192_197.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_19oA1_192_197.m
+HH1_19oA2_212_218.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_19oA2_212_218.m
+HH1_20oA1_198_204.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_20oA1_198_204.m
+HH1_20oA2_221_225.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_20oA2_221_225.m
+HH1_21oA1_207_213.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_21oA1_207_213.m
+HH1_21oA2_233_237.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_21oA2_233_237.m
+HH1_22oA1_216_220.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_22oA1_216_220.m
+HH1_22oA2_239_244.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_22oA2_239_244.m
+HH1_23oA1_227_232.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_23oA1_227_232.m
+HH1_23oA2_246_250.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_23oA2_246_250.m
+HH1_24oA1_234_239.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_24oA1_234_239.m
+HH1_25oA1_241_247.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_25oA1_241_247.m
+HH1_26oA1_255_259.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH1_26oA1_255_259.m
+HH2A_01oA1_7_14.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_01oA1_7_14.m
+HH2A_01oAW_1_12.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_01oAW_1_12.m
+HH2A_01oAX_1_11.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_01oAX_1_11.m
+HH2A_01oAZ_8_19.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_01oAZ_8_19.m
+HH2A_02oA1_23_31.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_02oA1_23_31.m
+HH2A_02oAW_13_17.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_02oAW_13_17.m
+HH2A_02oAX_29_37.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_02oAX_29_37.m
+HH2A_02oAZ_25_29.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_02oAZ_25_29.m
+HH2A_03oA1_45_73.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_03oA1_45_73.m
+HH2A_03oAW_32_40.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_03oAW_32_40.m
+HH2A_03oAX_51_79.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_03oAX_51_79.m
+HH2A_03oAZ_33_41.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_03oAZ_33_41.m
+HH2A_04oA1_84_90.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_04oA1_84_90.m
+HH2A_04oAW_54_82.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_04oAW_54_82.m
+HH2A_04oAX_90_96.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_04oAX_90_96.m
+HH2A_04oAZ_50_55.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_04oAZ_50_55.m
+HH2A_05oA1_91_97.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_05oA1_91_97.m
+HH2A_05oAW_93_99.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_05oAW_93_99.m
+HH2A_05oAX_97_103.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_05oAX_97_103.m
+HH2A_05oAZ_56_84.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_05oAZ_56_84.m
+HH2A_06oA1_98_120.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_06oA1_98_120.m
+HH2A_06oAW_100_106.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_06oAW_100_106.m
+HH2A_06oAX_104_127.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_06oAX_104_127.m
+HH2A_06oAZ_102_111.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_06oAZ_102_111.m
+HH2A_07oA1_122_132.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_07oA1_122_132.m
+HH2A_07oAW_107_129.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_07oAW_107_129.m
+HH2A_07oAX_133_142.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_07oAX_133_142.m
+HH2A_07oAZ_112_125.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_07oAZ_112_125.m
+HH2A_07v_1_88.m	AT	T4	T1	no	histone_module	check [not invoked by the bundle]	TIER4/HH2A_07v_1_88.m
+HH2A_08oAW_131_140.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_08oAW_131_140.m
+HH2A_08oAZ_126_130.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_08oAZ_126_130.m
+HH2A_08u_4_99.m	AT	T4	T1	no	histone_module	check [not invoked by the bundle]	TIER4/HH2A_08u_4_99.m
+HH2A_09oAW_141_145.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2A_09oAW_141_145.m
+HH2AMo_07v_1_88.m	AT	T4	T1	no	histone_module	check [not invoked by the bundle]	TIER4/HH2AMo_07v_1_88.m
+HH2AMo_08u_4_99.m	AT	T4	T1	no	histone_module	check [not invoked by the bundle]	TIER4/HH2AMo_08u_4_99.m
+HH2B_01oA_8_12.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_01oA_8_12.m
+HH2B_01u_104_145.m	AT	T4	T3	no	histone_module	H2B unmod diagnostic peptides, superseded by HH2B_AT01..07 [not invoked by the bundle]	TIER4/HH2B_01u_104_145.m
+HH2B_02oA_14_24.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_02oA_14_24.m
+HH2B_02v_1_29.m	AT	T4	T1	no	histone_module	check [not invoked by the bundle]	TIER4/HH2B_02v_1_29.m
+HH2B_03oA_29_33.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_03oA_29_33.m
+HH2B_04oA_45_49.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_04oA_45_49.m
+HH2B_05oA_57_62.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_05oA_57_62.m
+HH2B_06oA_63_67.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_06oA_63_67.m
+HH2B_07oA_71_81.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_07oA_71_81.m
+HH2B_08oA_82_96.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_08oA_82_96.m
+HH2B_09oA_97_103.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_09oA_97_103.m
+HH2B_10oA_110_116.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_10oA_110_116.m
+HH2B_11oA_117_123.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_11oA_117_123.m
+HH2B_12oA_124_132.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_12oA_124_132.m
+HH2B_13oA_133_140.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_13oA_133_140.m
+HH2B_14oA_8_12.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_14oA_8_12.m
+HH2B_15oA_14_24.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_15oA_14_24.m
+HH2B_16oA_29_33.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_16oA_29_33.m
+HH2B_17oA_45_49.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_17oA_45_49.m
+HH2B_18oA_57_62.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_18oA_57_62.m
+HH2B_19oA_63_67.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_19oA_63_67.m
+HH2B_20oA_71_81.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_20oA_71_81.m
+HH2B_21oA_82_96.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_21oA_82_96.m
+HH2B_22oA_97_103.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_22oA_97_103.m
+HH2B_23oA_110_116.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_23oA_110_116.m
+HH2B_24oA_117_123.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_24oA_117_123.m
+HH2B_25oA_124_132.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_25oA_124_132.m
+HH2B_26oA_133_140.m	AT	T4	T3	no	histone_module	Generated H1/H2A/H2B catalogue module (rt_ref=0, uncalibrated) [not invoked by the bundle]	TIER4/HH2B_26oA_133_140.m
+output_histone2.m	AT	T4	T2	no	io_output	Save per-region .mat variant 2 [not invoked by the bundle]	TIER4/output_histone2.m
+calculate_pepmz.m	CR	T1	T1	yes	core_quant	Compute peptide theoretical m/z from sequence, mods and charge	TIER1/calculate_pepmz.m
+check_layout.m	CR	T4	T1	no	qc_audit	Interactive layout inspector (breakpoint-based) [not invoked by the bundle]	TIER1/check_layout.m
+DrawISOProfile0.m	CR	T1	T1	yes	runner	Build RT reference (0_ref_info.mat) from top-3 runs	TIER1/DrawISOProfile0.m
+DrawISOProfile2.m	CR	T1	T1	yes	runner	Runner for SILAC mode (calls Extract_SILAC)	TIER1/DrawISOProfile2.m
+find_pair.m	CR	T1	T1	yes	core_quant	Select best co-eluting pair (me2/me3) by intensity and RT proximity	TIER1/find_pair.m
+find_pair_new.m	CR	T1	T1	yes	core_quant	Select best pair with directional RT constraint	TIER1/find_pair_new.m
+find_triple.m	CR	T1	T1	yes	core_quant	Select best co-eluting triple by intensity and RT proximity	TIER1/find_triple.m
+get_area.m	CR	T1	T1	yes	core_quant	Compute peptide AUC from XIC with overlap deconvolution	TIER1/get_area.m
+get_histone4.m	CR	T1	T1	yes	histone_quant	Quantify peptideform variant 4	TIER1/get_histone4.m
+get_histone6.m	CR	T1	T1	yes	histone_quant	Quantify peptideform variant 6	TIER1/get_histone6.m
+get_key_ions.m	CR	T1	T1	yes	core_quant	Extract diagnostic fragment ions for peptide ID	TIER1/get_key_ions.m
+get_key_ions1.m	CR	T1	T1	yes	core_quant	Extract key ions variant 1	TIER1/get_key_ions1.m
+get_key_ions2.m	CR	T1	T1	yes	core_quant	Extract key ions with advanced filtering	TIER1/get_key_ions2.m
+get_main_ch.m	CR	T4	T1	no	core_quant	Reorder charge states putting main charge first [not invoked by the bundle]	TIER1/get_main_ch.m
+get_mod_mass.m	CR	T1	T1	yes	core_quant	Calculate modification mass delta vector for a peptide	TIER1/get_mod_mass.m
+get_mod_postype.m	CR	T1	T1	yes	core_quant	Parse modification position and type from mod_type string	TIER1/get_mod_postype.m
+get_theo_mz.m	CR	T1	T1	yes	core_quant	Compute theoretical m/z from peptide and mods (standalone)	TIER1/get_theo_mz.m
+Getaamass.m	CR	T1	T1	yes	core_quant	Amino acid monoisotopic and average mass table (26 entries)	TIER1/Getaamass.m
+GetIPV.m	CR	T1	T1	yes	core_quant	Isotope pattern vector lookup table	TIER1/GetIPV.m
+GetLocal.m	CR	T1	T1	yes	core_quant	Local maxima/minima detection helper	TIER1/GetLocal.m
+GetMods.m	CR	T1	T1	yes	core_quant	Modification mass table (pr, ac, me1-3, ph, cr, ub, ox, etc.)	TIER1/GetMods.m
+GetProfiles.m	CR	T1	T1	yes	core_quant	Extract XIC profiles from MS1 scans for a set of m/z values	TIER1/GetProfiles.m
+GetPSM.m	CR	T1	T1	yes	io_output	Extract peptide-spectrum matches from MS2 (DDA)	TIER1/GetPSM.m
+GetPSM2.m	CR	T1	T1	yes	io_output	Extract PSMs for sequence-variant modules	TIER1/GetPSM2.m
+GetTopBottom.m	CR	T1	T1	yes	core_quant	Peak detection: find local maxima and boundaries in XIC	TIER1/GetTopBottom.m
+GetTopBottom11.m	CR	T1	T1	yes	core_quant	Peak detection variant with narrower window for relocated peaks	TIER1/GetTopBottom11.m
+H3_01_3_8.m	CR	T1	T1	yes	histone_module	H3 K4 region (TKQTAR): unmod, K4me1/2/3, K4ac	TIER1/H3_01_3_8.m
+H3_02_9_17.m	CR	T1	T1	yes	histone_module	H3 K9/K14 region (KSTGGKAPR): K9/K14 me/ac combos	TIER1/H3_02_9_17.m
+H3_02a_9_17.m	CR	T1	T1	yes	histone_module	H3 K9/K14 with S10ph	TIER1/H3_02a_9_17.m
+H3_02b_9_17.m	CR	T1	T1	yes	histone_module	H3 K9/K14 with K9ac	TIER1/H3_02b_9_17.m
+H3_03_18_26.m	CR	T1	T1	yes	histone_module	H3 K18/K23 region (KQLATKAAR): me/ac combos	TIER1/H3_03_18_26.m
+H3_04_27_40.m	CR	T1	T1	yes	histone_module	H3 K27/K36 region (KSAPATGGVKKPHR): me/ac combos (17 states)	TIER1/H3_04_27_40.m
+H3_04a_27_40.m	CR	T1	T1	yes	histone_module	H3 K27/K36 phospho/acetyl panel (S28ph combos)	TIER1/H3_04a_27_40.m
+H3_04v3a_27_40.m	CR	T1	T1	yes	histone_module	H3.3 variant (KSAPSTGGVKKPHR): phospho/acetyl panel	TIER1/H3_04v3a_27_40.m
+H3_05_41_49.m	CR	T1	T1	yes	histone_module	H3 41-49 region (YRPGTVALR)	TIER1/H3_05_41_49.m
+H3_06_53_63.m	CR	T3	T3	yes	histone_module	H3 K56 region (KYQKSTELLIR): K56me1/2/3, K56ac	TIER1/H3_06_53_63.m
+H3_06a_53_63.m	CR	T1	T1	yes	histone_module	H3 K56 variant (RYQKSTELLIR)	TIER1/H3_06a_53_63.m
+H3_07_73_83.m	CR	T1	T1	yes	histone_module	H3 K79 region (EIAQDFKTDLR); rt_ref 38.95 measured on AT (was 40.37, copy of K56)	TIER1/H3_07_73_83.m
+H3_08_117_128.m	CR	T1	T1	yes	histone_module	H3 K122 region (VTIMPKDIQLAR): K122ac	TIER1/H3_08_117_128.m
+H3_09u_64_135.m	CR	T1	T1	yes	histone_module	H3 misc peptides (KLPFQR, RIRGER, IRGERA)	TIER1/H3_09u_64_135.m
+H4_01_4_17.m	CR	T1	T1	yes	histone_module	H4 K5/K8/K12/K16 region (GKGGKGLGKGGAKR): 16 ac combos	TIER1/H4_01_4_17.m
+H4_02_20_23.m	CR	T1	T1	yes	histone_module	H4 K20 region (KVLR): K20me1/2/3, K20ac	TIER1/H4_02_20_23.m
+H4_02a_18_23.m	CR	T1	T1	yes	histone_module	H4 18-23 region (HRKVLR)	TIER1/H4_02a_18_23.m
+H4_02b_20_35.m	CR	T1	T1	yes	histone_module	H4 20-35 long peptide (KVLRDNIQGITKPAIR)	TIER1/H4_02b_20_35.m
+H4_03_24_35.m	CR	T1	T1	yes	histone_module	H4 24-35 region (DNIQGITKPAIR)	TIER1/H4_03_24_35.m
+H4_04_40_45.m	CR	T1	T1	yes	histone_module	H4 K44 region (RGGVKR)	TIER1/H4_04_40_45.m
+H4_05_68_78.m	CR	T1	T1	yes	histone_module	H4 68-78 region, AT sequence DAVTYTEHAR (R77; upstream human DAVTYTEHAKR)	TIER1/H4_05_68_78.m
+H4_06_79_92.m	CR	T1	T1	yes	histone_module	H4 79-92 region (KTVTAMDVVYALKR)	TIER1/H4_06_79_92.m
+H4_07u_24_102.m	CR	T1	T1	yes	histone_module	H4 24-102 unmodified long peptide, AT sequence with I61 (upstream V61)	TIER1/H4_07u_24_102.m
+H4_Snapshot.m	CR	T1	T1	yes	histone_module	Aggregate H4 PTM positions across all regions (AT sequence: I61, R77)	TIER1/H4_Snapshot.m
+JudgeLocalmaxmin.m	CR	T1	T1	yes	core_quant	Judge whether a point is local max or min	TIER1/JudgeLocalmaxmin.m
+OutputSinglePTMs.m	CR	T1	T1	yes	io_output	Compute single-PTM marginal ratios across peptideforms	TIER1/OutputSinglePTMs.m
+ReadInput.m	CR	T1	T1	yes	io_control	Parse paras.txt for raw_path, organism, source, subtype	TIER1/ReadInput.m
+relocateD.m	CR	T1	T1	yes	core_quant	Debug-mode RT relocation (narrow +/-1 min window per peptide)	TIER1/relocateD.m
+check_otherparas.m	CR	T2	T2	yes	io_control	Default parameters (ptol=10, ndebug=0) and RAW file discovery	TIER2/check_otherparas.m
+check_ref.m	CR	T2	T2	yes	core_quant	Look up RT reference from 0_ref_info.mat by seq_godel hash	TIER2/check_ref.m
+draw_layout.m	CR	T2	T2	yes	visualization	Draw XIC layout with peak boundaries (TIER1 version)	TIER2/draw_layout.m
+DrawISOProfile1.m	CR	T2	T2	yes	runner	Main runner for histone_normal mode (per-run quant + aggregation)	TIER2/DrawISOProfile1.m
+EpiProfile.m	CR	T2	T2	yes	runner	Main entry point: read params, convert RAW, dispatch runners	TIER2/EpiProfile.m
+get_histone0.m	CR	T2	T2	yes	histone_quant	Quantify unmod reference peptide with gradient-aware logic	TIER2/get_histone0.m
+get_histone1.m	CR	T2	T2	yes	histone_quant	Quantify a single modified peptideform (relocated RT)	TIER2/get_histone1.m
+get_histone10.m	CR	T2	T2	yes	histone_quant	Quantify peptideform variant 10	TIER2/get_histone10.m
+get_histone11.m	CR	T2	T2	yes	histone_quant	Quantify peptideform with GetTopBottom11 and diagnostic fprintf	TIER2/get_histone11.m
+get_histone12.m	CR	T2	T2	yes	histone_quant	Quantify peptideform variant 12	TIER2/get_histone12.m
+get_histone13.m	CR	T4	T2	no	histone_quant	Quantify peptideform variant 13 [not invoked by the bundle]	TIER2/get_histone13.m
+get_histone2.m	CR	T2	T2	yes	histone_quant	Quantify peptideform variant 2	TIER2/get_histone2.m
+get_histone22.m	CR	T4	T2	no	histone_quant	Quantify peptideform variant 22 [not invoked by the bundle]	TIER2/get_histone22.m
+get_rts.m	CR	T2	T2	yes	core_quant	Get RT within window with robustness guards for empty ranges	TIER2/get_rts.m
+get_rts0.m	CR	T2	T2	yes	core_quant	Get RT and intensity for a single peptide (reference building)	TIER2/get_rts0.m
+get_rts2.m	CR	T2	T2	yes	core_quant	Get RT using MS2 confirmation (DIA mode)	TIER2/get_rts2.m
+get_rts22.m	CR	T2	T2	yes	core_quant	Get RT using MS2 with mass offset support	TIER2/get_rts22.m
+GetBenchmark.m	CR	T4	T2	no	qc_audit	Generate identification benchmark metrics [not invoked by the bundle]	TIER2/GetBenchmark.m
+GetMS1ScanNo.m	CR	T2	T2	yes	io_input	GetMS1ScanNo	TIER2/GetMS1ScanNo.m
+GetMS2ScanNo.m	CR	T2	T2	yes	io_input	GetMS2ScanNo	TIER2/GetMS2ScanNo.m
+H3_04v3_27_40.m	CR	T2	T2	yes	histone_module	H3.3 variant (KSAPTTGGVKKPHR): 17 PTM states (plant-adapted)	TIER2/H3_04v3_27_40.m
+H3_Snapshot.m	CR	T2	T2	yes	histone_module	Aggregate H3 PTM positions across all regions (out_filename fixed: H3_06_53_63)	TIER2/H3_Snapshot.m
+HH2A_01u_1_7.m	CR	T3	T3	yes	histone_module	check	TIER2/HH2A_01u_1_7.m
+HH2B_01u_104_145.m	CR	T3	T3	yes	histone_module	HH2B_01u_104_145 — Unmod-only H2B diagnostic peptides (CR)	TIER2/HH2B_01u_104_145.m
+init_histone0.m	CR	T2	T2	yes	histone_module	Master peptide catalog for AT (56 entries incl. plant variants + H2A)	TIER2/init_histone0.m
+output_histone.m	CR	T2	T2	yes	io_output	Save per-region .mat with His struct and auc matrix	TIER2/output_histone.m
+output_histone2.m	CR	T4	T2	no	io_output	Save per-region .mat variant 2 [not invoked by the bundle]	TIER2/output_histone2.m
+OutputFigures.m	CR	T2	T2	yes	io_output	QC figures: bar, boxplot, PCA, heatmaps, clustergram	TIER2/OutputFigures.m
+OutputTogether.m	CR	T2	T2	yes	io_output	Aggregate all runs into histone_ratios.xls (cohort export)	TIER2/OutputTogether.m
+Raw2MS.m	CR	T2	T2	yes	io_control	Convert RAW files to MS1/MS2 .mat format	TIER2/Raw2MS.m
+H3_11_3_8.m	CR	T3	T3	yes	histone_module	H3 3-8 sequence variants: TKQTAR, TKQSAR, SNQTAR	TIER3/H3_11_3_8.m
+H3_12_9_17.m	CR	T3	T3	yes	histone_module	H3 9-17 sequence variants: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR	TIER3/H3_12_9_17.m
+H3_13_18_26.m	CR	T3	T3	yes	histone_module	H3 18-26 sequence variants: KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR	TIER3/H3_13_18_26.m
+H3_14_27_40.m	CR	T3	T3	yes	histone_module	H3 27-40 sequence variants: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR	TIER3/H3_14_27_40.m
+H3_16_53_63.m	CR	T3	T3	yes	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQKSTELLNR	TIER3/H3_16_53_63.m
+H3_17_73_83.m	CR	T3	T3	yes	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR	TIER3/H3_17_73_83.m
+H3_18_117_128.m	CR	T3	T3	yes	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR	TIER3/H3_18_117_128.m
+calculate_pepmz.m	MP	T1	T1	yes	core_quant	Compute peptide theoretical m/z from sequence, mods and charge	TIER1/calculate_pepmz.m
+check_layout.m	MP	T4	T1	no	qc_audit	Interactive layout inspector (breakpoint-based) [not invoked by the bundle]	TIER1/check_layout.m
+DrawISOProfile0.m	MP	T1	T1	yes	runner	Build RT reference (0_ref_info.mat) from top-3 runs	TIER1/DrawISOProfile0.m
+DrawISOProfile2.m	MP	T1	T1	yes	runner	Runner for SILAC mode (calls Extract_SILAC)	TIER1/DrawISOProfile2.m
+find_pair.m	MP	T1	T1	yes	core_quant	Select best co-eluting pair (me2/me3) by intensity and RT proximity	TIER1/find_pair.m
+find_pair_new.m	MP	T1	T1	yes	core_quant	Select best pair with directional RT constraint	TIER1/find_pair_new.m
+find_triple.m	MP	T1	T1	yes	core_quant	Select best co-eluting triple by intensity and RT proximity	TIER1/find_triple.m
+get_area.m	MP	T1	T1	yes	core_quant	Compute peptide AUC from XIC with overlap deconvolution	TIER1/get_area.m
+get_histone4.m	MP	T1	T1	yes	histone_quant	Quantify peptideform variant 4	TIER1/get_histone4.m
+get_histone6.m	MP	T1	T1	yes	histone_quant	Quantify peptideform variant 6	TIER1/get_histone6.m
+get_key_ions.m	MP	T1	T1	yes	core_quant	Extract diagnostic fragment ions for peptide ID	TIER1/get_key_ions.m
+get_key_ions1.m	MP	T1	T1	yes	core_quant	Extract key ions variant 1	TIER1/get_key_ions1.m
+get_key_ions2.m	MP	T1	T1	yes	core_quant	Extract key ions with advanced filtering	TIER1/get_key_ions2.m
+get_main_ch.m	MP	T4	T1	no	core_quant	Reorder charge states putting main charge first [not invoked by the bundle]	TIER1/get_main_ch.m
+get_mod_mass.m	MP	T1	T1	yes	core_quant	Calculate modification mass delta vector for a peptide	TIER1/get_mod_mass.m
+get_mod_postype.m	MP	T1	T1	yes	core_quant	Parse modification position and type from mod_type string	TIER1/get_mod_postype.m
+get_theo_mz.m	MP	T1	T1	yes	core_quant	Compute theoretical m/z from peptide and mods (standalone)	TIER1/get_theo_mz.m
+Getaamass.m	MP	T1	T1	yes	core_quant	Amino acid monoisotopic and average mass table (26 entries)	TIER1/Getaamass.m
+GetIPV.m	MP	T1	T1	yes	core_quant	Isotope pattern vector lookup table	TIER1/GetIPV.m
+GetLocal.m	MP	T1	T1	yes	core_quant	Local maxima/minima detection helper	TIER1/GetLocal.m
+GetMods.m	MP	T1	T1	yes	core_quant	Modification mass table (pr, ac, me1-3, ph, cr, ub, ox, etc.)	TIER1/GetMods.m
+GetProfiles.m	MP	T1	T1	yes	core_quant	Extract XIC profiles from MS1 scans for a set of m/z values	TIER1/GetProfiles.m
+GetPSM.m	MP	T1	T1	yes	io_output	Extract peptide-spectrum matches from MS2 (DDA)	TIER1/GetPSM.m
+GetPSM2.m	MP	T1	T1	yes	io_output	Extract PSMs for sequence-variant modules	TIER1/GetPSM2.m
+GetTopBottom.m	MP	T1	T1	yes	core_quant	Peak detection: find local maxima and boundaries in XIC	TIER1/GetTopBottom.m
+GetTopBottom11.m	MP	T1	T1	yes	core_quant	Peak detection variant with narrower window for relocated peaks	TIER1/GetTopBottom11.m
+H3_01_3_8.m	MP	T1	T1	yes	histone_module	H3 K4 region (TKQTAR): unmod, K4me1/2/3, K4ac	TIER1/H3_01_3_8.m
+H3_02_9_17.m	MP	T1	T1	yes	histone_module	H3 K9/K14 region (KSTGGKAPR): K9/K14 me/ac combos	TIER1/H3_02_9_17.m
+H3_02a_9_17.m	MP	T1	T1	yes	histone_module	H3 K9/K14 with S10ph	TIER1/H3_02a_9_17.m
+H3_02b_9_17.m	MP	T1	T1	yes	histone_module	H3 K9/K14 with K9ac	TIER1/H3_02b_9_17.m
+H3_03_18_26.m	MP	T1	T1	yes	histone_module	H3 K18/K23 region (KQLATKAAR): me/ac combos	TIER1/H3_03_18_26.m
+H3_04_27_40.m	MP	T1	T1	yes	histone_module	H3 K27/K36 region (KSAPATGGVKKPHR): me/ac combos (17 states)	TIER1/H3_04_27_40.m
+H3_04a_27_40.m	MP	T1	T1	yes	histone_module	H3 K27/K36 phospho/acetyl panel (S28ph combos)	TIER1/H3_04a_27_40.m
+H3_04v3a_27_40.m	MP	T1	T1	yes	histone_module	H3.3 variant (KSAPSTGGVKKPHR): phospho/acetyl panel	TIER1/H3_04v3a_27_40.m
+H3_05_41_49.m	MP	T1	T1	yes	histone_module	H3 41-49 region (YRPGTVALR)	TIER1/H3_05_41_49.m
+H3_06_53_63.m	MP	T3	T3	yes	histone_module	H3 K56 region (KYQKSTELLIR): K56me1/2/3, K56ac	TIER1/H3_06_53_63.m
+H3_06a_53_63.m	MP	T1	T1	yes	histone_module	H3 K56 variant (RYQKSTELLIR)	TIER1/H3_06a_53_63.m
+H3_07_73_83.m	MP	T1	T1	yes	histone_module	H3 K79 region (EIAQDFKTDLR); rt_ref 38.95 measured on AT (was 40.37, copy of K56)	TIER1/H3_07_73_83.m
+H3_08_117_128.m	MP	T1	T1	yes	histone_module	H3 K122 region (VTIMPKDIQLAR): K122ac	TIER1/H3_08_117_128.m
+H3_09u_64_135.m	MP	T1	T1	yes	histone_module	H3 misc peptides (KLPFQR, RIRGER, IRGERA)	TIER1/H3_09u_64_135.m
+H4_01_4_17.m	MP	T1	T1	yes	histone_module	H4 K5/K8/K12/K16 region (GKGGKGLGKGGAKR): 16 ac combos	TIER1/H4_01_4_17.m
+H4_02_20_23.m	MP	T1	T1	yes	histone_module	H4 K20 region (KVLR): K20me1/2/3, K20ac	TIER1/H4_02_20_23.m
+H4_02a_18_23.m	MP	T1	T1	yes	histone_module	H4 18-23 region (HRKVLR)	TIER1/H4_02a_18_23.m
+H4_02b_20_35.m	MP	T1	T1	yes	histone_module	H4 20-35 long peptide (KVLRDNIQGITKPAIR)	TIER1/H4_02b_20_35.m
+H4_03_24_35.m	MP	T1	T1	yes	histone_module	H4 24-35 region (DNIQGITKPAIR)	TIER1/H4_03_24_35.m
+H4_04_40_45.m	MP	T1	T1	yes	histone_module	H4 K44 region (RGGVKR)	TIER1/H4_04_40_45.m
+H4_05_68_78.m	MP	T1	T1	yes	histone_module	H4 68-78 region, AT sequence DAVTYTEHAR (R77; upstream human DAVTYTEHAKR)	TIER1/H4_05_68_78.m
+H4_06_79_92.m	MP	T1	T1	yes	histone_module	H4 79-92 region (KTVTAMDVVYALKR)	TIER1/H4_06_79_92.m
+H4_07u_24_102.m	MP	T1	T1	yes	histone_module	H4 24-102 unmodified long peptide, AT sequence with I61 (upstream V61)	TIER1/H4_07u_24_102.m
+H4_Snapshot.m	MP	T1	T1	yes	histone_module	Aggregate H4 PTM positions across all regions (AT sequence: I61, R77)	TIER1/H4_Snapshot.m
+JudgeLocalmaxmin.m	MP	T1	T1	yes	core_quant	Judge whether a point is local max or min	TIER1/JudgeLocalmaxmin.m
+OutputSinglePTMs.m	MP	T1	T1	yes	io_output	Compute single-PTM marginal ratios across peptideforms	TIER1/OutputSinglePTMs.m
+ReadInput.m	MP	T1	T1	yes	io_control	Parse paras.txt for raw_path, organism, source, subtype	TIER1/ReadInput.m
+relocateD.m	MP	T1	T1	yes	core_quant	Debug-mode RT relocation (narrow +/-1 min window per peptide)	TIER1/relocateD.m
+check_otherparas.m	MP	T2	T2	yes	io_control	Default parameters (ptol=10, ndebug=0) and RAW file discovery	TIER2/check_otherparas.m
+check_ref.m	MP	T2	T2	yes	core_quant	Look up RT reference from 0_ref_info.mat by seq_godel hash	TIER2/check_ref.m
+draw_layout.m	MP	T2	T2	yes	visualization	Draw XIC layout with peak boundaries (TIER1 version)	TIER2/draw_layout.m
+DrawISOProfile1.m	MP	T2	T2	yes	runner	Main runner for histone_normal mode (per-run quant + aggregation)	TIER2/DrawISOProfile1.m
+EpiProfile.m	MP	T2	T2	yes	runner	Main entry point: read params, convert RAW, dispatch runners	TIER2/EpiProfile.m
+get_histone0.m	MP	T2	T2	yes	histone_quant	Quantify unmod reference peptide with gradient-aware logic	TIER2/get_histone0.m
+get_histone1.m	MP	T2	T2	yes	histone_quant	Quantify a single modified peptideform (relocated RT)	TIER2/get_histone1.m
+get_histone10.m	MP	T2	T2	yes	histone_quant	Quantify peptideform variant 10	TIER2/get_histone10.m
+get_histone11.m	MP	T2	T2	yes	histone_quant	Quantify peptideform with GetTopBottom11 and diagnostic fprintf	TIER2/get_histone11.m
+get_histone12.m	MP	T2	T2	yes	histone_quant	Quantify peptideform variant 12	TIER2/get_histone12.m
+get_histone13.m	MP	T4	T2	no	histone_quant	Quantify peptideform variant 13 [not invoked by the bundle]	TIER2/get_histone13.m
+get_histone2.m	MP	T2	T2	yes	histone_quant	Quantify peptideform variant 2	TIER2/get_histone2.m
+get_histone22.m	MP	T4	T2	no	histone_quant	Quantify peptideform variant 22 [not invoked by the bundle]	TIER2/get_histone22.m
+get_rts.m	MP	T2	T2	yes	core_quant	Get RT within window with robustness guards for empty ranges	TIER2/get_rts.m
+get_rts0.m	MP	T2	T2	yes	core_quant	Get RT and intensity for a single peptide (reference building)	TIER2/get_rts0.m
+get_rts2.m	MP	T2	T2	yes	core_quant	Get RT using MS2 confirmation (DIA mode)	TIER2/get_rts2.m
+get_rts22.m	MP	T2	T2	yes	core_quant	Get RT using MS2 with mass offset support	TIER2/get_rts22.m
+GetBenchmark.m	MP	T4	T2	no	qc_audit	Generate identification benchmark metrics [not invoked by the bundle]	TIER2/GetBenchmark.m
+GetMS1ScanNo.m	MP	T2	T2	yes	io_input	GetMS1ScanNo	TIER2/GetMS1ScanNo.m
+GetMS2ScanNo.m	MP	T2	T2	yes	io_input	GetMS2ScanNo	TIER2/GetMS2ScanNo.m
+H3_04v3_27_40.m	MP	T2	T2	yes	histone_module	H3.3 variant (KSAPTTGGVKKPHR): 17 PTM states (plant-adapted)	TIER2/H3_04v3_27_40.m
+H3_Snapshot.m	MP	T2	T2	yes	histone_module	Aggregate H3 PTM positions across all regions (out_filename fixed: H3_06_53_63)	TIER2/H3_Snapshot.m
+HH2A_01u_1_7.m	MP	T3	T3	yes	histone_module	check	TIER2/HH2A_01u_1_7.m
+HH2B_01u_104_145.m	MP	T3	T3	yes	histone_module	HH2B_01u_104_145 — Unmod-only H2B diagnostic peptides (CR)	TIER2/HH2B_01u_104_145.m
+init_histone0.m	MP	T2	T2	yes	histone_module	Master peptide catalog for AT (56 entries incl. plant variants + H2A)	TIER2/init_histone0.m
+output_histone.m	MP	T2	T2	yes	io_output	Save per-region .mat with His struct and auc matrix	TIER2/output_histone.m
+output_histone2.m	MP	T4	T2	no	io_output	Save per-region .mat variant 2 [not invoked by the bundle]	TIER2/output_histone2.m
+OutputFigures.m	MP	T2	T2	yes	io_output	QC figures: bar, boxplot, PCA, heatmaps, clustergram	TIER2/OutputFigures.m
+OutputTogether.m	MP	T2	T2	yes	io_output	Aggregate all runs into histone_ratios.xls (cohort export)	TIER2/OutputTogether.m
+Raw2MS.m	MP	T2	T2	yes	io_control	Convert RAW files to MS1/MS2 .mat format	TIER2/Raw2MS.m
+H3_11_3_8.m	MP	T3	T3	yes	histone_module	H3 3-8 sequence variants: TKQTAR, TKQSAR, SNQTAR	TIER3/H3_11_3_8.m
+H3_12_9_17.m	MP	T3	T3	yes	histone_module	H3 9-17 sequence variants: KSTGGKAPR, KSTGGKGPR, KSHGGKAPR, ISTGGKAPR	TIER3/H3_12_9_17.m
+H3_13_18_26.m	MP	T3	T3	yes	histone_module	H3 18-26 sequence variants: KQLATKAAR, KELATKAAR, TLLATKAAR, KQLAPKAAR	TIER3/H3_13_18_26.m
+H3_14_27_40.m	MP	T3	T3	yes	histone_module	H3 27-40 sequence variants: KSAPATGGVKKPHR, KSAPTTGGVKKPHR, QSAPATGGVKKPHR	TIER3/H3_14_27_40.m
+H3_16_53_63.m	MP	T3	T3	yes	histone_module	H3 53-63 sequence variants: KYQKSTELLIR, KYQKSTELLNR	TIER3/H3_16_53_63.m
+H3_17_73_83.m	MP	T3	T3	yes	histone_module	H3 73-83 sequence variants: EIAQDFKTDLR, EIAQDYKTDLR	TIER3/H3_17_73_83.m
+H3_18_117_128.m	MP	T3	T3	yes	histone_module	H3 117-128 sequence variants: VTIMPKDIQLAR, VTIMPKDVQLAR, VTIMPKEIQLAR	TIER3/H3_18_117_128.m
+H4_02v_20_23.m	MP	T3	T3	yes	histone_module	H4_02v_20_23 — H4K20 quantification for Marchantia polymorpha	TIER3/H4_02v_20_23.m
+Extract_SILAC.m	AT	NOT_PORTED	upstream	no	runner	SILAC extraction — exists upstream, not included in the bundle	
+Extract_SILAC_1.m	AT	NOT_PORTED	upstream	no	runner	SILAC extraction variant — exists upstream, not included in the bundle	
+GetaamassH.m	AT	NOT_PORTED	upstream	no	core_quant	Heavy amino acid masses for N15 — exists upstream, not included in the bundle	
+DrawISOProfile3.m	AT	NOT_PORTED	upstream	no	runner	C13 mode runner — exists upstream, not included in the bundle	
+DrawISOProfile4.m	AT	NOT_PORTED	upstream	no	runner	N15 mode runner — exists upstream, not included in the bundle	
+DrawISOProfile5.m	AT	NOT_PORTED	upstream	no	runner	13CD3 mode runner — exists upstream, not included in the bundle	

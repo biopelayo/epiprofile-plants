@@ -5,14 +5,13 @@ function [cur_rts,cur_intens,cur_mono_isointens] = get_histone0(MS1_index,MS1_pe
 cur_rts = zeros([1,ncharge]);
 cur_intens = zeros([1,ncharge]);
 num_MS1 = size(MS1_index,1);
+cur_mono_isointens = zeros([num_MS1,1]);% initialize for early return safety
 end_rt = MS1_index(num_MS1,2);
 if end_rt>90
     gradient = 2;
 else
     gradient = 1;
 end;
-
-rtcol = MS1_index(:,2);
 
 % get MS1 profile
 delta = 1;
@@ -27,29 +26,19 @@ if ptol>100 && c_ch>=3
 else
     nC13 = 0;
 end;
-
-% --- Ventana inicial para el charge principal ---
 if His.rt_unmod_orig==His.rt_ref(1) && 1~=special.ndebug
     rt_i1 = 1;
     rt_i2 = num_MS1;
 else
     rt1 = His.rt_ref(hno)-5;
     rt2 = His.rt_ref(hno)+5;
-
-    p  = find(rtcol >= rt1);
-    pp = find(rtcol <= rt2);
-
-    if isempty(p) || isempty(pp) || p(1)>pp(end)
-        % No hay scans en ventana: devolver no-detectado sin crashear
-        % fprintf('get_histone0: ventana vacía (init) hno=%d rt1=%g rt2=%g RT=[%g,%g]\n', hno, rt1, rt2, min(rtcol), max(rtcol));
-        cur_mono_isointens = zeros(num_MS1,1);
-        return;
-    end
-
+    p = find( MS1_index(:,2)>=rt1 );
+    if isempty(p); return; end;
     rt_i1 = p(1);
+    pp = find( MS1_index(:,2)<=rt2 );
+    if isempty(pp); return; end;
     rt_i2 = pp(end);
-end
-
+end;
 [c_isorts,c_ref_isointens] = GetProfiles(MS1_index,MS1_peaks,c_ref_isomzs,c_ch,ptol,nC13,rt_i1:rt_i2);
 j = 2;
 c_mono_isointens = c_ref_isointens(:,j);
@@ -57,7 +46,6 @@ cur_mono_isointens = c_mono_isointens;
 
 % get rt and area
 [nt,nb,top1_idx,inten_sum] = GetTopBottom(c_mono_isointens);
-
 if 1==special.ndebug || -1==special.ndebug
     if 1==special.ndebug
         llimit = -delta;
@@ -79,6 +67,7 @@ if 1==special.ndebug || -1==special.ndebug
     end;
     x = find(flag==1);
     if 0==isempty(x)
+        %[tmp,id] = min(abs(c_isorts(nt(x))-ref_rt));%#ok
         if -1==special.ndebug && 1==isfield(His,'outfile') && 1==ismember(His.outfile,{'H3_02_9_17','H3_02a_9_17'}) && length(x)>=2
             [tmp,ix] = sort(inten_sum(x),'descend');%#ok
             ix = ix(1:2);
@@ -110,6 +99,7 @@ else
         end;
         x = find(flag==1);
         if 0==isempty(x)
+            %[tmp,id] = min(abs(c_isorts(nt(x))-ref_rt));%#ok
             [tmp,id] = max(inten_sum(x));%#ok
             top1_idx = x(id);
             cur_pos = nt(top1_idx);
@@ -130,21 +120,19 @@ else
         end;
     end;
 end;
+%{
+if 0==cur_intens(1)
+    return;
+end;
+%}
 
-% --- Ventana para charges 2..ncharge basada en cur_rts(1) ---
 rt1 = cur_rts(1)-delta;
 rt2 = cur_rts(1)+delta;
-
-p  = find(rtcol >= rt1);
-pp = find(rtcol <= rt2);
-
-if isempty(p) || isempty(pp) || p(1)>pp(end)
-    % No hay scans en la ventana alrededor del RT estimado: dejamos charges>1 en 0 y salimos
-    % fprintf('get_histone0: ventana vacía (charges) hno=%d rt1=%g rt2=%g cur_rt=%g RT=[%g,%g]\n', hno, rt1, rt2, cur_rts(1), min(rtcol), max(rtcol));
-    return;
-end
-
+p = find( MS1_index(:,2)>=rt1 );
+if isempty(p); p=[1]; end;
 rt_i1 = p(1);
+pp = find( MS1_index(:,2)<=rt2 );
+if isempty(pp); pp=[num_MS1]; end;
 rt_i2 = pp(end);
 
 for jno=2:ncharge
@@ -171,6 +159,7 @@ for jno=2:ncharge
     end;
     x = find(flag==1);
     if 0==isempty(x)
+        %[tmp,id] = min(abs(c_isorts(nt(x))-cur_rts(1)));%#ok
         [tmp,id] = max(inten_sum(x));%#ok
         top1_idx = x(id);
         cur_pos = nt(top1_idx);

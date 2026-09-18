@@ -15,7 +15,7 @@ url: "https://github.com/biopelayo/epiprofile-plants"
 license: "GPL-3.0-only"
 
 version: "0.1.0"
-date-released: "2026-01-09"
+date-released: "2026-05-25"
 
 keywords:
   - "histone"
@@ -44,7 +44,7 @@ preferred-citation:
       given-names: "Pelayo"
       orcid: "https://orcid.org/0000-0001-9409-1457"
   version: "0.1.0"
-  date-released: "2026-01-09"
+  date-released: "2026-05-25"
   url: "https://github.com/biopelayo/epiprofile-plants"
   license: "GPL-3.0-only"
 

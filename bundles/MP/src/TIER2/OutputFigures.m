@@ -15,16 +15,22 @@ cur_outpath = fullfile(layout_path,[prefix,'_',cur_rawname],'detail');
 npeps = 0;
 out_file1 = fullfile(cur_outpath,'*.mat');
 matfiles = dir(out_file1);
+% Fix A-CRIT-004 / C-CRIT-04: orden estable
+[~,idx_mf] = sort({matfiles.name});
+matfiles = matfiles(idx_mf);
 for j=1:length(matfiles)
     matfile1 = fullfile(cur_outpath,matfiles(j).name);
     load(matfile1);
     npeps = npeps + size(His.pep_mz,1);
 end;
 
-% separate nos
-c_npeps = zeros([2,1]);
+% separate nos — AT: count H3, H4, H2A, H2B, H1
+c_npeps = zeros([5,1]);
 out_file1 = fullfile(cur_outpath,'*.mat');
 matfiles = dir(out_file1);
+% Fix A-CRIT-004 / C-CRIT-04: orden estable
+[~,idx_mf] = sort({matfiles.name});
+matfiles = matfiles(idx_mf);
 for j=1:length(matfiles)
     matfile1 = fullfile(cur_outpath,matfiles(j).name);
     load(matfile1);
@@ -33,10 +39,16 @@ for j=1:length(matfiles)
     if 1==strcmp(pepname(1:2),'HH')
         pepname = pepname(2:end);
     end;
-    if 1==strcmp(pepname(1:2),'H3')
+    if length(pepname)>=2 && 1==strcmp(pepname(1:2),'H3')
         c_npeps(1) = c_npeps(1) + cnp;
-    elseif 1==strcmp(pepname(1:2),'H4')
+    elseif length(pepname)>=2 && 1==strcmp(pepname(1:2),'H4')
         c_npeps(2) = c_npeps(2) + cnp;
+    elseif length(pepname)>=3 && 1==strcmp(pepname(1:3),'H2A')
+        c_npeps(3) = c_npeps(3) + cnp;
+    elseif length(pepname)>=3 && 1==strcmp(pepname(1:3),'H2B')
+        c_npeps(4) = c_npeps(4) + cnp;
+    elseif length(pepname)>=2 && 1==strcmp(pepname(1:2),'H1')
+        c_npeps(5) = c_npeps(5) + cnp;
     end;
 end;
 
@@ -45,6 +57,9 @@ m = 0;
 peptides = repmat({''},[npeps,1]);
 out_file1 = fullfile(cur_outpath,'*.mat');
 matfiles = dir(out_file1);
+% Fix A-CRIT-004 / C-CRIT-04: orden estable
+[~,idx_mf] = sort({matfiles.name});
+matfiles = matfiles(idx_mf);
 for j=1:length(matfiles)
     matfile1 = fullfile(cur_outpath,matfiles(j).name);
     load(matfile1);
@@ -204,6 +219,7 @@ set(gcf,'visible','off');
 
 cur_ratio = zscore_ratio;
 [wcoeff,score] = pca(cur_ratio');%#ok row is observation (sample)
+if size(score,2)<2; score(:,2) = 0; end;% guard: <2 PCs
 plot(score(:,1),score(:,2),'+');
 title('PCA of samples');
 xlabel('1st Principal Component');
@@ -271,6 +287,7 @@ if 0~=exist(mat_file,'file')
     set(gcf,'visible','off');
     
     cur_ratio = zscore(sratios,[],2);
+    cur_ratio(isnan(cur_ratio)) = 0;% replace NaN from zero-variance rows
     cgo = clustergram(cur_ratio,'RowLabels',targets,'ColumnLabels',raw_names,'Cluster',1,'DisplayRatio',[1e-6 0.2]);
     addTitle(cgo,'HeatMap of zscores for single PTMs','FontSize',10);
     plot(cgo);
@@ -281,10 +298,14 @@ if 0~=exist(mat_file,'file')
 end;
 
 % 11---------------------
-all_figs = {'11_heatmap_ratio_H3','11_heatmap_ratio_H4'};
-index = [1;cumsum(c_npeps)+1];
+all_figs = {'11_heatmap_ratio_H3','11_heatmap_ratio_H4','11_heatmap_ratio_H2A','11_heatmap_ratio_H2B','11_heatmap_ratio_H1'};
+% Remove empty histones (no peptides detected)
+keep = c_npeps > 0;
+all_figs = all_figs(keep);
+c_npeps_nz = c_npeps(keep);
+index = [1;cumsum(c_npeps_nz)+1];
 
-for ino=1:length(c_npeps)
+for ino=1:length(c_npeps_nz)
     cur_fig = all_figs{ino};
     out_file = fullfile(fig_path,[cur_fig,'.pdf']);
     warning off all;
